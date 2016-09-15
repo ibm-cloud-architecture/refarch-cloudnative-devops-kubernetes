@@ -1,0 +1,216 @@
+---
+default_locale: en
+locales: 
+  $ref: locales.yml
+name: "OmniChannel toolchain"
+description: "With this omnichannel, cloud-native toolchain, you can create a toolchain the supports an omnichannel applications that consists of microservices, APIConnect, data sources and Bluemix services. The toolchain is preconfigured for continuous delivery, source control, blue-green deployment, functional testing, issue tracking, online editing, and messaging.\n\nTo get started, click **Create**."
+version: 0.1
+image: data:image/png;base64,$file(toolchain.png,base64)
+required:
+ - deploy
+ - github
+
+ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-bluecompute-mobile"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-mobile"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+
+ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-bluecompute-web"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+
+# Github repos
+catalog-api-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-bff-inventory"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory"
+    type: clone
+    has_issues: false
+  hidden: [form, description]
+
+orders-api-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-bff-socialreview"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview"
+    type: clone
+    has_issues: false
+  hidden: [form, description]
+
+ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-api"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-api"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-auth"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-auth"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+  
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-micro-inventory"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+  
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-micro-socialreview"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+  
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "microservices-netflix-eureka"
+    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-eureka"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+  
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "microservices-netflix-zuul"
+    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-zuul"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+  
+  ui-repo:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-mysql"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql"
+    type: clone
+    has_issues: true
+  hidden: [form, description]
+
+# Pipelines
+ui-build:
+  service_id: pipeline
+  parameters:
+    name: "microservices-netflix-eureka"
+    ui-pipeline: true
+    configuration:
+      content: $file(microservices-netflix-eureka.yml)
+ #     env:
+ #      SAUCE_LABS: "test"
+ #       UI_REPO: "ui-repo"
+ #       CF_APP_NAME: "{{deploy.parameters.ui-app-name}}"
+ #       DEV_SPACE_NAME: "{{deploy.parameters.dev-space}}"
+ #       DEV_ORG_NAME: "{{deploy.parameters.dev-organization}}"
+ #       DEV_REGION_ID: "{{deploy.parameters.dev-region}}"
+ #       QA_SPACE_NAME: "{{deploy.parameters.qa-space}}"
+ #       QA_ORG_NAME: "{{deploy.parameters.qa-organization}}"
+ #       QA_REGION_ID: "{{deploy.parameters.qa-region}}"
+ #       PROD_SPACE_NAME: "{{deploy.parameters.prod-space}}"
+ #       PROD_ORG_NAME: "{{deploy.parameters.prod-organization}}"
+ #       PROD_REGION_ID: "{{deploy.parameters.prod-region}}"
+      execute: true
+    services: ["ui-repo"]
+  hidden: [form, description]  
+
+catalog-api-build:
+  service_id: pipeline
+  parameters:
+    name: "refarch-cloudnative-bff-inventory"
+    configuration:
+      content: $file(refarch-cloudnative-bff-inventory.yml)
+ #     env:
+ #      SAUCE_LABS: "test"
+ #       UI_REPO: "ui-repo"
+ #       CF_APP_NAME: "{{deploy.parameters.ui-app-name}}"
+ #       DEV_SPACE_NAME: "{{deploy.parameters.dev-space}}"
+ #       DEV_ORG_NAME: "{{deploy.parameters.dev-organization}}"
+ #       DEV_REGION_ID: "{{deploy.parameters.dev-region}}"
+ #       QA_SPACE_NAME: "{{deploy.parameters.qa-space}}"
+ #       QA_ORG_NAME: "{{deploy.parameters.qa-organization}}"
+ #       QA_REGION_ID: "{{deploy.parameters.qa-region}}"
+ #       PROD_SPACE_NAME: "{{deploy.parameters.prod-space}}"
+ #       PROD_ORG_NAME: "{{deploy.parameters.prod-organization}}"
+ #       PROD_REGION_ID: "{{deploy.parameters.prod-region}}"
+      execute: true
+    services: ["catalog-api-repo", "test"]
+  hidden: [form, description]
+
+
+#Slack
+messaging:
+  service_id: slack
+  include: slack.yml
+
+#Sauce Labs
+#test:
+#  service_id: saucelabs
+#  include: saucelabs.yml
+
+#PagerDuty
+alerting:
+  service_id: pagerduty
+  include: pagerduty.yml
+  
+#Web IDE
+#webide:
+#  service_id: orion
+  
+#Deployment
+deploy:
+  schema:
+    $ref: deploy.json
+  service-category: pipeline
+  parameters:
+    dev-region: "{{region}}"
+    qa-region: "{{region}}"
+    prod-region: "{{region}}"
+    dev-organization: "{{organization}}"
+    qa-organization: "{{organization}}"
+    prod-organization: "{{organization}}"
+    dev-space: dev
+    qa-space: qa
+    prod-space: prod
+    orders-app-name: "{{orders-api-repo.parameters.repo_name}}"
+    catalog-app-name: "{{catalog-api-repo.parameters.repo_name}}"
+    ui-app-name: "{{ui-repo.parameters.repo_name}}"
+
+#Github
+#github:
+#  schema:
+#    $ref: github.json
+#  service-category: githubpublic
+#  parameters:
+#    catalog-api-repo_name: "catalog-api-{{name}}"
+#    catalog-api-repo_url: https://github.com/open-toolchain/Microservices_CatalogAPI
+#    orders-api-repo_name: "orders-api-{{name}}"
+#    orders-api-repo_url: https://github.com/open-toolchain/Microservices_OrdersAPI
+#    ui-repo_name: "ui-{{name}}"
+#    ui-repo_url: https://github.com/open-toolchain/Microservices_UI
+
+    Contact GitHub API Training Shop Blog About 
+
+    © 2016 GitHub, Inc. Terms Privacy Security Status Help 
+
