@@ -21,7 +21,7 @@ bluecompute-web-pipeline:
   parameters:
     name: "bluecompute-web"
     configuration:
-      content: $file(bluecompute.yaml)
+      content: $file(bluecompute-web.yaml)
       env:
       execute: true
 
