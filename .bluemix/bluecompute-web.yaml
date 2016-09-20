@@ -35,9 +35,9 @@ stages:
     type: deployer
     target:
       region_id: ibm:yp:us-south
-      organization: sreenivas@us.ibm.com
-      space: dev
-      application: bluecompute-web-ssibm-dev
+      organization: cent@us.ibm.com
+      space: cloudnative-qa
+      application: bluecompute-web-tc
     script: |
       #!/bin/bash
       cf push "${CF_APP}" -n "${CF_APP}" -d mybluemix.net
