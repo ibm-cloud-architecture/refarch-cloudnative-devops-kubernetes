@@ -72,4 +72,15 @@ TODO - Add developerPortal instruction.
 
 ## Toolchains in detail
 
-TODO - Quick walkthrough of the individual pipelines within the toolchain
+Here is the instruction of how to build your DevOps toolchain and pipelines from scratch.
+
+### Create a Bluemix DevOps Toolchain
+
+Click this [link](https://new-console.ng.bluemix.net/devops?cm_mmc=developerWorks-_-dWdevcenter-_-devops-services-_-lp&cm_mc_uid=50560713550714744636050&cm_mc_sid_50200000=1474581316) to bring up Bluemix DevOps dashboard, click the Toolchains tab and click Create a Toolchain.  
+
+Under Advanced section, click **Build your own toolchain**.
+
+Give a name like "refarch-cloudnative-toolchain-qa", then click **Create**
+
+Then you can review the toolchain (the page will automatically refresh to the toolchain page)
+Now, you can start building the pipeline and associated DevOps tools for each component.
