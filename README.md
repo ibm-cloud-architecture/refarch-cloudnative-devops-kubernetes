@@ -197,7 +197,7 @@ Under the **INPUT** tab, enter/select following:
   Stage:        Build Microservices (*this is the Build stage you created earlier*)  
   Job:          Build  
 
-Then, check the "Run jbos when the previous stage is completed." This will trigger the deploy when the build phase completes.   
+Then, check the "Run jobs when the previous stage is completed." This will trigger the deploy when the build phase completes.   
 Switch to the **JOBS** tab, click **ADD JOB**  
 Name the Job as "Prepare Cloudant"  
 Choose Deploy Type as **Cloud Foundry**  
