@@ -32,7 +32,7 @@ stages:
         log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
         $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
         . mysql.env
-        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
         log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
         # Deploy Container Group:
@@ -108,6 +108,12 @@ stages:
   - name: DESIRED_INSTANCES
     value: ${DESIRED_INSTANCES}
     type: text
+  - name: INVENTORY_MSNAME
+    value: ${INVENTORY_MSNAME}
+    type: text
+  - name: CTXPATH
+    value: ${CTXPATH}
+    type: text
   triggers:
   - type: stage
   jobs:
@@ -136,7 +142,7 @@ stages:
         log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
         $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
         . mysql.env
-        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
         log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
         # Deploy Container Group:

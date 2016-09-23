@@ -52,4 +52,4 @@ stages:
       application: ${NAME}
     script: |
       #!/bin/bash
-      cf push "${CF_APP}" -n "${CF_APP}"" -d "${APP_DOMAIN}""
+      cf push "${CF_APP}" -n "${CF_APP}" -d "${APP_DOMAIN}"

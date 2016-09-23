@@ -40,6 +40,22 @@
         "mysql-root-pass": {
             "description": "Password for MySQL admin user",
             "type": "string"
+        },
+        "apic-url": {
+            "description": "Region specific APIC hostname",
+            "type": "string"
+        },
+        "context-path": {
+            "description": "Context path for published APIs",
+            "type": "string"
+        },
+        "inventory-msname": {
+            "description": "Product name for Inventory Microservice APIs",
+            "type": "string"
+        },
+        "socialreview-msname": {
+            "description": "Product name for Socialreview Microservice APIs",
+            "type": "string"
         }
     },
     "required": [
@@ -59,6 +75,12 @@
             "readonly": false,
             "title": "Domain name for all routes",
             "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "API Connect hostname",
+            "key": "apic-url"
         },
         {
             "type": "text",
