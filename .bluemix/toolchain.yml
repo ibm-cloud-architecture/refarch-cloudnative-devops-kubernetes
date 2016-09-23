@@ -29,13 +29,13 @@ git-inventorydb-mysql:
     type: clone
     has_issues: true
 
-# git-micro-inventory:
-#   service_id: githubpublic
-#   parameters:
-#     repo_name: "refarch-cloudnative-micro-inventory-{{name}}"
-#     repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
-#     type: clone
-#     has_issues: true
+git-micro-inventory:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-micro-inventory-{{name}}"
+    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
+    type: clone
+    has_issues: true
 
 # git-micro-socialreview:
 #   service_id: githubpublic
@@ -142,10 +142,35 @@ pipeline-inventorydb-mysql:
        NAME: "{{pipeline-inventorydb-mysql.parameters.name}}"
        PORT: "3306"
        MEMORY: "128"
-       DBNAME: "inventorydb"
-       DBUSER: "dbuser"
-       DBPASS: "Pass4dbUs3r"
-       DBAPASS: "Pass4Admin123"
+       DBNAME: "{{deploy.parameters.mysql-database}}"
+       DBUSER: "{{deploy.parameters.mysql-dbuser}}"
+       DBPASS: "{{deploy.parameters.mysql-dbpass}}"
+       DBAPASS: "{{deploy.parameters.mysql-root-pass}}"
+      execute: true
+
+pipeline-micro-inventory:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "micro-inventory"
+    ui-pipeline: true
+    services: ["git-micro-inventory"]
+    configuration:
+      content: $file(micro-inventory.pipeline.yml)
+      env:
+       DOMAIN: "{{deploy.parameters.route-domain}}"
+       REPO: "git-micro-inventory"
+       REGION: "{{deploy.parameters.deploy-region}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME: "{{pipeline-micro-inventory.parameters.name}}"
+       PORT: "8080"
+       MEMORY: "128"
+       MIN_INSTANCES: "1"
+       MAX_INSTANCES: "3"
+       DESIRED_INSTANCES: "2"
+       MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}"
+       EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
 
 pipeline-bluecompute-web:
@@ -175,3 +200,7 @@ deploy:
     deploy-space: dev
     route-domain: mybluemix.net
     bluecompute-web-app-name: "{{pipeline-bluecompute-web.parameters.name}}"
+    mysql-database: "inventorydb"
+    mysql-dbuser: "dbuser"
+    mysql-dbpass: "Pass4dbus3r"
+    mysql-root-pass: "Pass4Admin123"
