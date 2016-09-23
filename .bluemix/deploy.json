@@ -1,0 +1,94 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Omnichannel Toolchain Deployment to Bluemix",
+    "description": "omnichanel toolchain",
+    "longDescription": "Information entered here will be used at deployment time.",
+    "type": "object",
+    "properties": {
+        "deploy-region": {
+            "description": "Deploy to this Bluemix Region",
+            "type": "string"
+        },
+        "deploy-org": {
+            "description": "Deploy to this Bluemix Organization",
+            "type": "string"
+        },
+        "deploy-space": {
+            "description": "Deploy to this space",
+            "type": "string"
+        },
+        "route-domain": {
+            "description": "Domain name. Example: mybluemix.net for runtimes in US-South",
+            "type": "string"
+        },
+        "bluecompute-web-app-name": {
+            "description": "App name for Bluecompute web application",
+            "type": "string"
+        }
+    },
+    "required": [
+        "deploy-region",
+        "deploy-org",
+        "deploy-space",
+        "route-domain",
+        "bluecompute-web-app-name"
+    ],
+    "form": [
+        {
+            "type": "validator",
+            "url": "/devops/setup/bm-helper/helper.html"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Domain name for all routes",
+            "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Bluecompute Web App Name",
+            "key": "bluecompute-web-app-name"
+        },
+        {
+            "type": "table",
+            "columnCount": 4,
+            "widths": ["15%", "28%", "28%", "28%"],
+            "items": [
+                {
+                    "type": "label",
+                    "title": ""
+                },
+                {
+                    "type": "label",
+                    "title": "Region"
+                },
+                {
+                    "type": "label",
+                    "title": "Organization"
+                },
+                {
+                    "type": "label",
+                    "title": "Space"
+                },
+                {
+                    "type": "label",
+                    "title": "Deploy to:"
+                },
+                {
+                    "type": "select",
+                    "key": "deploy-region"
+                },
+                {
+                    "type": "select",
+                    "key": "deploy-org"
+                },
+                {
+                    "type": "select",
+                    "key": "deploy-space",
+                    "readonly": false
+                }
+            ]
+        }
+    ]
+}

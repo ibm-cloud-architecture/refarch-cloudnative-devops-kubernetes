@@ -1,0 +1,34 @@
+---
+stages:
+- name: Build
+  inputs:
+  - service: ${REPO}
+    type: git
+    branch: master
+  triggers:
+  - type: commit
+  jobs:
+  - name: Build
+    type: builder
+- name: Deploy
+  inputs:
+  - type: job
+    stage: Build
+    job: Build
+  triggers:
+  - type: stage
+  properties:
+  - name: APP_DOMAIN
+    value: ${DOMAIN}
+    type: text
+  jobs:
+  - name: Deploy
+    type: deployer
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+      application: ${NAME}
+    script: |-
+      #!/bin/bash
+      cf push "${CF_APP}" -n "${CF_APP}" -d "${APP_DOMAIN}"
