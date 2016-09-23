@@ -120,7 +120,7 @@ stages:
   triggers:
   - type: stage
   jobs:
-  - name: Deploy Eureka Container Group
+  - name: Prepare Cloudant
     type: deployer
     target:
       region_id: ${REGION}
