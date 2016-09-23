@@ -24,6 +24,22 @@
         "bluecompute-web-app-name": {
             "description": "App name for Bluecompute web application",
             "type": "string"
+        },
+        "mysql-database": {
+            "description": "Inventory database name",
+            "type": "string"
+        },
+        "mysql-dbuser": {
+            "description": "MySQL database user",
+            "type": "string"
+        },
+        "mysql-dbpass": {
+            "description": "Password for MySQL database user",
+            "type": "string"
+        },
+        "mysql-root-pass": {
+            "description": "Password for MySQL admin user",
+            "type": "string"
         }
     },
     "required": [
