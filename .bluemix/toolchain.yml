@@ -169,6 +169,8 @@ pipeline-micro-inventory:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
+       INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
+       CTXPATH: "{{deploy.parameters.context-path}}"
        MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
@@ -194,6 +196,8 @@ pipeline-micro-socialreview:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
+       SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
+       CTXPATH: "{{deploy.parameters.context-path}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
 
@@ -214,8 +218,8 @@ pipeline-bff-inventory:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-bff-inventory.parameters.name}}"
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}.{{deploy.parameters.route-domain}}"
-       CTXPATH: "micro"
-       INVENTORY_MSNAME: "inventory-microservice"
+       CTXPATH: "{{deploy.parameters.context-path}}"
+       INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
       execute: true
 
 pipeline-api:
@@ -234,7 +238,7 @@ pipeline-api:
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-api.parameters.name}}"
-       APIC_URL: "us.apiconnect.ibmcloud.com"
+       APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "apicusername"
       execute: true
 
@@ -255,10 +259,10 @@ pipeline-bff-socialreview:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-bff-socialreview.parameters.name}}"
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}.{{deploy.parameters.route-domain}}"
-       APIC_URL: "us.apiconnect.ibmcloud.com"
+       APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "apicusername"
-       CTXPATH: "micro"
-       SOCIALREVIEW_MSNAME: "socialreview-microservice"
+       CTXPATH: "{{deploy.parameters.context-path}}"
+       SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
       execute: true
 
 pipeline-bluecompute-web:
@@ -292,3 +296,7 @@ deploy:
     mysql-dbuser: "dbuser"
     mysql-dbpass: "Pass4dbus3r"
     mysql-root-pass: "Pass4Admin123"
+    apic-url: "us.apiconnect.ibmcloud.com"
+    context-path: "micro"
+    inventory-msname: "inventory-microservice"
+    socialreview-msname: "socialreview-microservice"

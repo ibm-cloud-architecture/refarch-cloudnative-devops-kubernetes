@@ -111,6 +111,12 @@ stages:
   - name: MAX_INSTANCES
     value: ${MAX_INSTANCES}
     type: text
+  - name: SOCIALREVIEW_MSNAME
+    value: ${SOCIALREVIEW_MSNAME}
+    type: text
+  - name: CTXPATH
+    value: ${CTXPATH}
+    type: text
   - name: DESIRED_INSTANCES
     value: ${DESIRED_INSTANCES}
     type: text
@@ -157,7 +163,7 @@ stages:
         log_and_echo "Build SocialReview Docker Container"
         cf service-key refarch-cloudantdb refarch-cloudantdb-credential|grep -E 'host|username|password'|sed 's/[\" \"|"|,]//g'|sed 's/:/=/g' > cloudant.env
         . cloudant.env
-        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "cloudant.username=$username" -e "cloudant.password=$password" -e "cloudant.host=https://$host""
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${SOCIALREVIEW_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "cloudant.username=$username" -e "cloudant.password=$password" -e "cloudant.host=https://$host""
         log_and_echo "Docker arguments: " $OPTIONAL_ARGS
 
 

@@ -5,6 +5,8 @@ stages:
   - service: ${REPO}
     type: git
     branch: master
+  triggers:
+  - type: commit
   properties:
   - name: APIC_URL
     value: ${APIC_URL}
