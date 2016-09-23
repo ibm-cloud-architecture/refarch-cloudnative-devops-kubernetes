@@ -5,6 +5,8 @@ stages:
   - service: ${REPO}
     type: git
     branch: master
+  triggers:
+  - type: commit
   properties:
   - name: APP_DOMAIN
     value: ${DOMAIN}
@@ -15,8 +17,8 @@ stages:
   - name: CTXPATH
     value: ${CTXPATH}
     type: text
-  - name: SOCIALREVIEW_MSNAME
-    value: ${SOCIALREVIEW_MSNAME}
+  - name: INVENTORY_MSNAME
+    value: ${INVENTORY_MSNAME}
     type: text
   jobs:
   - name: Build Inventory BFF
@@ -50,4 +52,4 @@ stages:
       application: ${NAME}
     script: |
       #!/bin/bash
-      cf push "${CF_APP}" -n ${CF_APP} -d ${APP_DOMAIN}
+      cf push "${CF_APP}" -n "${CF_APP}"" -d "${APP_DOMAIN}""

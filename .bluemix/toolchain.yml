@@ -61,13 +61,13 @@ git-bff-socialreview:
     type: clone
     has_issues: true
 
-# git-api:
-#   service_id: githubpublic
-#   parameters:
-#     repo_name: "refarch-cloudnative-api-{{name}}"
-#     repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-api
-#     type: clone
-#     has_issues: true
+git-api:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-api-{{name}}"
+    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-api
+    type: clone
+    has_issues: true
 
 git-bluecompute-web:
   service_id: githubpublic
@@ -215,7 +215,27 @@ pipeline-bff-inventory:
        NAME: "{{pipeline-bff-inventory.parameters.name}}"
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}.{{deploy.parameters.route-domain}}"
        CTXPATH: "micro"
-       SOCIALREVIEW_MSNAME: "inventory-microservice"
+       INVENTORY_MSNAME: "inventory-microservice"
+      execute: true
+
+pipeline-api:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "api"
+    ui-pipeline: true
+    services: ["git-api"]
+    configuration:
+      content: $file(api.pipeline.yml)
+      env:
+       DOMAIN: "{{deploy.parameters.route-domain}}"
+       REPO: "git-api"
+       REGION: "{{deploy.parameters.deploy-region}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME: "{{pipeline-api.parameters.name}}"
+       APIC_URL: "us.apiconnect.ibmcloud.com"
+       APIC_USER: "apicusername"
       execute: true
 
 pipeline-bff-socialreview:
