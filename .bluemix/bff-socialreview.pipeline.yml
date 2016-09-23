@@ -1,0 +1,64 @@
+---
+stages:
+- name: BUILD
+  inputs:
+  - service: ${REPO}
+    type: git
+    branch: master
+  properties:
+  - name: APIC_URL
+    value: ${APIC_URL}
+    type: text
+  - name: APIC_USER
+    value: ${APIC_USER}
+    type: text
+  - name: APIC_PASS
+    type: secure
+  - name: ZUUL_PROXY_URL
+    value: ${ZUUL_PROXY_URL}
+    type: text
+  - name: CTXPATH
+    value: ${CTXPATH}
+    type: text
+  - name: SOCIALREVIEW_MSNAME
+    value: ${SOCIALREVIEW_MSNAME}
+    type: text
+  jobs:
+  - name: Publish Socialreview BFF
+    type: builder
+    working_dir: socialreview
+    artifact_dir: ''
+    build_type: npm
+    script: |-
+      #!/bin/bash
+      # The default Node.js version is 0.10.40
+      # To use Node.js 0.12.7, uncomment the following line:
+      export PATH=/opt/IBM/node-v0.12/bin:$PATH
+      # To use Node.js 4.2.2, uncomment the following line:
+      #export PATH=/opt/IBM/node-v4.2/bin:$PATH
+
+      echo $PWD
+      ls -al .
+
+      # Set Zuul proxy url
+      echo "set zuul url..."
+      /bin/bash set-zuul-proxy-url.sh -c $CTXPATH -m $SOCIALREVIEW_MSNAME -z $ZUUL_PROXY_URL
+
+      # Configure APIC cli
+      echo -e "Start installing apiconnect cli"
+      npm install -g apiconnect
+      echo -e "completed installing apic cli"
+      echo "yes" | apic
+
+      echo -e "Publish the socialreview bff app"
+
+      apic login -u $APIC_USER -p $APIC_PASS -s ${APIC_URL}
+      apic config:set app=apic-app://${APIC_URL}/orgs/centusibmcom-cloudnative-qa/apps/${NAME}
+      apic apps:publish | tee -a publish.out
+      TARGET_HOST=$(cat publish.out|grep 'API target urls:'|awk '{print $NF}')
+      echo "TARGET_HOST: ${TARGET_HOST}"
+      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;/value\: >\-$/{N;s/https\:\/\/.*$/$TARGET_HOST/}}}}" definitions/socialreview.yaml
+      cat definitions/socialreview.yaml
+      echo -e "Publish the SocialReview api"
+      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/centusibmcom-cloudnative-qa/catalogs/bluecompute
+      apic publish definitions/socialreview-product.yaml
