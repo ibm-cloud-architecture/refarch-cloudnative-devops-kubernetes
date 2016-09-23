@@ -38,7 +38,7 @@ stages:
 - name: DEPLOY
   inputs:
   - type: job
-    stage: Build
+    stage: BUILD
     job: Build Inventory BFF
   triggers:
   - type: stage
