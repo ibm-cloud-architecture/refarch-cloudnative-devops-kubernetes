@@ -203,7 +203,7 @@ pipeline-bff-inventory:
   parameters:
     name: "bff-inventory"
     ui-pipeline: true
-    services: ["git-bff-socialreview"]
+    services: ["git-bff-inventory"]
     configuration:
       content: $file(bff-inventory.pipeline.yml)
       env:
