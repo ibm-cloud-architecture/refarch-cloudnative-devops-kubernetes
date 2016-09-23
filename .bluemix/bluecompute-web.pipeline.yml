@@ -10,6 +10,12 @@ stages:
   jobs:
   - name: Build
     type: builder
+    working_dir: StoreWebApp
+    artifact_dir: ''
+    build_type: npm
+    script: |-
+      #!/bin/bash
+      npm install
 - name: Deploy
   inputs:
   - type: job

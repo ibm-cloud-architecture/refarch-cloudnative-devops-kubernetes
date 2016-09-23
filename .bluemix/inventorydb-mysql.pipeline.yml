@@ -65,7 +65,7 @@ stages:
   inputs:
   - type: job
     stage: BUILD
-    job: Regiser MySQL Container Image
+    job: Register MySQL Container Image
   properties:
   - name: MEMORY
     value: ${MEMORY}
