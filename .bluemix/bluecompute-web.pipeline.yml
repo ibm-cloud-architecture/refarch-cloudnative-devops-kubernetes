@@ -1,6 +1,6 @@
 ---
 stages:
-- name: Build
+- name: BUILD
   inputs:
   - service: ${REPO}
     type: git
@@ -8,7 +8,7 @@ stages:
   triggers:
   - type: commit
   jobs:
-  - name: Build
+  - name: Build Bluecompute web app
     type: builder
     working_dir: StoreWebApp
     artifact_dir: ''
@@ -16,11 +16,11 @@ stages:
     script: |-
       #!/bin/bash
       npm install
-- name: Deploy
+- name: DEPLOY
   inputs:
   - type: job
-    stage: Build
-    job: Build
+    stage: BUILD
+    job: Build Bluecompute web app
   triggers:
   - type: stage
   properties:
@@ -28,7 +28,7 @@ stages:
     value: ${DOMAIN}
     type: text
   jobs:
-  - name: Deploy
+  - name: Deploy Bluecompute web app
     type: deployer
     target:
       region_id: ${REGION}
