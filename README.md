@@ -7,7 +7,9 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative*
 
 DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Bluemix to implement the CI/CD for the BlueCompute reference application.
 
-The project uses [Bluemix DevOps open toolchains](https://new-console.ng.bluemix.net/docs/toolchains/toolchains_overview.html) to implement the CI/CD. The goal is to standup most of the application components as part of an automated pipeline. So you don't have to go through the manual setup as outlined in the project main repository page.
+The project uses [Bluemix DevOps open toolchains](https://new-console.ng.bluemix.net/docs/toolchains/toolchains_overview.html) to implement the CI/CD. The goal is to standup most of the application components as part of an automated pipeline. So you don't have to go through the manual setup as outlined in the project main repository page. The toolchain for BlueCompute application looks like this:
+
+![DevOps Toolchain](static/imgs/bluemix_devops_toolchain.png?raw=true)  
 
 To read more about the Open Toolchains, please check out this [Blog post](https://developer.ibm.com/devops-services/2016/06/16/open-toolchain-with-ibm-bluemix-devops-services/)
 
@@ -95,7 +97,7 @@ Select **Clone** as Repository type,
 Enter the New Repository name as: **refarch-cloudnative-micro-socialreview**,  
 And Enter the git repository link for the socialreviw microservice: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview,  
 You can choose to enable the git issue, then it will be part of the tool chain.  
-Click Create Integration button.
+Click **Create Integration** button.
 
 ![Create Github](static/imgs/socialreview_github_tool.png?raw=true)  
 You may need to Grant your github access for the toolchain.  
