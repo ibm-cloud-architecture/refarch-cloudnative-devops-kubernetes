@@ -237,7 +237,7 @@ pipeline-api:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-api.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME: "{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
        APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "apicusername"
       execute: true
