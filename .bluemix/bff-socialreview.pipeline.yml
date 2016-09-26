@@ -22,8 +22,17 @@ stages:
   - name: CTXPATH
     value: ${CTXPATH}
     type: text
+  - name: APP_NAME
+    value: ${NAME}
+    type: text
   - name: SOCIALREVIEW_MSNAME
     value: ${SOCIALREVIEW_MSNAME}
+    type: text
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
     type: text
   jobs:
   - name: Publish Socialreview BFF
@@ -41,7 +50,9 @@ stages:
 
       echo $PWD
       ls -al .
-
+      # set orgs
+      CHARLST="[@|.|-|_]"
+      ORGS=$(echo $ORG|sed "s/$CHARLST//g")-$SPACE
       # Set Zuul proxy url
       echo "set zuul url..."
       /bin/bash set-zuul-proxy-url.sh -c $CTXPATH -m $SOCIALREVIEW_MSNAME -z $ZUUL_PROXY_URL
@@ -55,12 +66,12 @@ stages:
       echo -e "Publish the socialreview bff app"
 
       apic login -u $APIC_USER -p $APIC_PASS -s ${APIC_URL}
-      apic config:set app=apic-app://${APIC_URL}/orgs/centusibmcom-cloudnative-qa/apps/${NAME}
+      apic config:set app=apic-app://${APIC_URL}/orgs/${ORGS}/apps/${APP_NAME}
       apic apps:publish | tee -a publish.out
       TARGET_HOST=$(cat publish.out|grep 'API target urls:'|awk '{print $NF}')
       echo "TARGET_HOST: ${TARGET_HOST}"
       sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;/value\: >\-$/{N;s/https\:\/\/.*$/$TARGET_HOST/}}}}" definitions/socialreview.yaml
       cat definitions/socialreview.yaml
       echo -e "Publish the SocialReview api"
-      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/centusibmcom-cloudnative-qa/catalogs/bluecompute
+      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
       apic publish definitions/socialreview-product.yaml

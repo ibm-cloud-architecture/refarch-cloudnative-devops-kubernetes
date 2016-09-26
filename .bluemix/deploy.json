@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Omnichannel Toolchain Deployment to Bluemix",
-    "description": "omnichanel toolchain",
+    "title": "Bluecompute Toolchain Deployment to Bluemix",
+    "description": "bluecompute toolchain",
     "longDescription": "Information entered here will be used at deployment time.",
     "type": "object",
     "properties": {
@@ -71,24 +71,6 @@
             "url": "/devops/setup/bm-helper/helper.html"
         },
         {
-            "type": "text",
-            "readonly": false,
-            "title": "Domain name for all routes",
-            "key": "route-domain"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "API Connect hostname",
-            "key": "apic-url"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "Bluecompute Web App Name",
-            "key": "bluecompute-web-app-name"
-        },
-        {
             "type": "table",
             "columnCount": 4,
             "widths": ["15%", "28%", "28%", "28%"],
@@ -127,6 +109,18 @@
                     "readonly": false
                 }
             ]
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Domain name for all routes",
+            "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "API Connect hostname",
+            "key": "apic-url"
         }
     ]
 }

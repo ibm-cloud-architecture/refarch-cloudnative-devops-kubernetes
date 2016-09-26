@@ -16,6 +16,12 @@ stages:
     type: text
   - name: APIC_PASS
     type: secure
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
+    type: text
   jobs:
   - name: Publish Inventory BFF
     type: builder
@@ -31,6 +37,9 @@ stages:
       #npm install
       echo $PWD
       ls -al .
+      # set orgs
+      CHARLST="[@|.|-|_]"
+      ORGS=$(echo $ORG|sed "s/$CHARLST//g")-$SPACE
       # Configure APIC cli
       echo -e "Start installing apiconnect cli"
       npm install -g apiconnect
@@ -40,5 +49,5 @@ stages:
       echo -e "Publish the inventory api"
       cd inventory
       apic login -u $APIC_USER -p $APIC_PASS -s ${APIC_URL}
-      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/centusibmcom-cloudnative-qa/catalogs/bluecompute
+      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
       apic publish inventory-product_0.0.1.yaml
