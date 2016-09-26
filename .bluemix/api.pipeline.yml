@@ -23,10 +23,10 @@ stages:
     value: ${SPACE}
     type: text
   - name: APP_NAME
-    value: http://${NAME}
+    value: ${NAME}
     type: text
   - name: DOMAIN
-    value: http://${DOMAIN}
+    value: ${DOMAIN}
     type: text
   jobs:
   - name: Publish Inventory BFF
@@ -57,7 +57,7 @@ stages:
       TARGET_HOST=$APP_NAME.$DOMAIN
       sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'http\:\/\/$TARGET_HOST\'/}}}" inventory.yaml
       cat inventory.yaml
-      
+
       echo -e "Publish the inventory api"
       apic login -u $APIC_USER -p $APIC_PASS -s ${APIC_URL}
       apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
