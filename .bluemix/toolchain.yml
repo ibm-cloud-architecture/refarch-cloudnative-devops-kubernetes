@@ -92,7 +92,7 @@ pipeline-netflix-eureka:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-netflix-eureka.parameters.name}}"
+       NAME: "{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8761"
        MEMORY: "128"
        MIN_INSTANCES: "1"
@@ -115,13 +115,13 @@ pipeline-netflix-zuul:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-netflix-zuul.parameters.name}}"
+       NAME: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8080"
        MEMORY: "128"
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
-       EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
+       EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
 
 pipeline-inventorydb-mysql:
@@ -139,7 +139,7 @@ pipeline-inventorydb-mysql:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-inventorydb-mysql.parameters.name}}"
+       NAME: "{{pipeline-inventorydb-mysql.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "3306"
        MEMORY: "128"
        DBNAME: "{{deploy.parameters.mysql-database}}"
@@ -163,7 +163,7 @@ pipeline-micro-inventory:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-micro-inventory.parameters.name}}"
+       NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8080"
        MEMORY: "128"
        MIN_INSTANCES: "1"
@@ -171,8 +171,8 @@ pipeline-micro-inventory:
        DESIRED_INSTANCES: "2"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
-       MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}"
-       EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
+       MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
 
 pipeline-micro-socialreview:
@@ -190,7 +190,7 @@ pipeline-micro-socialreview:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-micro-socialreview.parameters.name}}"
+       NAME: "{{pipeline-micro-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8080"
        MEMORY: "128"
        MIN_INSTANCES: "1"
@@ -198,7 +198,7 @@ pipeline-micro-socialreview:
        DESIRED_INSTANCES: "2"
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
-       EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}.{{deploy.parameters.route-domain}}/eureka/"
+       EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: true
 
 pipeline-bff-inventory:
@@ -216,8 +216,8 @@ pipeline-bff-inventory:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-bff-inventory.parameters.name}}"
-       ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}.{{deploy.parameters.route-domain}}"
+       NAME: "{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
       execute: true
@@ -237,7 +237,7 @@ pipeline-api:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-api.parameters.name}}"
+       NAME: "{{pipeline-api.parameters.name}}-{{deploy.parameters.deploy-space}}"
        APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "apicusername"
       execute: true
@@ -257,8 +257,8 @@ pipeline-bff-socialreview:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{pipeline-bff-socialreview.parameters.name}}"
-       ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}.{{deploy.parameters.route-domain}}"
+       NAME: "{{pipeline-bff-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}"
        APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "apicusername"
        CTXPATH: "{{deploy.parameters.context-path}}"
@@ -280,7 +280,7 @@ pipeline-bluecompute-web:
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME: "{{deploy.parameters.bluecompute-web-app-name}}"
+       NAME: "{{deploy.parameters.bluecompute-web-app-name}}-{{deploy.parameters.deploy-space}}"
       execute: true
 
 deploy:

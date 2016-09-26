@@ -125,8 +125,12 @@ stages:
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
-        #!/bin/bash
+        #!/bin/sh
 
+        set -e
+        echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
+        $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
+        set +e
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
         echo -e "${label_color}Starting deployment script${no_color}"
 

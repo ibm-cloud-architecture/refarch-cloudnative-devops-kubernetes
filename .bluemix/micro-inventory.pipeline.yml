@@ -138,7 +138,12 @@ stages:
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
-        #!/bin/bash
+        #!/bin/sh
+
+        set -e
+        echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
+        $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
+        set +e
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
         echo -e "${label_color}Starting deployment script${no_color}"
 
@@ -151,7 +156,7 @@ stages:
         log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
         $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
         . mysql.env
-        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH} -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://$HostIp:$HostPort/$MYSQL_DATABASE" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
         log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
         # Deploy Container Group:
