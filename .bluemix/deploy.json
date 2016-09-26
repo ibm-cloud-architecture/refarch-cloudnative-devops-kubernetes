@@ -45,6 +45,14 @@
             "description": "Region specific APIC hostname",
             "type": "string"
         },
+        "apic-user": {
+            "description": "APIC username",
+            "type": "string"
+        },
+        "apic-pass": {
+            "description": "APIC password",
+            "type": "password"
+        },
         "context-path": {
             "description": "Context path for published APIs",
             "type": "string"
@@ -63,8 +71,10 @@
         "deploy-org",
         "deploy-space",
         "route-domain",
-        "bluecompute-web-app-name"
-    ],
+        "apic-url",
+        "apic-user",
+        "apic-pass"
+        ],
     "form": [
         {
             "type": "validator",
@@ -121,6 +131,18 @@
             "readonly": false,
             "title": "API Connect hostname",
             "key": "apic-url"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "APIC Username",
+            "key": "apic-user"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": "APIC Password",
+            "key": "apic-pass"
         }
     ]
 }

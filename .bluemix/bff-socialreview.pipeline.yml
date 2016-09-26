@@ -15,6 +15,7 @@ stages:
     value: ${APIC_USER}
     type: text
   - name: APIC_PASS
+    value: ${APIC_PASS}
     type: secure
   - name: ZUUL_PROXY_URL
     value: ${ZUUL_PROXY_URL}

@@ -239,8 +239,9 @@ pipeline-api:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
        APIC_URL: "{{deploy.parameters.apic-url}}"
-       APIC_USER: "apicusername"
-      execute: false
+       APIC_USER: "{{deploy.parameters.apic-user}}"
+       APIC_PASS: "{{deploy.parameters.apic-pass}}"
+      execute: true
 
 pipeline-bff-socialreview:
   service_id: pipeline
@@ -260,10 +261,11 @@ pipeline-bff-socialreview:
        NAME: "{{pipeline-bff-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}"
        APIC_URL: "{{deploy.parameters.apic-url}}"
-       APIC_USER: "apicusername"
+       APIC_USER: "{{deploy.parameters.apic-user}}"
+       APIC_PASS: "{{deploy.parameters.apic-pass}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
-      execute: false
+      execute: true
 
 pipeline-bluecompute-web:
   service_id: pipeline
@@ -297,6 +299,8 @@ deploy:
     mysql-dbpass: "Pass4dbus3r"
     mysql-root-pass: "Pass4Admin123"
     apic-url: "us.apiconnect.ibmcloud.com"
+    apic-user: "enter APIC username"
+    apic-pass: "enter APIC password"
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
