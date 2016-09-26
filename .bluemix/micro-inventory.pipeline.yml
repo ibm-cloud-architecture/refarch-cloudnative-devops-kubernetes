@@ -134,7 +134,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m ${MEMORY} --min {MIN_INSTANCES} --max ${MAX_INSTANCES} --env eureka.client.fetchRegistry=true --env eureka.client.registerWithEureka=true --env eureka.instance.nonSecurePort=80 --env eureka.port=80
+    OPTIONAL_ARGS: -m ${MEMORY} --env eureka.client.fetchRegistry=true --env eureka.client.registerWithEureka=true --env eureka.instance.nonSecurePort=80 --env eureka.port=80
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-

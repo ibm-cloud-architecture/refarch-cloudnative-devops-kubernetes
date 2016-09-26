@@ -145,7 +145,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m ${MEMORY} --min ${MIN_INSTANCES} --max ${MAX_INSTANCES}
+    OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
