@@ -76,3 +76,22 @@ stages:
       echo -e "Publish the SocialReview api"
       apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
       apic publish definitions/socialreview-product.yaml
+- name: DEPLOY
+  inputs:
+  - type: job
+    stage: BUILD
+    job: Publish Socialreview BFF
+  triggers:
+  - type: stage
+  jobs:
+  - name: Bind AutoScaling Service
+    type: deployer
+    target:
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+      application: ${NAME}
+    script: |-
+      #!/bin/bash
+      cf bs "${CF_APP}" cloudnative-autoscale
+      cf restage "${CF_APP}"
