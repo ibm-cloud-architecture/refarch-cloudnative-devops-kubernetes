@@ -98,7 +98,7 @@ pipeline-netflix-eureka:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
-      execute: false
+      execute: true
 
 pipeline-netflix-zuul:
   service_id: pipeline
@@ -122,7 +122,7 @@ pipeline-netflix-zuul:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
-      execute: false
+      execute: true
 
 pipeline-inventorydb-mysql:
   service_id: pipeline
@@ -146,7 +146,7 @@ pipeline-inventorydb-mysql:
        DBUSER: "{{deploy.parameters.mysql-dbuser}}"
        DBPASS: "{{deploy.parameters.mysql-dbpass}}"
        DBAPASS: "{{deploy.parameters.mysql-root-pass}}"
-      execute: false
+      execute: true
 
 pipeline-micro-inventory:
   service_id: pipeline
@@ -173,7 +173,7 @@ pipeline-micro-inventory:
        CTXPATH: "{{deploy.parameters.context-path}}"
        MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}-{{deploy.parameters.deploy-space}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
-      execute: false
+      execute: true
 
 pipeline-micro-socialreview:
   service_id: pipeline
@@ -199,7 +199,7 @@ pipeline-micro-socialreview:
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
-      execute: false
+      execute: true
 
 pipeline-bff-inventory:
   service_id: pipeline
@@ -220,7 +220,7 @@ pipeline-bff-inventory:
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
-      execute: false
+      execute: true
 
 pipeline-api:
   service_id: pipeline
@@ -281,7 +281,7 @@ pipeline-bluecompute-web:
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{deploy.parameters.bluecompute-web-app-name}}-{{deploy.parameters.deploy-space}}"
-      execute: false
+      execute: true
 
 deploy:
   schema: deploy.json
@@ -297,6 +297,6 @@ deploy:
     mysql-dbpass: "Pass4dbus3r"
     mysql-root-pass: "Pass4Admin123"
     apic-url: "us.apiconnect.ibmcloud.com"
-    context-path: "micro"
+    context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
