@@ -93,5 +93,6 @@ stages:
       application: ${NAME}
     script: |-
       #!/bin/bash
+      cf create-service Auto-Scaling free cloudnative-autoscale
       cf bs "${CF_APP}" cloudnative-autoscale
       cf restage "${CF_APP}"
