@@ -168,7 +168,6 @@ pipeline-micro-inventory:
        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
-       MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
       execute: false
 
