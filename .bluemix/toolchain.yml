@@ -1,6 +1,6 @@
 ---
-name: "Omnichannel Toolchain"
-description: "Omnichannel sample application"
+name: "BlueCompute Toolchain"
+description: "BlueCompute sample application"
 version: 0.1
 required:
  - deploy
@@ -299,8 +299,8 @@ deploy:
     mysql-dbpass: "Pass4dbus3r"
     mysql-root-pass: "Pass4Admin123"
     apic-url: "us.apiconnect.ibmcloud.com"
-    apic-user: "enter APIC username"
-    apic-pass: "enter APIC password"
+    apic-user: ""
+    apic-pass: ""
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
