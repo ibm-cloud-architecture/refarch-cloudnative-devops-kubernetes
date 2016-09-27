@@ -291,7 +291,7 @@ deploy:
   parameters:
     deploy-region: "{{region}}"
     deploy-org: "{{organization}}"
-    deploy-space: dev
+    deploy-space: "{{space}}"
     route-domain: mybluemix.net
     bluecompute-web-app-name: "{{pipeline-bluecompute-web.parameters.name}}"
     mysql-database: "inventorydb"
