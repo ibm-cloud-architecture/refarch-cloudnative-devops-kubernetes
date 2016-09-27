@@ -71,7 +71,7 @@ stages:
       apic apps:publish | tee -a publish.out
       TARGET_HOST=$(cat publish.out|grep 'API target urls:'|awk '{print $NF}')
       echo "TARGET_HOST: ${TARGET_HOST}"
-      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;/value\: >\-$/{N;s/https\:\/\/.*$/$TARGET_HOST/}}}}" definitions/socialreview.yaml
+      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;/value\: >\-$/{N;s/\(https\:\/\/\)\(.*$\)/\1$TARGET_HOST/}}}}" definitions/socialreview.yaml
       cat definitions/socialreview.yaml
       echo -e "Publish the SocialReview api"
       apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
