@@ -81,10 +81,10 @@ stages:
     type: text
   - name: MYSQL_PASSWORD
     value: ${DBPASS}
-    type: text
+    type: secure
   - name: MYSQL_ROOT_PASSWORD
     value: ${DBAPASS}
-    type: text
+    type: secure
   triggers:
   - type: stage
   jobs:

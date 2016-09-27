@@ -29,17 +29,21 @@
             "description": "Inventory database name",
             "type": "string"
         },
+        "mysql-port": {
+            "description": "MySQL server port",
+            "type": "string"
+        },
         "mysql-dbuser": {
             "description": "MySQL database user",
             "type": "string"
         },
         "mysql-dbpass": {
             "description": "Password for MySQL database user",
-            "type": "string"
+            "type": "password"
         },
         "mysql-root-pass": {
             "description": "Password for MySQL admin user",
-            "type": "string"
+            "type": "password"
         },
         "apic-url": {
             "description": "Region specific APIC hostname",
