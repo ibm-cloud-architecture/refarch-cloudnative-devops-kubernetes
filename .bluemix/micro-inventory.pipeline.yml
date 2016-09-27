@@ -101,9 +101,6 @@ stages:
   - name: MYSQL_CONTAINER
     value: ${MYSQL_CONTAINER}
     type: text
-  - name: MYSQL_CONTAINER
-    value: ${MYSQL_CONTAINER}
-    type: text
   - name: MYSQL_PORT
     value: ${MYSQL_PORT}
     type: text
