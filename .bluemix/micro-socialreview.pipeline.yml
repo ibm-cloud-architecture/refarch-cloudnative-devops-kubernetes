@@ -45,9 +45,11 @@ stages:
         ######################################
         # Build Container via Dockerfile     #
         ######################################
-
+        SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/"
+        )
+        IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
         REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
-        FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:cloudnative
+        FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
         # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
 
         if [ -f Dockerfile ]; then
