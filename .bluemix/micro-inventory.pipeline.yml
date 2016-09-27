@@ -112,7 +112,7 @@ stages:
     type: text
   - name: MYSQL_PASSWORD
     value: ${MYSQL_PASSWORD}
-    type: secret
+    type: secure
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
     type: text
