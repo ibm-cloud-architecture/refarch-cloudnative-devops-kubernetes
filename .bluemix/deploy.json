@@ -21,10 +21,6 @@
             "description": "Domain name. Example: mybluemix.net for runtimes in US-South",
             "type": "string"
         },
-        "bluecompute-web-app-name": {
-            "description": "App name for Bluecompute web application",
-            "type": "string"
-        },
         "mysql-database": {
             "description": "Inventory database name",
             "type": "string"

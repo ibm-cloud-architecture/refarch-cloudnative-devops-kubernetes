@@ -271,7 +271,6 @@ deploy:
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
     route-domain: mybluemix.net
-    bluecompute-web-app-name: "{{pipeline-bluecompute-web.parameters.name}}"
     mysql-port: "3306"
     mysql-database: "inventorydb"
     mysql-dbuser: "dbuser"
