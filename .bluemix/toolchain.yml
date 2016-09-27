@@ -69,14 +69,6 @@ git-api:
     type: clone
     has_issues: true
 
-git-bluecompute-web:
-  service_id: githubpublic
-  parameters:
-    repo_name: "refarch-cloudnative-bluecompute-web-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web"
-    type: clone
-    has_issues: true
-
 pipeline-netflix-eureka:
   service_id: pipeline
   hidden: [form, description]
