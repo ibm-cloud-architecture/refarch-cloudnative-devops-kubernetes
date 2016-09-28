@@ -39,28 +39,22 @@ provision a portal for you. You should receive a message like the one below. ![A
 9. Once the new Developer Portal has been created, you will receive an email.
 
 ### Step 2: Create the Bluemix DevOps toolchain
-[TODO: add images - steps 2-4 documentation in progress]
-Click the following button to deploy the toolchain to Bluemix.
+Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOps runtime will parse the toolchain template file and creates associated DevOps components such as GitHub repos and Delivery Pipelines.
 
 [![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git)
 
-This button essentially uploads the toolchain template to your Bluemix space. The Bluemix DevOps runtime will parse the template file and creates associated DevOps components for you, such as github repos and delivery pipelines.
+1. Enter toolchain name in the **Name:** field. ![Create Toolchain](static/imgs/create-toolchain.png)
+2. By default, the **GitHub** integration is configured to clone the associated git repos to your GitHub account. Click on **GitHub** integration to see the list of repos that are setup to clone to your account.
+3. Click on **Delivery Pipeline** integration to do the configuration.
+4. Update __Region__, __Organization__, and __Space__. Adjust the __Domain name__ and __API Connect hostname__ to match the region. Also enter __APIC Username__ and __Password__. Click **Create** to create the toolchain. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
+5. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
 
-### Step 3: Create the toolchain
+### Step 3: Execute the toolchain
+1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container running the **inventorydb** database.
+2. After the BUILD stage completes successfully it will automatically trigger the DEPLOY stage. Stay on the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully.
+3. Repeat above two steps for each delivery pipeline in the following order: **netflix-eureka**, **netflix-zuul**, **micro-inventory**, **micro-socialreview**, **bff-inventory**, **api**, **bff-socialreview**.
 
-There are certain credential needs to updated in order to execute the toolchain:
-1. Enter toolchain name in the **Name:** field.
-2. By default, the **GitHub** integration is configured to clone all git repos to your github account.
-3. Click on **Delivery Pipeline** configuration.
-4. Enter the Region, Organization, and Space. Adjust the Domain name and APIC hostname to match your region. Also enter APIC Username and Password. Click **Create** to create the toolchain.
-5. Click on **View Toolchain** to go to the toolchain page.
-
-This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one GitHub repo. Configuration data is shared between all the delivery pipelines.
-
-### Step 4: Execute the toolchain
-1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container. Ensure both the BUILD and DEPLOY stages have completed successfully. If a stage fails, troubleshoot based on the log information.
-2. Start BUILD stages for following delivery pipelines in the following sequence making sure each pipeline deployed successfully; **netflix-eureka**, **netflix-zuul**, **micro-inventory**, and **micro-socialreview**.
-
+This completes the creation of Bluemix DevOps toolchain to deploy the BlueCompute omnichannel application.
 
 ### Step 5: Complete the solution
 
