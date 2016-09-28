@@ -64,7 +64,7 @@ This toolchain will create and integrate eight GitHub repos with Issues enabled,
 
 ### Step 5: Complete the solution
 
-After successfully execute all the DevOps pipelines, you have the entire BlueCompute backend ready on IBM Cloud. There are 3 tasks remaining to get the BlueCompute application (both Mobile and Web) working:
+After successfully running all the DevOps pipelines, you have the entire BlueCompute backend ready on IBM Cloud. There are 3 tasks remaining to get the BlueCompute application (both Mobile and Web) working:
 
 - Subscribe to the APIs via API Connect developerPortal.  
    Please follow reference [the API subscription manual](https://github.com/ibm-cloud-architecture/refarch-cloudnative-api#subscribe-to-the-apis-in-the-developer-portal) to subscribe and consume the APIs.   
@@ -75,4 +75,4 @@ After successfully execute all the DevOps pipelines, you have the entire BlueCom
 - Configure and Run the BlueCompute Web application.  
    Please follow the [Run the BlueCompute web app](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web) to setup the Web application in IBM Cloud.  
 
-You have set up the BlueCompute stack using IBM Bluemix DevOps open toolchains. 
+You have set up the BlueCompute stack using IBM Bluemix DevOps open toolchains.
