@@ -62,8 +62,17 @@ This toolchain will create and integrate eight GitHub repos with Issues enabled,
 2. Start BUILD stages for following delivery pipelines in the following sequence making sure each pipeline deployed successfully; **netflix-eureka**, **netflix-zuul**, **micro-inventory**, and **micro-socialreview**.
 
 
-### Step 5: Validate the solution
+### Step 5: Complete the solution
 
-You will need to subscribe the APIs via APIC developerPortal, please follow the instructions below to subscribe:
+After successfully execute all the DevOps pipelines, you have the entire BlueCompute backend ready on IBM Cloud. There are 3 tasks remaining to get the BlueCompute application (both Mobile and Web) working:
 
-TODO - Add developerPortal instruction.
+- Subscribe to the APIs via API Connect developerPortal.  
+   Please follow reference [the API subscription manual](https://github.com/ibm-cloud-architecture/refarch-cloudnative-api#subscribe-to-the-apis-in-the-developer-portal) to subscribe and consume the APIs.   
+
+- Configure and Run the Mobile iOS BlueCompute App.  
+   Please follow the [Run the iOS application guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-mobile) to setup your iOS application.  
+
+- Configure and Run the BlueCompute Web application.  
+   Please follow the [Run the BlueCompute web app](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web) to setup the Web application in IBM Cloud.  
+
+You have set up the BlueCompute stack using IBM Bluemix DevOps open toolchains. 
