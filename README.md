@@ -39,33 +39,31 @@ sandbox has automatically been generated for you. ![API Info](static/imgs/bluemi
 provision a portal for you. You should receive a message like the one below. ![API Info](static/imgs/bluemix_9.png?raw=true)
 9. Once the new Developer Portal has been created, you will receive an email.
 
-### Step 2: Configure the DevOps open toolchains
-
-The project uses a centralized property file to control the configuration for various endpoint and environment variable. You need to configure them before executing the toolchain.
-
-TODO: Instruction on configuration.
-
-### Step 3: Create the Bluemix DevOps toolchain
-
+### Step 2: Create the Bluemix DevOps toolchain
+[TODO: add images - steps 2-4 documentation in progress]
 Click the following button to deploy the toolchain to Bluemix.
 
-[![Deploy To Bluemix](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git)
+[![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git)
 
 This button essentially uploads the toolchain template to your Bluemix space. The Bluemix DevOps runtime will parse the template file and creates associated DevOps components for you, such as github repos and delivery pipelines.
 
-
-### Step 4: Update the toolchain
+### Step 3: Create the toolchain
 
 There are certain credential needs to updated in order to execute the toolchain:
+1. Enter toolchain name in the **Name:** field.
+2. By default, the **GitHub** integration is configured to clone all git repos to your github account.
+3. Click on **Delivery Pipeline** configuration.
+4. Enter the Region, Organization, and Space. Adjust the Domain name and APIC hostname to match your region. Also enter APIC Username and Password. Click **Create** to create the toolchain.
+5. Click on **View Toolchain** to go to the toolchain page.
 
-TODO - Provide detail what needs to updated.
+This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one GitHub repo. Configuration data is shared between all the delivery pipelines.
+
+### Step 4: Execute the toolchain
+1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container. Ensure both the BUILD and DEPLOY stages have completed successfully. If a stage fails, troubleshoot based on the log information.
+2. Start BUILD stages for following delivery pipelines in the following sequence making sure each pipeline deployed successfully; **netflix-eureka**, **netflix-zuul**, **micro-inventory**, and **micro-socialreview**.
 
 
-### Step 5: Execute the toolchain
-
-TODO - execute the entire toolchain???
-
-### Step 6: Validate the solution
+### Step 5: Validate the solution
 
 You will need to subscribe the APIs via APIC developerPortal, please follow the instructions below to subscribe:
 
