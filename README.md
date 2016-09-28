@@ -46,17 +46,18 @@ Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOp
 1. Enter toolchain name in the **Name:** field. ![Create Toolchain](static/imgs/create-toolchain.png)
 2. By default, the **GitHub** integration is configured to clone the associated git repos to your GitHub account. Click on **GitHub** integration to see the list of repos that are setup to clone to your account.
 3. Click on **Delivery Pipeline** integration to do the configuration.
-4. Update __Region__, __Organization__, and __Space__. Adjust the __Domain name__ and __API Connect hostname__ to match the region. Also enter __APIC Username__ and __Password__. Click **Create** to create the toolchain. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
+4. By default the Bluemix Region, Organization, and Space information will be filled with the logged in Region, Organization, and Space values. Double-check to ensure this is the desired Region, Organization, and Space this toolchain should deploy to and update __Region__, __Organization__, and __Space__ values accordingly.
+5. Adjust the __Domain name__ and __API Connect hostname__ to match the region. Also enter __APIC Username__ and __Password__. Click **Create** to create the toolchain. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
 5. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
 
 ### Step 3: Execute the toolchain
 1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container running the **inventorydb** database.
-2. After the BUILD stage completes successfully it will automatically trigger the DEPLOY stage. Stay on the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully.
+2. After the BUILD stage completes successfully it will automatically trigger the DEPLOY stage. Stay on the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully. ![Successfully Deployed Pipeline](static/imgs/inventorydb-mysql-pipeline.png)
 3. Repeat above two steps for each delivery pipeline in the following order: **netflix-eureka**, **netflix-zuul**, **micro-inventory**, **micro-socialreview**, **bff-inventory**, **api**, **bff-socialreview**.
 
 This completes the creation of Bluemix DevOps toolchain to deploy the BlueCompute omnichannel application.
 
-### Step 5: Complete the solution
+### Step 4: Complete the solution
 
 After successfully running all the DevOps pipelines, you have the entire BlueCompute backend ready on IBM Cloud. There are 3 tasks remaining to get the BlueCompute application (both Mobile and Web) working:
 
