@@ -216,7 +216,7 @@ pipeline-bff-inventory:
        ZUUL_PROXY_URL: "{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
-      execute: true
+      execute: false
 
 pipeline-api:
   service_id: pipeline
@@ -237,7 +237,7 @@ pipeline-api:
        APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "{{deploy.parameters.apic-user}}"
        APIC_PASS: "{{deploy.parameters.apic-pass}}"
-      execute: true
+      execute: false
 
 pipeline-bff-socialreview:
   service_id: pipeline
@@ -261,7 +261,7 @@ pipeline-bff-socialreview:
        APIC_PASS: "{{deploy.parameters.apic-pass}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
-      execute: true
+      execute: false
 
 deploy:
   schema: deploy.json
@@ -270,7 +270,7 @@ deploy:
     deploy-region: "{{region}}"
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
-    route-domain: mybluemix.net
+    route-domain: "mybluemix.net"
     mysql-port: "3306"
     mysql-database: "inventorydb"
     mysql-dbuser: "dbuser"
