@@ -26,7 +26,7 @@ stages:
         ./gradlew build
         ./gradlew docker
         ls -al docker
-        cp docker/* .
+        cp -R docker/* .
         ls -al $PWD
         echo "Gradle build complete."
 
