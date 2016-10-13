@@ -64,6 +64,10 @@
         "socialreview-msname": {
             "description": "Product name for Socialreview Microservice APIs",
             "type": "string"
+        },
+        "new-relic-lic-key": {
+            "description": "New Relic License Key",
+            "type": "string"
         }
     },
     "required": [
@@ -73,7 +77,8 @@
         "route-domain",
         "apic-url",
         "apic-user",
-        "apic-pass"
+        "apic-pass",
+        "new-relic-lic-key"
         ],
     "form": [
         {
@@ -105,6 +110,12 @@
             "key": "apic-pass"
         },
         {
+            "type": "text",
+            "readonly": false,
+            "title": "New Relic License Key",
+            "key": "new-relic-lic-key"
+        },
+        {
             "type": "table",
             "columnCount": 4,
             "widths": ["15%", "28%", "28%", "28%"],
@@ -127,7 +138,7 @@
                 },
                 {
                     "type": "label",
-                    "title": "Deploy to:"
+                    "title": "Deploy to"
                 },
                 {
                     "type": "select",

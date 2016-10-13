@@ -125,6 +125,9 @@ stages:
   - name: CTXPATH
     value: ${CTXPATH}
     type: text
+  - name: NEW_RELIC_LICENSE
+    value: ${NEW_RELIC_LICENSE}
+    type: text
   triggers:
   - type: stage
   jobs:

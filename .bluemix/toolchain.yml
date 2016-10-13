@@ -90,6 +90,7 @@ pipeline-netflix-eureka:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"       
       execute: false
 
 pipeline-netflix-zuul:
@@ -114,6 +115,7 @@ pipeline-netflix-zuul:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-inventorydb-mysql:
@@ -169,6 +171,7 @@ pipeline-micro-inventory:
        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-micro-socialreview:
@@ -195,6 +198,7 @@ pipeline-micro-socialreview:
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-bff-inventory:
@@ -282,3 +286,4 @@ deploy:
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
+    new-relic-lic-key: ""

@@ -23,9 +23,9 @@ stages:
         log_and_echo "Run gradle build..."
         export JAVA_HOME=~/java8
         export PATH=$JAVA_HOME/bin:$PATH
-        /bin/bash build-gradle.sh
+        /bin/bash build-microservice.sh -d
         ls -al docker
-        cp docker/* .
+        cp -R docker/* .
         ls -al $PWD
         echo "Gradle build complete."
 
@@ -111,6 +111,9 @@ stages:
     type: text
   - name: DESIRED_INSTANCES
     value: ${DESIRED_INSTANCES}
+    type: text
+  - name: NEW_RELIC_LICENSE
+    value: ${NEW_RELIC_LICENSE}
     type: text
   triggers:
   - type: stage
