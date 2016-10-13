@@ -81,6 +81,30 @@
             "url": "/devops/setup/bm-helper/helper.html"
         },
         {
+            "type": "text",
+            "readonly": false,
+            "title": "Domain name for all routes",
+            "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "API Connect hostname",
+            "key": "apic-url"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "APIC Username",
+            "key": "apic-user"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": "APIC Password",
+            "key": "apic-pass"
+        },
+        {
             "type": "table",
             "columnCount": 4,
             "widths": ["15%", "28%", "28%", "28%"],
@@ -119,30 +143,6 @@
                     "readonly": false
                 }
             ]
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "Domain name for all routes",
-            "key": "route-domain"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "API Connect hostname",
-            "key": "apic-url"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "APIC Username",
-            "key": "apic-user"
-        },
-        {
-            "type": "password",
-            "readonly": false,
-            "title": "APIC Password",
-            "key": "apic-pass"
         }
     ]
 }

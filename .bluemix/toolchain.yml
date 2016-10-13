@@ -8,16 +8,16 @@ required:
 git-netflix-eureka:
   service_id: githubpublic
   parameters:
-    repo_name: "microservices-netflix-eureka-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-eureka"
+    repo_name: "refarch-cloudnative-netflix-eureka-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka"
     type: clone
     has_issues: true
 
 git-netflix-zuul:
   service_id: githubpublic
   parameters:
-    repo_name: "microservices-netflix-zuul-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-zuul"
+    repo_name: "refarch-cloudnative-netflix-zuul-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-zuul"
     type: clone
     has_issues: true
 
@@ -33,7 +33,7 @@ git-micro-inventory:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-micro-inventory-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory"
     type: clone
     has_issues: true
 
@@ -41,7 +41,7 @@ git-micro-socialreview:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-micro-socialreview-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview"
     type: clone
     has_issues: true
 
@@ -49,7 +49,7 @@ git-bff-inventory:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-bff-inventory-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory"
     type: clone
     has_issues: true
 
@@ -57,7 +57,7 @@ git-bff-socialreview:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-bff-socialreview-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview"
     type: clone
     has_issues: true
 
@@ -65,7 +65,7 @@ git-api:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-api-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-api
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-api"
     type: clone
     has_issues: true
 
