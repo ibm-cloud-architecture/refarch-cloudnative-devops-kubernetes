@@ -8,16 +8,16 @@ required:
 git-netflix-eureka:
   service_id: githubpublic
   parameters:
-    repo_name: "microservices-netflix-eureka-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-eureka"
+    repo_name: "refarch-cloudnative-netflix-eureka-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-eureka"
     type: clone
     has_issues: true
 
 git-netflix-zuul:
   service_id: githubpublic
   parameters:
-    repo_name: "microservices-netflix-zuul-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/microservices-netflix-zuul"
+    repo_name: "refarch-cloudnative-netflix-zuul-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-netflix-zuul"
     type: clone
     has_issues: true
 
@@ -33,7 +33,7 @@ git-micro-inventory:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-micro-inventory-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory"
     type: clone
     has_issues: true
 
@@ -41,7 +41,7 @@ git-micro-socialreview:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-micro-socialreview-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview"
     type: clone
     has_issues: true
 
@@ -49,7 +49,7 @@ git-bff-inventory:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-bff-inventory-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory"
     type: clone
     has_issues: true
 
@@ -57,7 +57,7 @@ git-bff-socialreview:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-bff-socialreview-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview"
     type: clone
     has_issues: true
 
@@ -65,7 +65,7 @@ git-api:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-api-{{name}}"
-    repo_url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-api
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-api"
     type: clone
     has_issues: true
 
@@ -90,6 +90,7 @@ pipeline-netflix-eureka:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"       
       execute: false
 
 pipeline-netflix-zuul:
@@ -114,6 +115,7 @@ pipeline-netflix-zuul:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-inventorydb-mysql:
@@ -169,6 +171,7 @@ pipeline-micro-inventory:
        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-micro-socialreview:
@@ -195,6 +198,7 @@ pipeline-micro-socialreview:
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-bff-inventory:
@@ -282,3 +286,4 @@ deploy:
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
+    new-relic-lic-key: ""

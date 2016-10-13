@@ -23,9 +23,9 @@ stages:
         log_and_echo "Run gradle build..."
         export JAVA_HOME=~/java8
         export PATH=$JAVA_HOME/bin:$PATH
-        /bin/bash build-gradle.sh
+        /bin/bash build-microservice.sh -d
         ls -al docker
-        cp docker/* .
+        cp -R docker/* .
         ls -al $PWD
         echo "Gradle build complete."
 
@@ -112,6 +112,24 @@ stages:
   - name: DESIRED_INSTANCES
     value: ${DESIRED_INSTANCES}
     type: text
+  - name: SERVER_SELF_PRESERVATION
+    value: 'true'
+    type: text
+  - name: CLIENT_HEALTH_CHECK
+    value: 'true'
+    type: text
+  - name: INSTANCE_LEASE_RENEWAL_INTERVAL_SECS
+    value: '30'
+    type: text
+  - name: INSTANCE_LEASE_EXPIRATION_DURATION_SECS
+    value: '90'
+    type: text
+  - name: SERVER_RENEWAL_THRESHOLD_PCT
+    value: '0.25'
+    type: text
+  - name: NEW_RELIC_LICENSE
+    value: ${NEW_RELIC_LICENSE}
+    type: text
   triggers:
   - type: stage
   jobs:
@@ -158,7 +176,7 @@ stages:
         #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
         #                                    Default is 1
         ROUTE_FQDN=$ROUTE_HOSTNAME.$ROUTE_DOMAIN
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e eureka.client.serviceUrl.defaultZone=http://$ROUTE_FQDN/eureka/ -e eureka.instance.hostname=$ROUTE_FQDN"
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e eureka.server.enableSelfPreservation=${SERVER_SELF_PRESERVATION} -e eureka.server.renewalPercentThreshold=${SERVER_RENEWAL_THRESHOLD_PCT} -e eureka.instance.leaseRenewalIntervalInSeconds=${INSTANCE_LEASE_RENEWAL_INTERVAL_SECS} -e eureka.instance.leaseExpirationDurationInSeconds=${INSTANCE_LEASE_EXPIRATION_DURATION_SECS} -e eureka.client.healthcheck.enabled=${CLIENT_HEALTH_CHECK} -e eureka.client.serviceUrl.defaultZone=http://$ROUTE_FQDN/eureka/ -e eureka.instance.hostname=$ROUTE_FQDN"
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
 
         /bin/bash deployscripts/deploygroup.sh

@@ -95,6 +95,9 @@ stages:
     stage: BUILD
     job: Register SocialReview Microservice Container Image
   properties:
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text      
   - name: ROUTE_HOSTNAME
     value: ${NAME}
     type: text
@@ -124,6 +127,9 @@ stages:
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
+    type: text
+  - name: NEW_RELIC_LICENSE
+    value: ${NEW_RELIC_LICENSE}
     type: text
   triggers:
   - type: stage
