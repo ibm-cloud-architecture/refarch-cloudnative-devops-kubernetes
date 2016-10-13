@@ -92,6 +92,9 @@ stages:
     stage: BUILD
     job: Register Inventory Microservice Container Image
   properties:
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME}
     type: text

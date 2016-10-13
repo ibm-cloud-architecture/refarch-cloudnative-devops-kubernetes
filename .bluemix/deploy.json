@@ -77,8 +77,7 @@
         "route-domain",
         "apic-url",
         "apic-user",
-        "apic-pass",
-        "new-relic-lic-key"
+        "apic-pass"
         ],
     "form": [
         {
