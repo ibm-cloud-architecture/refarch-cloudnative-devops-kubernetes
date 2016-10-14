@@ -128,7 +128,7 @@ stages:
     value: '0.25'
     type: text
   - name: NEW_RELIC_LICENSE_KEY
-    value: ${NEW_RELIC_LICENSE_KEY}
+    value: ${NEW_RELIC_LICENSE}
     type: text
   triggers:
   - type: stage
