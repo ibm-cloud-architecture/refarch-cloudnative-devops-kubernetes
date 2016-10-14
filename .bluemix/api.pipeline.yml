@@ -56,7 +56,7 @@ stages:
       cd inventory
       echo -e "Set TARGET_HOST"
       TARGET_HOST=$APP_NAME.$DOMAIN
-      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'http\:\/\/$TARGET_HOST\'/}}}" inventory.yaml
+      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$TARGET_HOST\'/}}}" inventory.yaml
       cat inventory.yaml
 
       echo -e "Publish the inventory api"
