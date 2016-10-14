@@ -97,7 +97,7 @@ stages:
   properties:
   - name: IGNORE_MAPPING_ROUTE
     value: 'true'
-    type: text      
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME}
     type: text
@@ -128,7 +128,7 @@ stages:
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
     type: text
-  - name: NEW_RELIC_LICENSE
+  - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}
     type: text
   triggers:
@@ -176,7 +176,7 @@ stages:
         log_and_echo "Build SocialReview Docker Container"
         cf service-key refarch-cloudantdb refarch-cloudantdb-credential|grep -E 'host|username|password'|sed 's/[\" \"|"|,]//g'|sed 's/:/=/g' > cloudant.env
         . cloudant.env
-        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e "spring.application.name=${SOCIALREVIEW_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "cloudant.username=$username" -e "cloudant.password=$password" -e "cloudant.host=https://$host""
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e "spring.application.name=${SOCIALREVIEW_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "cloudant.username=$username" -e "cloudant.password=$password" -e "cloudant.host=https://$host""
         log_and_echo "Docker arguments: " $OPTIONAL_ARGS
 
 
