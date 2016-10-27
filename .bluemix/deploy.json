@@ -70,7 +70,7 @@
             "type": "string"
         },
         "shared-secret": {
-            "description": "JWT shared secret",
+            "description": "JWT shared secret. Use https://mkjwk.org/ to generate a secret. Switch to Shared Secret and use Key Size:2048, Key Use:signing, Algorithm:HS256",
             "type": "string"
         }
     },
