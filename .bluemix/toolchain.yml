@@ -286,7 +286,7 @@ deploy:
     apic-user: ""
     apic-pass: ""
     shared-secret: ""
-    context-path: "/micro"
+    context-path: "micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
     new-relic-lic-key: ""
