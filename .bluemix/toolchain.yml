@@ -90,7 +90,7 @@ pipeline-netflix-eureka:
        MIN_INSTANCES: "1"
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
-       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"       
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-netflix-zuul:
@@ -115,6 +115,7 @@ pipeline-netflix-zuul:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        EUREKA_REGISTRY_URL: "http://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+       JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
@@ -241,6 +242,7 @@ pipeline-api:
        APIC_URL: "{{deploy.parameters.apic-url}}"
        APIC_USER: "{{deploy.parameters.apic-user}}"
        APIC_PASS: "{{deploy.parameters.apic-pass}}"
+       JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
       execute: false
 
 pipeline-bff-socialreview:
@@ -283,6 +285,7 @@ deploy:
     apic-url: "us.apiconnect.ibmcloud.com"
     apic-user: ""
     apic-pass: ""
+    shared-secret: ""
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     socialreview-msname: "socialreview-microservice"
