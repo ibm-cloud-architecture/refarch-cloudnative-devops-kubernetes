@@ -29,6 +29,9 @@ stages:
   - name: SOCIALREVIEW_MSNAME
     value: ${SOCIALREVIEW_MSNAME}
     type: text
+  - name: JWT_SHARED_SECRET
+    value: ${JWT_SHARED_SECRET}
+    type: text
   - name: ORG
     value: ${ORG}
     type: text
@@ -71,7 +74,7 @@ stages:
       apic apps:publish | tee -a publish.out
       TARGET_HOST=$(cat publish.out|grep 'API target urls:'|awk '{print $NF}')
       echo "TARGET_HOST: ${TARGET_HOST}"
-      sed -i "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;/value\: >\-$/{N;s/\(https\:\/\/\)\(.*$\)/\1$TARGET_HOST/}}}}" definitions/socialreview.yaml
+      sed -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\: \"https\:\/\/\)\(.*\)\(\"$\)/\1$TARGET_HOST\3/}}}"  -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" definitions/socialreview.yaml
       cat definitions/socialreview.yaml
       echo -e "Publish the SocialReview api"
       apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute

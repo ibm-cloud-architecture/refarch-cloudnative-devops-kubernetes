@@ -267,6 +267,7 @@ pipeline-bff-socialreview:
        APIC_PASS: "{{deploy.parameters.apic-pass}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
+       JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
       execute: false
 
 deploy:
