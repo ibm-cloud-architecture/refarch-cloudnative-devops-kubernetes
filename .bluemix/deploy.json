@@ -81,7 +81,8 @@
         "route-domain",
         "apic-url",
         "apic-user",
-        "apic-pass"
+        "apic-pass",
+        "shared-secret"
         ],
     "form": [
         {
