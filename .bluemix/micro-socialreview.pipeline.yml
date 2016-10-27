@@ -143,7 +143,7 @@ stages:
       application: ${NAME}
     script: |-
         #!/bin/bash
-        cf create-service cloudantNoSQLDB Shared refarch-cloudantdb
+        cf create-service cloudantNoSQLDB Lite refarch-cloudantdb
         cf create-service-key refarch-cloudantdb refarch-cloudantdb-credential
   - name: Deploy SocialReview Microservice Container Group
     type: deployer

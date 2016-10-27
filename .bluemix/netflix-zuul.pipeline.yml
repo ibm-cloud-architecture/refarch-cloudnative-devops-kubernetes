@@ -115,6 +115,9 @@ stages:
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
     type: text
+  - name: JWT_SHARED_SECRET
+    value: ${JWT_SHARED_SECRET}
+    type: text
   - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}
     type: text
@@ -168,7 +171,7 @@ stages:
         #                                    Default is 1
         # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         ROUTE_FQDN="$ROUTE_HOSTNAME.$ROUTE_DOMAIN"
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname=$ROUTE_FQDN -e spring.cloud.client.hostname=$ROUTE_FQDN"
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname=$ROUTE_FQDN -e spring.cloud.client.hostname=$ROUTE_FQDN"
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
         /bin/bash deployscripts/deploygroup.sh
 
