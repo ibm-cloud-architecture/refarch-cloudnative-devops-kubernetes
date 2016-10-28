@@ -48,7 +48,9 @@ Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOp
 3. Click on **Delivery Pipeline** integration to do the configuration.
 4. By default the Bluemix Region, Organization, and Space information will be filled with the logged in Region, Organization, and Space values. Double-check to ensure this is the desired Region, Organization, and Space this toolchain should deploy to and update __Region__, __Organization__, and __Space__ values accordingly.
 5. Adjust the __Domain name__ and __API Connect hostname__ to match the region. Also enter __APIC Username__ and __Password__. Click **Create** to create the toolchain. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
-5. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
+6. Go to [JSON Web Key Generator](https://mkjwk.org/#shared). Set __Key Size: 2048__, __Key Use: Signing__, __Algorithm: HS256__ and click on __New Key__ button. Copy the generated key displayed in the output box titled __Key__ identified by __"k"__ field. Paste this key value in the __JWT Shared Secret__ input field on the create toolchain form.
+7. Containers deployed by this toolchain are enabled for New Relic monitoring. Enter __New Relic License Key__ to monitor the deployed containers. 
+8. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
 
 ### Step 3: Execute the toolchain
 1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container running the **inventorydb** database.
