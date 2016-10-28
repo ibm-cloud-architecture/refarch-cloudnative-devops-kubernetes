@@ -165,7 +165,7 @@ pipeline-micro-inventory:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
-       CTXPATH: "{{deploy.parameters.context-path}}"
+       CTXPATH: "/{{deploy.parameters.context-path}}"
        MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}-{{deploy.parameters.deploy-space}}"
        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
@@ -197,7 +197,7 @@ pipeline-micro-socialreview:
        MAX_INSTANCES: "3"
        DESIRED_INSTANCES: "2"
        SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
-       CTXPATH: "{{deploy.parameters.context-path}}"
+       CTXPATH: "/{{deploy.parameters.context-path}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
