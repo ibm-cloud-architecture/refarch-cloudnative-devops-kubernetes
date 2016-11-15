@@ -81,6 +81,7 @@ pipeline-netflix-eureka:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-netflix-eureka"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -105,6 +106,7 @@ pipeline-netflix-zuul:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-netflix-zuul"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -131,6 +133,7 @@ pipeline-inventorydb-mysql:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-inventorydb-mysql"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -155,6 +158,7 @@ pipeline-micro-inventory:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-micro-inventory"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -187,6 +191,7 @@ pipeline-micro-socialreview:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-micro-socialreview"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -214,6 +219,7 @@ pipeline-bff-inventory:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-bff-inventory"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -235,6 +241,7 @@ pipeline-api:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-api"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -257,6 +264,7 @@ pipeline-bff-socialreview:
       env:
        DOMAIN: "{{deploy.parameters.route-domain}}"
        REPO: "git-bff-socialreview"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION: "{{deploy.parameters.deploy-region}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
@@ -274,6 +282,7 @@ deploy:
   schema: deploy.json
   service-category: pipeline
   parameters:
+    repo-branch: "{{branch}}"
     deploy-region: "{{region}}"
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
