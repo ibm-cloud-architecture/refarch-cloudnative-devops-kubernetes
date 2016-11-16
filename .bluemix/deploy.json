@@ -5,6 +5,10 @@
     "longDescription": "Information entered here will be used at deployment time.",
     "type": "object",
     "properties": {
+        "repo-branch": {
+            "description": "Git repo branch",
+            "type": "string"
+        },
         "deploy-region": {
             "description": "Deploy to this Bluemix Region",
             "type": "string"
@@ -75,6 +79,7 @@
         }
     },
     "required": [
+        "repo-branch",
         "deploy-region",
         "deploy-org",
         "deploy-space",
@@ -88,6 +93,12 @@
         {
             "type": "validator",
             "url": "/devops/setup/bm-helper/helper.html"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Git repo branch",
+            "key": "repo-branch"
         },
         {
             "type": "text",
