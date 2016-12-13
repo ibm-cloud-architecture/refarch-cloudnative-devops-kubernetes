@@ -9,10 +9,6 @@
             "description": "Git repo branch",
             "type": "string"
         },
-        "deploy-region": {
-            "description": "Deploy to this Bluemix Region",
-            "type": "string"
-        },
         "deploy-org": {
             "description": "Deploy to this Bluemix Organization",
             "type": "string"
@@ -21,8 +17,48 @@
             "description": "Deploy to this space",
             "type": "string"
         },
-        "route-domain": {
-            "description": "Domain name. Example: mybluemix.net for runtimes in US-South",
+        "deploy-region-us": {
+            "description": "Deploy to this US region",
+            "type": "string"
+        },
+        "deploy-region-eu": {
+            "description": "Deploy to this EU region",
+            "type": "string"
+        },
+        "route-domain-us": {
+            "description": "US Route Domain",
+            "type": "string"
+        },
+        "route-domain-eu": {
+            "description": "EU Route Domain",
+            "type": "string"
+        },
+        "customer-gateway-ip-us": {
+            "description": "Customer Gateway Address in US Region",
+            "type": "string"
+        },
+        "customer-gateway-ip-eu": {
+            "description": "Customer Gateway Address in EU Region",
+            "type": "string"
+        },
+        "customer-subnet-us": {
+            "description": "Customer Subnet in US Region",
+            "type": "string"
+        },
+        "customer-subnet-eu": {
+            "description": "Customer Subnet in EU Region",
+            "type": "string"
+        },
+        "customer-psk": {
+            "description": "Pre-Shared Key for VPN connection",
+            "type": "string"
+        },
+        "mysql-server-ipaddrs-us": {
+            "description": "MySQL Server Addresses <host_ip>:<port>[,<host_ip>:<port> ...] US-South",
+            "type": "string"
+        },
+        "mysql-server-ipaddrs-eu": {
+            "description": "MySQL Server Addresses <host_ip>:<port>[,<host_ip>:<port> ...] London",
             "type": "string"
         },
         "mysql-database": {
@@ -41,12 +77,12 @@
             "description": "Password for MySQL database user",
             "type": "password"
         },
-        "mysql-root-pass": {
-            "description": "Password for MySQL admin user",
-            "type": "password"
+        "apic-url-us": {
+            "description": "APIC US URL ",
+            "type": "string"
         },
-        "apic-url": {
-            "description": "Region specific APIC hostname",
+        "apic-url-eu": {
+            "description": "APIC EU URL ",
             "type": "string"
         },
         "apic-user": {
@@ -80,14 +116,16 @@
     },
     "required": [
         "repo-branch",
-        "deploy-region",
         "deploy-org",
         "deploy-space",
-        "route-domain",
-        "apic-url",
         "apic-user",
         "apic-pass",
-        "shared-secret"
+        "shared-secret",
+        "mysql-server-ipaddrs-us",
+        "mysql-server-ipaddrs-eu",
+        "mysql-database",
+        "mysql-dbuser",
+        "mysql-dbpass"
         ],
     "form": [
         {
@@ -103,14 +141,62 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "Domain name for all routes",
-            "key": "route-domain"
+            "title": "Customer Gateway - US",
+            "key": "customer-gateway-ip-us"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "API Connect hostname",
-            "key": "apic-url"
+            "title": "Customer Subnet - US",
+            "key": "customer-subnet-us"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Customer Gateway - EU",
+            "key": "customer-gateway-ip-eu"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Customer Subnet - EU",
+            "key": "customer-subnet-eu"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "VPN Pre-shared key",
+            "key": "customer-psk"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "On-prem MySQL Server(s) <host_ip>:<port>[,<host_ip>:<port> ...] - US-South",
+            "key": "mysql-server-ipaddrs-us"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "On-prem MySQL Server(s) <host_ip>:<port>[,<host_ip>:<port> ...] - London",
+            "key": "mysql-server-ipaddrs-eu"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "MySQL Database Name",
+            "key": "mysql-database"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "MySQL Database Username",
+            "key": "mysql-dbuser"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": "MySQL Database Password",
+            "key": "mysql-dbpass"
         },
         {
             "type": "text",
@@ -138,16 +224,12 @@
         },
         {
             "type": "table",
-            "columnCount": 4,
-            "widths": ["15%", "28%", "28%", "28%"],
+            "columnCount": 3,
+            "widths": ["30%", "35%", "35%"],
             "items": [
                 {
                     "type": "label",
                     "title": ""
-                },
-                {
-                    "type": "label",
-                    "title": "Region"
                 },
                 {
                     "type": "label",
@@ -159,11 +241,7 @@
                 },
                 {
                     "type": "label",
-                    "title": "Deploy to"
-                },
-                {
-                    "type": "select",
-                    "key": "deploy-region"
+                    "title": "Deploy to (in US-South and London)"
                 },
                 {
                     "type": "select",

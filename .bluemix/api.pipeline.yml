@@ -1,6 +1,6 @@
 ---
 stages:
-- name: BUILD
+- name: BUILD US-South
   inputs:
   - service: ${REPO}
     type: git
@@ -9,7 +9,7 @@ stages:
   - type: commit
   properties:
   - name: APIC_URL
-    value: ${APIC_URL}
+    value: ${APIC_URL_US}
     type: text
   - name: APIC_USER
     value: ${APIC_USER}
@@ -24,16 +24,16 @@ stages:
     value: ${SPACE}
     type: text
   - name: APP_NAME
-    value: ${NAME}
+    value: ${NAME_US}
     type: text
   - name: DOMAIN
-    value: ${DOMAIN}
+    value: ${DOMAIN_US}
     type: text
   - name: JWT_SHARED_SECRET
     value: ${JWT_SHARED_SECRET}
     type: text
   jobs:
-  - name: Publish Inventory BFF
+  - name: Publish Inventory BFF to US-South
     type: builder
     artifact_dir: ''
     build_type: npm
@@ -55,7 +55,74 @@ stages:
       npm install -g apiconnect
       echo -e "completed installing apic cli"
       echo "yes" | apic
+      echo "no" | apic
+      cd inventory
+      echo -e "Set TARGET_HOST"
+      TARGET_HOST=$APP_NAME.$DOMAIN
+      sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$TARGET_HOST\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ inventory.yaml
+      cat inventory.yaml
 
+      echo -e "Publish the inventory api"
+      apic login -u $APIC_USER -p $APIC_PASS -s ${APIC_URL}
+      apic config:set catalog=apic-catalog://${APIC_URL}/orgs/${ORGS}/catalogs/bluecompute
+      apic publish inventory-product_0.0.1.yaml
+
+- name: BUILD London
+  inputs:
+  - service: ${REPO}
+    type: git
+    branch: ${BRANCH}
+  triggers:
+  - type: commit
+  properties:
+  - name: APIC_URL
+    value: ${APIC_URL_EU}
+    type: text
+  - name: APIC_USER
+    value: ${APIC_USER}
+    type: text
+  - name: APIC_PASS
+    value: ${APIC_PASS}
+    type: secure
+  - name: ORG
+    value: ${ORG}
+    type: text
+  - name: SPACE
+    value: ${SPACE}
+    type: text
+  - name: APP_NAME
+    value: ${NAME_EU}
+    type: text
+  - name: DOMAIN
+    value: ${DOMAIN_EU}
+    type: text
+  - name: JWT_SHARED_SECRET
+    value: ${JWT_SHARED_SECRET}
+    type: text
+  jobs:
+  - name: Publish Inventory BFF to London
+    type: builder
+    artifact_dir: ''
+    build_type: npm
+    script: |-
+      #!/bin/bash
+      # The default Node.js version is 0.10.40
+      # To use Node.js 0.12.7, uncomment the following line:
+      export PATH=/opt/IBM/node-v0.12/bin:$PATH
+      # To use Node.js 4.2.2, uncomment the following line:
+      #export PATH=/opt/IBM/node-v4.2/bin:$PATH
+      #npm install
+      echo $PWD
+      ls -al .
+      # set orgs
+      CHARLST="[@|.|-|_]"
+      ORGS=$(echo $ORG|sed "s/$CHARLST//g")-$SPACE
+      # Configure APIC cli
+      echo -e "Start installing apiconnect cli"
+      npm install -g apiconnect
+      echo -e "completed installing apic cli"
+      echo "yes" | apic
+      echo "no" | apic
       cd inventory
       echo -e "Set TARGET_HOST"
       TARGET_HOST=$APP_NAME.$DOMAIN
