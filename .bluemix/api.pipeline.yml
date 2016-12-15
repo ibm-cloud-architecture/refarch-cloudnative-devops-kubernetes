@@ -50,6 +50,7 @@ stages:
       # set orgs
       CHARLST="[@|.|-|_]"
       ORGS=$(echo $ORG|sed "s/$CHARLST//g")-$SPACE
+      ORGS=$(echo $ORGS|tr '[:upper:]' '[:lower:]')
       # Configure APIC cli
       echo -e "Start installing apiconnect cli"
       npm install -g apiconnect
