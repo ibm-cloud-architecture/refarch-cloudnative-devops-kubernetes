@@ -57,6 +57,7 @@ stages:
       # set orgs
       CHARLST="[@|.|-|_]"
       ORGS=$(echo $ORG|sed "s/$CHARLST//g")-$SPACE
+      ORGS=$(echo $ORGS|tr '[:upper:]' '[:lower:]')
       # Set Zuul proxy url
       echo "set zuul url..."
       /bin/bash set-zuul-proxy-url.sh -c $CTXPATH -m $SOCIALREVIEW_MSNAME -z $ZUUL_PROXY_URL

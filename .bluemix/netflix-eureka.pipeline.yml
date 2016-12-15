@@ -91,9 +91,6 @@ stages:
     stage: BUILD US-South
     job: Register Eureka Container Image
   properties:
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text

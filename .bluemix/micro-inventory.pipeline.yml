@@ -619,7 +619,7 @@ stages:
     value: '2'
     type: text
   - name: INVENTORY_MSNAME
-    value: ${NAME_US}
+    value: ${INVENTORY_MSNAME}
     type: text
   - name: CTXPATH
     value: ${CTXPATH}
@@ -1325,7 +1325,7 @@ stages:
     value: '2'
     type: text
   - name: INVENTORY_MSNAME
-    value: ${NAME_EU}
+    value: ${INVENTORY_MSNAME}
     type: text
   - name: CTXPATH
     value: ${CTXPATH}
