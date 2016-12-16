@@ -41,7 +41,7 @@ provision a portal for you. You should receive a message like the one below. ![A
 ### Step 2: Create the Bluemix DevOps toolchain
 Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOps runtime will parse the toolchain template file and creates associated DevOps components such as GitHub repos and Delivery Pipelines.
 
-[![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git&branch=integration)
+[![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git&branch=master)
 
 1. Enter toolchain name in the **Name:** field. ![Create Toolchain](static/imgs/create-toolchain.png)
 2. By default, the **GitHub** integration is configured to clone the associated git repos to your GitHub account. Click on **GitHub** integration to see the list of repos that are setup to clone to your account.
