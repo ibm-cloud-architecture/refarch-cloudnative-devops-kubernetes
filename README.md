@@ -17,15 +17,32 @@ Let's get started.
 
 ## Setup BlueCompute application using Bluemix DevOps open toolchain
 
-With the open toolchain, you should be able to stand up the entire application stack, including API gateway, Database, computing component, with little manual configuration.
+Bluemix DevOps toolchain provided with this application integrates the source code in git repositories with deployment scripts to continuously deliver code changes to staging and production applications.
+
+To demonstrate hybrid connectivity, the inventory microservice in BlueCompute application is setup to connect to a MySQL cluster in US and London regions. Setup Vyatta network gateway appliances in SoftLayer US and London regions, and then setup MySQL servers in both regions.
 
 ### Prerequisites
 
 You need to have a Bluemix account. Login to your Bluemix account or register for a new account [here](https://bluemix.net/registration)
 
-Once you have logged in, create a new space for hosting the application.
+Once you have logged in, create a new space for hosting the application in US-South and London regions. Use the same space name in both regions.
 
-### Step 1:  Provision the API Connect Service
+### Step 1: Setup VPN Tunnel and MySQL servers in SoftLayer
+
+See [VPN and MySQL instructions](https://github.com/ibm-cloud-architecture/refarch-cloudnative-resiliency/blob/master/mysql/README.md#set-up-vpn-tunnel-between-bluemix-and-on-premise-resources) to setup on-premise MySQL server accessible from Bluemix service over a VPN tunnel.
+
+After setting up the vpn tunnel and MySQL servers, get following information to set in toolchain configuration.
+
+||US-South|London|
+|---|---|---|
+|Vyatta Gateway Address|||
+|VPN Pre-shared Key|||
+|Subnet with MySQL servers|||
+|MySQL server addresses|ipaddr:port[,ipaddr:port]..|||
+
+
+
+### Step 2:  Provision the API Connect Service
 
 1. Click on the Bluemix console and select API.  
 2. Select the API Connect service.  
@@ -38,30 +55,32 @@ Once you have logged in, create a new space for hosting the application.
 provision a portal for you. You should receive a message like the one below. ![API Info](static/imgs/bluemix_9.png?raw=true)
 9. Once the new Developer Portal has been created, you will receive an email.
 
-### Step 2: Create the Bluemix DevOps toolchain
-Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOps runtime will parse the toolchain template file and creates associated DevOps components such as GitHub repos and Delivery Pipelines.
+### Step 3: Create the Bluemix DevOps toolchain
+Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOps runtime will parse the toolchain template file that creates and integrates GitHub repos and Continuous Delivery pipelines to deploy to a targetted space in US-South and London Bluemix regions.
 
 [![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git&branch=master)
 
 1. Enter toolchain name in the **Name:** field. ![Create Toolchain](static/imgs/create-toolchain.png)
 2. By default, the **GitHub** integration is configured to clone the associated git repos to your GitHub account. Click on **GitHub** integration to see the list of repos that are setup to clone to your account.
 3. Click on **Delivery Pipeline** integration to do the configuration. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
-4. By default the Bluemix Region, Organization, and Space information will be filled with the logged in Region, Organization, and Space values. Double-check to ensure this is the desired Region, Organization, and Space this toolchain should deploy to and update __Region__, __Organization__, and __Space__ values accordingly.
-5. Adjust the __Domain name__ and __API Connect hostname__ to match the region.
+4. By default the Bluemix Organization, and Space information will be filled with the logged in Region, Organization, and Space values. Double-check to ensure this is the desired Region, Organization, and Space this toolchain should deploy to and update __Region__, __Organization__, and __Space__ values accordingly.
+5. Enter __Customer Gateway__, __Customer Subnet__, __VPN Preshared key__, and __Onprem MySQL server__ addresses for both US-South and London regions based on information collected in Step 1.
 6. Enter __APIC Username__ and __Password__. These are Bluemix credentials, which are IBMid username and password with administrative access to API Developer Portal in the corresponding Bluemix space.
 7. Go to [JSON Web Key Generator](https://mkjwk.org/#shared). Switch to __Shared Secret__ tab, set __Key Size: 2048__, __Key Use: Signing__, __Algorithm: HS256__ and click on __New Key__ button. Copy the generated key displayed in the output box titled __Key__ identified by __"k"__ field. Paste this key value in the __JWT Shared Secret__ input field on the create toolchain form.
-9. Containers deployed by this toolchain are enabled for New Relic monitoring. Enter __New Relic License Key__ to monitor the deployed containers.
-10. Click **Create** to create the toolchain.
-11. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
+8. Containers deployed by this toolchain are enabled for New Relic monitoring. Enter __New Relic License Key__ to monitor the deployed containers.
+9. Click **Create** to create the toolchain.
+10. Click on **View Toolchain** to go to the toolchain page. This toolchain will create and integrate eight GitHub repos with Issues enabled, and eight Delivery Pipelines each connected to one of the integrated GitHub repos. Configuration data is shared between all the delivery pipelines.
 
-### Step 3: Execute the toolchain
-1. Click on **inventorydb-mysql** delivery pipeline, and click the play button on BUILD stage to initiate the build and deployment of MySQL container running the **inventorydb** database.
-2. After the BUILD stage completes successfully it will automatically trigger the DEPLOY stage. Stay on the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully. ![Successfully Deployed Pipeline](static/imgs/inventorydb-mysql-pipeline.png)
-3. Repeat above two steps for each delivery pipeline in the following order: **netflix-eureka**, **netflix-zuul**, **micro-inventory**, **micro-socialreview**, **bff-inventory**, **api**, **bff-socialreview**.
+### Step 4: Execute the toolchain
+1. VPN connection should be established between VPN service in Bluemix region and the on-premise VPN gateway. Click on __Delivery Pipeline__ named __vpn__. Click on play button on __BUILD US-South__ and __BUILD London__ boxes.
+2. After the VPN connections are established successfully, execute the remaining pipelines. Its recommended to start with __netflix-eureka__.
+3. For each pipeline, start deployment with __BUILD US-South__ stage. While that deployment is running, click on  __BUILD London__ to start deployment to London region.
+2. For each pipeline, the __DEPLOY__ stages will follow successful __BUILD__. On the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully. ![Successfully Deployed Pipeline](static/imgs/netflix-eureka-pipeline.png)
+3. Repeat above steps for each delivery pipeline in the following order: **netflix-zuul**, **micro-inventory**, **micro-socialreview**, **bff-inventory**, **api**, **bff-socialreview**.
 
 This completes the creation of Bluemix DevOps toolchain to deploy the BlueCompute omnichannel application.
 
-### Step 4: Complete the solution
+### Step 5: Complete the solution
 
 After successfully running all the DevOps pipelines, you have the entire BlueCompute backend ready on IBM Cloud. There are 3 tasks remaining to get the BlueCompute application (both Mobile and Web) working:
 
