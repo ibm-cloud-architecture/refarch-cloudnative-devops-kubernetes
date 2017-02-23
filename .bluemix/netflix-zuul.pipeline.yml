@@ -91,6 +91,9 @@ stages:
     stage: BUILD US-South
     job: Register Zuul Container Image
   properties:
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text
@@ -197,7 +200,6 @@ stages:
         fi
         echo -e "${green}Execution complete${no_label}"
 
-
 - name: BUILD London
   inputs:
   - service: ${REPO}
@@ -289,6 +291,9 @@ stages:
     stage: BUILD London
     job: Register Zuul Container Image
   properties:
+  - name: REGION
+    value: ${REGION_EU}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
     type: text
