@@ -8,7 +8,7 @@ stages:
   triggers:
   - type: commit
   jobs:
-  - name: Register Orders Microservice Container Image
+  - name: Build and register image
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
@@ -93,26 +93,29 @@ stages:
         ######################################################################################
         echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
 
+
 - name: DEPLOY US-South
   inputs:
   - type: job
     stage: BUILD US-South
-    job: Register Orders Microservice Container Image
+    job: Build and register image
+  triggers:
+  - type: stage
   properties:
   - name: APP_NAME
     value: 'orders-microservice'
-    type: text
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
-  - name: AUTO_RECOVERY
-    value: 'true'
     type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN_US}
+    type: text
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'true'
     type: text
   - name: MEMORY
     value: '256'
@@ -142,11 +145,10 @@ stages:
     value: ${MYSQL_USER}
     type: text
   - name: MYSQL_PASSWORD
-    value: ${MYSQL_PASSWORD}
     type: secure
-  triggers:
-  - type: stage
-  - name: Deploy Orders Container Group
+    value: ${MYSQL_PASSWORD}
+  jobs:
+  - name: Deploy Orders Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
@@ -262,7 +264,6 @@ stages:
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
         curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
 
-
 - name: BUILD London
   inputs:
   - service: ${REPO}
@@ -271,7 +272,7 @@ stages:
   triggers:
   - type: commit
   jobs:
-  - name: Register Orders Microservice Container Image
+  - name: Build and register image
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
@@ -360,22 +361,24 @@ stages:
   inputs:
   - type: job
     stage: BUILD London
-    job: Register Orders Microservice Container Image
+    job: Build and register image
+  triggers:
+  - type: stage
   properties:
   - name: APP_NAME
     value: 'orders-microservice'
-    type: text
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
-  - name: AUTO_RECOVERY
-    value: 'true'
     type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN_EU}
+    type: text
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'true'
     type: text
   - name: MEMORY
     value: '256'
@@ -405,11 +408,10 @@ stages:
     value: ${MYSQL_USER}
     type: text
   - name: MYSQL_PASSWORD
-    value: ${MYSQL_PASSWORD}
     type: secure
-  triggers:
-  - type: stage
-  - name: Deploy Orders Container Group
+    value: ${MYSQL_PASSWORD}
+  jobs:
+  - name: Deploy Orders Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
