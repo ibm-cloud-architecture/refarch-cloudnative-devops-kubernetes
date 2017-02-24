@@ -104,16 +104,19 @@ stages:
     value: 'true'
     type: text
   - name: MEMORY
-    value: ${MEMORY}
+    value: '256'
+    type: text
+  - name: CONTAINER_SIZE
+    value: '256'
     type: text
   - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
+    value: '1'
     type: text
   - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
+    value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
+    value: '1'
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL_US}
@@ -199,6 +202,10 @@ stages:
             exit $RESULT
         fi
         echo -e "${green}Execution complete${no_label}"
+
+        # add to CMDB
+        echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
 
 - name: BUILD London
   inputs:
@@ -304,16 +311,19 @@ stages:
     value: 'true'
     type: text
   - name: MEMORY
-    value: ${MEMORY}
+    value: '256'
+    type: text
+  - name: CONTAINER_SIZE
+    value: '256'
     type: text
   - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
+    value: '1'
     type: text
   - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
+    value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
+    value: '1'
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL_EU}
@@ -399,3 +409,7 @@ stages:
             exit $RESULT
         fi
         echo -e "${green}Execution complete${no_label}"
+
+        # add to CMDB
+        echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
