@@ -65,22 +65,30 @@ stages:
         [ $? -eq 0 ] && echo "OpenWhisk CLI is successfully configured." || { echo "Failed to setup OpenWhisk CLI. Exit with error."; exit 1; }
 
         # get cloudant credentials
+        set +e
         cf services | grep cloudantNoSQLDB
         [ $? -eq 1 ] && cf cs cloudantNoSQLDB Lite cloudnative-cloudantDB
+        set -e
         cloudant_svc=$(cf services | grep cloudantNoSQLDB | sed "s/\(.*\)\(cloudantNoSQLDB\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${cloudant_svc}" | grep "No service key for service instance"
+        set -e
         [ $? -eq 0 ] && cf csk "${cloudant_svc}" "${cloudant_svc}-cred1"
-        cloudant_svc_key_name=`cf service-keys "${cloudant_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
-        cloudant_svc_url=`cf service-key "${cloudant_svc}" "${cloudant_svc_key_name}" | grep -v "Getting key "` | ./jq '.url' | sed 's/\"//g'`
+        cloudant_svc_key_name=$(cf service-keys "${cloudant_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        cloudant_svc_url=$(cf service-key "${cloudant_svc}" "${cloudant_svc_key_name}" | grep -v "Getting key " | ./jq '.url' | sed 's/\"//g')
 
         # get watson tone analyzer credentials
+        set +e
         cf services | grep tone_analyzer
         [ $? -eq 1 ] && cf cs tone_analyzer standard cloudnative-toneanalyzer
-        watson_svc=`cf services | grep tone_analyzer | sed "s/\(.*\)\(tone_analyzer\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set -e
+        watson_svc=$(cf services | grep tone_analyzer | sed "s/\(.*\)\(tone_analyzer\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${watson_svc}" | grep "No service key for service instance"
+        set -e
         [ $? -eq 0 ] && cf csk "${watson_svc}" "${watson_svc}-key1"
-        watson_svc_key_name=`cf service-keys "${watson_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')`
-        watson_svc_cred=`cf service-key "${watson_svc}" "${watson_svc_key_name}" | grep -v "Getting key "`
+        watson_svc_key_name=$(cf service-keys "${watson_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        watson_svc_cred=$(cf service-key "${watson_svc}" "${watson_svc_key_name}" | grep -v "Getting key ")
 
         watson_url=`echo ${watson_svc_cred} | ./jq .url | sed 's/\"//g'`
         watson_username=`echo ${watson_svc_cred} | ./jq .username | sed 's/\"//g'`

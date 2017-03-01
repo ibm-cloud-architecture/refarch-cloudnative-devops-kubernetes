@@ -23,9 +23,14 @@ stages:
         log_and_echo "$LABEL" "Starting build script"
 
         export JAVA_HOME=~/java8
-
+        set -x
         cd catalog; ./gradlew build docker
+        cd ..
+        pwd
+
         cp -r catalog/docker/* .
+
+        find .
 
         # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
         # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
@@ -256,9 +261,14 @@ stages:
         log_and_echo "$LABEL" "Starting build script"
 
         export JAVA_HOME=~/java8
-
+        set -x
         cd catalog; ./gradlew build docker
+        cd ..
+        pwd
+
         cp -r catalog/docker/* .
+
+        find .
 
         # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
         # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
@@ -316,7 +326,6 @@ stages:
         # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
         ######################################################################################
         echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
-
 - name: DEPLOY London
   inputs:
   - type: job

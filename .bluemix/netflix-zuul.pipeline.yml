@@ -138,7 +138,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m 128 -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=false
+    OPTIONAL_ARGS: -m ${MEMORY} -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=false
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-

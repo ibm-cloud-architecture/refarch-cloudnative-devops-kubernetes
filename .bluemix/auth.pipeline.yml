@@ -92,9 +92,6 @@ stages:
   - name: APP_NAME
     value: 'auth-microservice'
     type: text
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
   - name: AUTO_RECOVERY
     value: 'true'
     type: text
@@ -121,6 +118,9 @@ stages:
     type: text
   - name: DESIRED_INSTANCES
     value: '2'
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: ${EUREKA_REGISTRY_URL_US}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}
@@ -293,9 +293,6 @@ stages:
   - name: APP_NAME
     value: 'auth-microservice'
     type: text
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
   - name: AUTO_RECOVERY
     value: 'true'
     type: text
@@ -322,6 +319,9 @@ stages:
     type: text
   - name: DESIRED_INSTANCES
     value: '2'
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: ${EUREKA_REGISTRY_URL_EU}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}

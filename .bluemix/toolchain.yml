@@ -329,6 +329,8 @@ pipeline-auth:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME_US: "us-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}"
        NAME_EU: "eu-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
+       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 

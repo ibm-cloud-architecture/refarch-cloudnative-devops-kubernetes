@@ -167,29 +167,37 @@ stages:
         set -x
 
         # get elasticsearch creds
+        set +e
         cf services | grep compose-for-elasticsearch
         [ $? -eq 1 ] && cf cs compose-for-elasticsearch Standard cloudnative-elasticsearch
+        set -e
         es_svc=$(cf services | grep compose-for-elasticsearch | sed "s/\(.*\)\(compose-for-elasticsearch\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${es_svc}" | grep "No service key for service instance"
         [ $? -eq 0 ] && cf csk "${es_svc}" "${es_svc}-cred1"
+        set -e
         es_cred_name=$(cf service-keys "${es_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
         es_creds=$(cf service-key "${es_svc}" "${es_cred_name}" | grep -v "Getting key ")
-        es_url=$(echo "${es_creds}"|jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
-        es_user=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
-        es_password=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
+        es_url=$(echo "${es_creds}"|./jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
+        es_user=$(echo "${es_creds}"|./jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
+        es_password=$(echo "${es_creds}"|./jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
 
         # get messagehub creds
+        set +e
         cf services | grep messagehub
         [ $? -eq 1 ] && cf cs messagehub standard cloudnative-messagehub
+        set -e
         messagehub_svc=$(cf services | grep messagehub | sed "s/\(.*\)\(messagehub\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${messagehub_svc}" | grep "No service key for service instance"
         [ $? -eq 0 ] && cf csk "${messagehub_svc}" "${messagehub_svc}-cred1"
+        set -e
         messagehub_cred_name=$(cf service-keys "${messagehub_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
         messagehub_creds=$(cf service-key "${messagehub_svc}" "${messagehub_cred_name}" | grep -v "Getting key ")
         kafka_username=`echo "${messagehub_creds}" | ./jq '.user' | sed -e 's/"//g'`
         kafka_password=`echo "${messagehub_creds}" | ./jq '.password' | sed -e 's/"//g'`
         kafka_brokerlist=`echo "${messagehub_creds}" | ./jq '.kafka_brokers_sasl | join(" ")' | sed -e 's/"//g'`
-        kafka_apikey=`echo $"{messagehub_creds}" | ./jq '.api_key' | sed -e 's/"//g'`
+        kafka_apikey=`echo "${messagehub_creds}" | ./jq '.api_key' | sed -e 's/"//g'`
         kafka_adminurl=`echo "${messagehub_creds}" | ./jq '.kafka_admin_url' | sed -e 's/"//g'`
 
         # get or create orders topic
@@ -226,7 +234,7 @@ stages:
             -e eureka.client.fetchRegistry=false \
             -e eureka.client.registerWithEureka=false \
             -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
-            -e "spring.datasource.url=jdbc:mysql://${JDBC_URL}" \
+            -e "spring.datasource.url=${JDBC_URL}" \
             -e "spring.datasource.username=${MYSQL_USER}" \
             -e "spring.datasource.password=${MYSQL_PASSWORD}" \
             -e "elasticsearch.user=${es_user}" \

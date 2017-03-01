@@ -174,19 +174,22 @@ stages:
         fi
 
         # get messagehub creds
+        set +e
         cf services | grep messagehub
         [ $? -eq 1 ] && cf cs messagehub standard cloudnative-messagehub
+        set -e
         messagehub_svc=$(cf services | grep messagehub | sed "s/\(.*\)\(messagehub\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${messagehub_svc}" | grep "No service key for service instance"
         [ $? -eq 0 ] && cf csk "${messagehub_svc}" "${messagehub_svc}-cred1"
+        set -e
         messagehub_cred_name=$(cf service-keys "${messagehub_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
         messagehub_creds=$(cf service-key "${messagehub_svc}" "${messagehub_cred_name}" | grep -v "Getting key ")
-        kafka_username=`echo ${messagehub_creds} | ./jq '.user' | sed -e 's/"//g'`
-        kafka_password=`echo ${messagehub_creds} | ./jq '.password' | sed -e 's/"//g'`
-        kafka_brokerlist=`echo ${messagehub_creds} | ./jq '.kafka_brokers_sasl | join(",")' | sed -e 's/"//g'`
-
-        kafka_apikey=`echo ${messagehub_creds} | ./jq '.api_key' | sed -e 's/"//g'`
-        kafka_adminurl=`echo ${messagehub_creds} | ./jq '.kafka_admin_url' | sed -e 's/"//g'`
+        kafka_username=`echo "${messagehub_creds}" | ./jq '.user' | sed -e 's/"//g'`
+        kafka_password=`echo "${messagehub_creds}" | ./jq '.password' | sed -e 's/"//g'`
+        kafka_brokerlist=`echo "${messagehub_creds}" | ./jq '.kafka_brokers_sasl | join(" ")' | sed -e 's/"//g'`
+        kafka_apikey=`echo "${messagehub_creds}" | ./jq '.api_key' | sed -e 's/"//g'`
+        kafka_adminurl=`echo "${messagehub_creds}" | ./jq '.kafka_admin_url' | sed -e 's/"//g'`
 
         # get or create orders topic
         topicexists=`curl -I -H "X-Auth-Token: ${kafka_apikey}" ${kafka_adminurl}/topics/orders | grep HTTP | grep 404`

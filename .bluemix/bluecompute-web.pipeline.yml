@@ -14,15 +14,28 @@ stages:
     artifact_dir: ''
     build_type: npm
     script: |-
-      #!/bin/bash
-      # The default Node.js version is 0.10.40
-      # To use Node.js 0.12.7, uncomment the following line:
-      export PATH=/opt/IBM/node-v0.12/bin:$PATH
-      # To use Node.js 4.2.2, uncomment the following line:
-      #export PATH=/opt/IBM/node-v4.2/bin:$PATH
-      npm install newrelic --save
-      cp node_modules/newrelic/newrelic.js ./
-      npm install
+        #!/bin/bash
+        # The default Node.js version is 0.10.40
+        # To use Node.js 0.12.7, uncomment the following line:
+        export PATH=/opt/IBM/node-v0.12/bin:$PATH
+        # To use Node.js 4.2.2, uncomment the following line:
+        #export PATH=/opt/IBM/node-v4.2/bin:$PATH
+        npm install newrelic --save
+        cp node_modules/newrelic/newrelic.js ./
+
+        if [ ! -f ./jq ]; then
+           wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+           mv jq-linux64 jq
+           chmod u+x jq
+        fi
+
+        cat config/default.json | grep -v '^[ ]*//' | \
+            ./jq '.Application.local_mode=false' | \
+            ./jq '.Application.ObjectStorage.container="bluecompute"' \
+            > config/default.json.new
+        mv config/default.json.new config/default.json
+
+        npm install
 
 - name: DEPLOY US-South
   inputs:
@@ -44,6 +57,24 @@ stages:
   - name: ROUTE_DOMAIN_BFF_WEB
     value: ${ROUTE_DOMAIN_BFF_WEB}
     type: text
+  - name: OBJSTORAGE_CONTAINER
+    value: 'bluecompute'
+    type: text
+  - name: APIC_CATALOG
+    value: 'bluecompute'
+    type: text
+  - name: APIC_URL_US
+    value: ${APIC_URL_US}
+    type: text
+  - name: APIC_URL_EU
+    value: ${APIC_URL_EU}
+    type: text
+  - name: APIC_USER
+    value: ${APIC_USER}
+    type: text
+  - name: APIC_PASS
+    value: ${APIC_PASS}
+    type: secure
   - name: NEW_RELIC_LICENSE
     value: ${NEW_RELIC_LICENSE}
     type: text
@@ -58,7 +89,7 @@ stages:
     script: |
         #!/bin/bash
         set -x
-        objstorage_container="bluecompute"
+        set +e
 
         # download jq
         if [ ! -f ./jq ]; then
@@ -68,31 +99,128 @@ stages:
         fi
 
         # create objectstorage service and key
-        cf services | grep Object-Storage
-        if [ $? -eq 1 ]; then
-            cf cs Object-Storage Free cloudnative-objstore
-            for i in {1..5}
-            do
-                status=$(cf service "${objstorage_svc}"|grep -i 'status:'|awk '{print $NF}')
-                case $status in
-                    "progress") sleep 10;;
-                    "succeeded") break;;
-                    *) sleep 10;;
-                 esac
-            done
+        objstorage_svc="cloudnative-objstore"
+        objstorage_container="bluecompute"
+        cf create-service Object-Storage Free ${objstorage_svc}
+        for i in {1..5}
+        do
+            status=$(cf service ${objstorage_svc}|grep -i 'status:'|awk '{print $NF}')
+            case $status in
+                 "progress") sleep 10;;
+                 "succeeded") break;;
+                 *) sleep 10;;
+            esac
+        done
+        cf create-service-key ${objstorage_svc} admin1
+
+        set -x
+
+        # set orgs
+        CHARLST="[@|.|-|_]"
+        ORGS=$(echo ${CF_ORG}|sed "s/$CHARLST//g")-${CF_SPACE}
+        ORGS=$(echo $ORGS|tr '[:upper:]' '[:lower:]')
+
+        CATALOG=bluecompute
+        AUTH_HEADER=`echo -n "${APIC_USER}:${APIC_PASS}" | base64`
+
+        # create org for user with apic
+        ORG_ID=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL}/v1/portal/orgs | \
+            ./jq '.[].id' | \
+            sed -e 's/"//g' | \
+            head -1`
+
+        if [ -z "${ORG_ID}" ]; then
+            ORG_ID=`curl -k \
+                  -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: Basic ${AUTH_HEADER}" \
+                  -X POST \
+                  -d '{"name": "'${APIC_USER}'"}' \
+                  https://developer.${APIC_URL}/v1/portal/orgs | \
+                ./jq '.id' | \
+                sed -e 's/"//g'`
         fi
-        objstorage_svc=$(cf services | grep Object-Storage | sed "s/\(.*\)\(Object-Storage\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
-        cf service-keys "${objstorage_svc}" | grep "No service key for service instance"
-        [ $? -eq 0 ] && cf csk "${objstorage_svc}" "${objstorage_svc}-admin1"
-        objstorage_key_name=$(cf service-keys "${objstorage_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
-        objstorage_keys=$(cf service-key "${objstorage_svc}" "${objstorage_key_name}" | grep -v "Getting key ")
+
+        # create app for me
+        apps_json=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps`
+
+        app_json=`echo ${apps_json} | ./jq -c '.[] | select(.name == "'${CF_APP}'")'`
+
+        if [ -z "${app_json}" ]; then
+            # create app
+            APP_CALLBACK_URL="https://${CF_APP}.${APP_DOMAIN}/login/callback" # dummy callback because we dont use this
+
+            app_json=`curl -k \
+                -X POST \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" \
+                -d '{"name": "'${CF_APP}'", "oauthRedirectURI": "'${APP_CALLBACK_URL}'", "public": true}' \
+                https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps`
+        fi
+
+        APP_ID=`echo ${app_json} | ./jq '.id' | sed -e 's/"//g'`
+
+        # subscribe my app to all APIs
+        # get products
+        product_ids=`curl -k \
+                  -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: Basic ${AUTH_HEADER}" \
+                  https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/products | \
+                ./jq '.[].id' | \
+                sed -e 's/"//g' | \
+                tr '\n' ' '`
+
+        echo "product ids: ${product_ids}"
+
+        for product_id in ${product_ids}; do
+            curl -k \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/products/${product_id}
+
+            # TODO: we always use "default" plan for now
+
+            #subscribe app to plan
+            curl -k \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" \
+                -X POST \
+                -d '{ "plan": "default", "product": {"id": "'${product_id}'"}}' \
+                https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps/${APP_ID}/subscriptions | \
+                ./jq
+        done
+
+        # update default.json with my catalog and client id
+        CLIENT_ID=`echo ${app_json} | ./jq '.credentials.clientID' | sed -e 's/"//g'`
+        cat config/default.json | grep -v '^[ ]*//' | \
+            ./jq 'setpath(["Application", "ObjectStorage", "container"]; "'${objstorage_container}'")' | \
+            ./jq 'setpath(["API-Server", "host"]; "api.'${APIC_URL}'")' | \
+            ./jq 'setpath(["API-Server", "org"]; "'${ORGS}'")' | \
+            ./jq 'setpath(["API-Server", "catalog"]; "'${CATALOG}'")' | \
+            ./jq 'setpath(["Application", "client_id"]; "'${CLIENT_ID}'")' > \
+         config/default.json.new
+
+        mv config/default.json.new config/default.json
 
         # set env for swift client
-        export OS_REGION_NAME=$(echo "${objstorage_keys}" | ./jq '.region' | sed 's/"//g')
-        export OS_PROJECT_ID=$(echo "${objstorage_keys}" | ./jq '.projectId' | sed 's/"//g')
-        export OS_USER_ID=$(echo "${objstorage_keys}" | ./jq '.userId' | sed 's/"//g')
-        export OS_PASSWORD=$(echo "${objstorage_keys}" | ./jq '.password' | sed 's/"//g')
-        export OS_AUTH_URL=$(echo "${objstorage_keys}" | ./jq '.auth_url' | sed 's/"//g')/v3
+        cf service-key ${objstorage_svc} admin1 > admin1
+        sed -i -e '/^\s*$/d' -e '/Getting /d' admin1
+        cat admin1
+        export OS_REGION_NAME=$(cat admin1 | ./jq '.region' | sed 's/"//g')
+        export OS_PROJECT_ID=$(cat admin1 | ./jq '.projectId' | sed 's/"//g')
+        export OS_USER_ID=$(cat admin1 | ./jq '.userId' | sed 's/"//g')
+        export OS_PASSWORD=$(cat admin1 | ./jq '.password' | sed 's/"//g')
+        export OS_AUTH_URL=$(cat admin1 | ./jq '.auth_url' | sed 's/"//g')/v3
         export OS_AUTH_VERSION=3
         export OS_IDENTITY_API_VERSION=3
 
@@ -105,7 +233,9 @@ stages:
 
         # upload image folder to swift container
         swift post ${objstorage_container}
-        swift upload --changed --skip-identical ${objstorage_container} image
+        pushd image
+        swift upload --changed --skip-identical ${objstorage_container} *.jpg
+        popd
         swift list ${objstorage_container}
 
         # create auto-scaling service
@@ -113,12 +243,6 @@ stages:
 
         # create app
         cf push "${CF_APP}" -n "${CF_APP}" -d "${APP_DOMAIN}" --no-start
-
-        # create route
-        cf domains | grep ${ROUTE_DOMAIN_BFF_WEB}
-        [ $? -eq 0 ] && echo "Domain exists" || cf create-domain ${CF_ORG} ${ROUTE_DOMAIN_BFF_WEB}
-        cf map-route ${CF_APP} ${ROUTE_DOMAIN_BFF_WEB} --hostname ${ROUTE_HOSTNAME_BFF_WEB}
-
         cf bind-service "${CF_APP}" "${objstorage_svc}"
         cf set-env "${CF_APP}" NEW_RELIC_LICENSE_KEY "${NEW_RELIC_LICENSE}"
         cf set-env "${CF_APP}" NEW_RELIC_APP_NAME "${CF_APP}"
@@ -203,6 +327,24 @@ stages:
   - name: ROUTE_DOMAIN_BFF_WEB
     value: ${ROUTE_DOMAIN_BFF_WEB}
     type: text
+  - name: OBJSTORAGE_CONTAINER
+    value: 'bluecompute'
+    type: text
+  - name: APIC_CATALOG
+    value: 'bluecompute'
+    type: text
+  - name: APIC_URL_US
+    value: ${APIC_URL_US}
+    type: text
+  - name: APIC_URL_EU
+    value: ${APIC_URL_EU}
+    type: text
+  - name: APIC_USER
+    value: ${APIC_USER}
+    type: text
+  - name: APIC_PASS
+    value: ${APIC_PASS}
+    type: secure
   - name: NEW_RELIC_LICENSE
     value: ${NEW_RELIC_LICENSE}
     type: text
@@ -217,7 +359,7 @@ stages:
     script: |
         #!/bin/bash
         set -x
-        objstorage_container="bluecompute"
+        set +e
 
         # download jq
         if [ ! -f ./jq ]; then
@@ -227,31 +369,128 @@ stages:
         fi
 
         # create objectstorage service and key
-        cf services | grep Object-Storage
-        if [ $? -eq 1 ]; then
-            cf cs Object-Storage Free cloudnative-objstore
-            for i in {1..5}
-            do
-                status=$(cf service "${objstorage_svc}"|grep -i 'status:'|awk '{print $NF}')
-                case $status in
-                    "progress") sleep 10;;
-                    "succeeded") break;;
-                    *) sleep 10;;
-                 esac
-            done
+        objstorage_svc="cloudnative-objstore"
+        objstorage_container="bluecompute"
+        cf create-service Object-Storage Free ${objstorage_svc}
+        for i in {1..5}
+        do
+            status=$(cf service ${objstorage_svc}|grep -i 'status:'|awk '{print $NF}')
+            case $status in
+                 "progress") sleep 10;;
+                 "succeeded") break;;
+                 *) sleep 10;;
+            esac
+        done
+        cf create-service-key ${objstorage_svc} admin1
+
+        set -x
+
+        # set orgs
+        CHARLST="[@|.|-|_]"
+        ORGS=$(echo ${CF_ORG}|sed "s/$CHARLST//g")-${CF_SPACE}
+        ORGS=$(echo $ORGS|tr '[:upper:]' '[:lower:]')
+
+        CATALOG=bluecompute
+        AUTH_HEADER=`echo -n "${APIC_USER}:${APIC_PASS}" | base64`
+
+        # create org for user with apic
+        ORG_ID=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL}/v1/portal/orgs | \
+            ./jq '.[].id' | \
+            sed -e 's/"//g' | \
+            head -1`
+
+        if [ -z "${ORG_ID}" ]; then
+            ORG_ID=`curl -k \
+                  -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: Basic ${AUTH_HEADER}" \
+                  -X POST \
+                  -d '{"name": "'${APIC_USER}'"}' \
+                  https://developer.${APIC_URL}/v1/portal/orgs | \
+                ./jq '.id' | \
+                sed -e 's/"//g'`
         fi
-        objstorage_svc=$(cf services | grep Object-Storage | sed "s/\(.*\)\(Object-Storage\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
-        cf service-keys "${objstorage_svc}" | grep "No service key for service instance"
-        [ $? -eq 0 ] && cf csk "${objstorage_svc}" "${objstorage_svc}-admin1"
-        objstorage_key_name=$(cf service-keys "${objstorage_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
-        objstorage_keys=$(cf service-key "${objstorage_svc}" "${objstorage_key_name}" | grep -v "Getting key ")
+
+        # create app for me
+        apps_json=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps`
+
+        app_json=`echo ${apps_json} | ./jq -c '.[] | select(.name == "'${CF_APP}'")'`
+
+        if [ -z "${app_json}" ]; then
+            # create app
+            APP_CALLBACK_URL="https://${CF_APP}.${APP_DOMAIN}/login/callback" # dummy callback because we dont use this
+
+            app_json=`curl -k \
+                -X POST \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" \
+                -d '{"name": "'${CF_APP}'", "oauthRedirectURI": "'${APP_CALLBACK_URL}'", "public": true}' \
+                https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps`
+        fi
+
+        APP_ID=`echo ${app_json} | ./jq '.id' | sed -e 's/"//g'`
+
+        # subscribe my app to all APIs
+        # get products
+        product_ids=`curl -k \
+                  -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: Basic ${AUTH_HEADER}" \
+                  https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/products | \
+                ./jq '.[].id' | \
+                sed -e 's/"//g' | \
+                tr '\n' ' '`
+
+        echo "product ids: ${product_ids}"
+
+        for product_id in ${product_ids}; do
+            curl -k \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/products/${product_id}
+
+            # TODO: we always use "default" plan for now
+
+            #subscribe app to plan
+            curl -k \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" \
+                -X POST \
+                -d '{ "plan": "default", "product": {"id": "'${product_id}'"}}' \
+                https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps/${APP_ID}/subscriptions | \
+                ./jq
+        done
+
+        # update default.json with my catalog and client id
+        CLIENT_ID=`echo ${app_json} | ./jq '.credentials.clientID' | sed -e 's/"//g'`
+        cat config/default.json | grep -v '^[ ]*//' | \
+            ./jq 'setpath(["Application", "ObjectStorage", "container"]; "'${objstorage_container}'")' | \
+            ./jq 'setpath(["API-Server", "host"]; "api.'${APIC_URL}'")' | \
+            ./jq 'setpath(["API-Server", "org"]; "'${ORGS}'")' | \
+            ./jq 'setpath(["API-Server", "catalog"]; "'${CATALOG}'")' | \
+            ./jq 'setpath(["Application", "client_id"]; "'${CLIENT_ID}'")' > \
+         config/default.json.new
+
+        mv config/default.json.new config/default.json
 
         # set env for swift client
-        export OS_REGION_NAME=$(echo "${objstorage_keys}" | ./jq '.region' | sed 's/"//g')
-        export OS_PROJECT_ID=$(echo "${objstorage_keys}" | ./jq '.projectId' | sed 's/"//g')
-        export OS_USER_ID=$(echo "${objstorage_keys}" | ./jq '.userId' | sed 's/"//g')
-        export OS_PASSWORD=$(echo "${objstorage_keys}" | ./jq '.password' | sed 's/"//g')
-        export OS_AUTH_URL=$(echo "${objstorage_keys}" | ./jq '.auth_url' | sed 's/"//g')/v3
+        cf service-key ${objstorage_svc} admin1 > admin1
+        sed -i -e '/^\s*$/d' -e '/Getting /d' admin1
+        cat admin1
+        export OS_REGION_NAME=$(cat admin1 | ./jq '.region' | sed 's/"//g')
+        export OS_PROJECT_ID=$(cat admin1 | ./jq '.projectId' | sed 's/"//g')
+        export OS_USER_ID=$(cat admin1 | ./jq '.userId' | sed 's/"//g')
+        export OS_PASSWORD=$(cat admin1 | ./jq '.password' | sed 's/"//g')
+        export OS_AUTH_URL=$(cat admin1 | ./jq '.auth_url' | sed 's/"//g')/v3
         export OS_AUTH_VERSION=3
         export OS_IDENTITY_API_VERSION=3
 
@@ -264,7 +503,9 @@ stages:
 
         # upload image folder to swift container
         swift post ${objstorage_container}
-        swift upload --changed --skip-identical ${objstorage_container} image
+        pushd image
+        swift upload --changed --skip-identical ${objstorage_container} *.jpg
+        popd
         swift list ${objstorage_container}
 
         # create auto-scaling service
@@ -272,12 +513,6 @@ stages:
 
         # create app
         cf push "${CF_APP}" -n "${CF_APP}" -d "${APP_DOMAIN}" --no-start
-
-        # create route
-        cf domains | grep ${ROUTE_DOMAIN_BFF_WEB}
-        [ $? -eq 0 ] && echo "Domain exists" || cf create-domain ${CF_ORG} ${ROUTE_DOMAIN_BFF_WEB}
-        cf map-route ${CF_APP} ${ROUTE_DOMAIN_BFF_WEB} --hostname ${ROUTE_HOSTNAME_BFF_WEB}
-
         cf bind-service "${CF_APP}" "${objstorage_svc}"
         cf set-env "${CF_APP}" NEW_RELIC_LICENSE_KEY "${NEW_RELIC_LICENSE}"
         cf set-env "${CF_APP}" NEW_RELIC_APP_NAME "${CF_APP}"

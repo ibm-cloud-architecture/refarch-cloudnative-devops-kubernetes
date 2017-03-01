@@ -56,13 +56,14 @@ stages:
         #npm install
         echo $PWD
         ls -al .
-
         # apic api url
         APIC_API_URL=api.${APIC_URL}
 
         # install yaml
-        curl https://github.com/mikefarah/yaml/releases/download/1.5/yaml_linux_amd64 -o yaml
-        chmod +x yaml
+        if [ ! -f ./yaml ]; then
+          wget https://github.com/mikefarah/yaml/releases/download/1.5/yaml_linux_amd64 -O yaml
+          chmod +x yaml
+        fi
 
         # install jq
         if [ ! -f ./jq ]; then
@@ -90,10 +91,10 @@ stages:
         # publish oauthProvider
         echo -e "publish oauthProvider.."
         pushd oauthProvider
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.custom-form.url "https://${AUTH_FQDN}/login.html"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.redirect-url "https://${AUTH_FQDN}/authenticate"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.authentication.x-ibm-authentication-url.url "https://${AUTH_FQDN}/authenticate"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.authorization.custom-form.url "https://${AUTH_FQDN}/grant.html"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.custom-form.url "https://${AUTH_FQDN}/login.html"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.redirect-url "https://${AUTH_FQDN}/authenticate"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.authentication.x-ibm-authentication-url.url "https://${AUTH_FQDN}/authenticate"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.authorization.custom-form.url "https://${AUTH_FQDN}/grant.html"
         cat oauth-provider.yaml
         apic publish oauth-provider-product.yaml
         popd
@@ -103,11 +104,12 @@ stages:
         pushd socialreview
         # payload for openwhisk api
         echo -e "\nprepare payload to request openwhisk cli authkey..."
-        payload=$(curl -XPOST -H "Accept: application/json" -H "Authorization: Basic Y2Y6" -H "Content-Type: application/x-www-form-urlencoded" -d "response_type=token&grant_type=password&username=${APIC_USER}&password=${APIC_PASS}" "https://${BXLOGIN_API_ENDPOINT}/UAALoginServerWAR/oauth/token" | ./jq '{"accessToken": .access_token, "refreshToken": .refresh_token}')
+        payload=$(curl -XPOST -H "Accept: application/json" -H "Authorization: Basic Y2Y6" -H "Content-Type: application/x-www-form-urlencoded" -d "response_type=token&grant_type=password&username=${APIC_USER}&password=${APIC_PASS}" "https://${BXLOGIN_API_ENDPOINT}/UAALoginServerWAR/oauth/token" | ../jq -c '{"accessToken": .access_token, "refreshToken": .refresh_token}')
 
         # get openwhisk authkey
         echo -e "\nrequest openwhisk cli authkey..."
-        auth_key=$(curl -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "${payload}" "https://${OPENWHISK_API_ENDPOINT}/bluemix/v1/authenticate" | ./jq --arg namespace "${namespace}" '.namespaces[] | select(.name == $namespace) | [.uuid,":",.key] | add' | sed -e 's/"//g')
+        namespace="${ORG}_${SPACE}"
+        auth_key=$(curl -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "${payload}" "https://${OPENWHISK_API_ENDPOINT}/bluemix/v1/authenticate" | ../jq --arg namespace "${namespace}" '.namespaces[] | select(.name == $namespace) | [.uuid,":",.key] | add' | sed -e 's/"//g')
         echo -e "\nwsk-authkey= $auth_key"
 
         # setup openwhisk cli
@@ -120,38 +122,52 @@ stages:
         ./wsk action invoke /whisk.system/utils/echo -p message hello --blocking --result
         [ $? -eq 0 ] && echo "OpenWhisk CLI is successfully configured." || { echo "Failed to setup OpenWhisk CLI. Exit with error."; exit 1; }
 
-        TARGET_HOST=$(wsk api-experimental list|grep -v 'Verb\|APIs'|head -1|awk '{print $NF}'|cut -f1-3 -d'/')
+        TARGET_HOST=$(./wsk api-experimental list|grep -v 'Verb\|APIs'|head -1|awk '{print $NF}'|cut -f1-3 -d'/')
 
-        ./yaml w socialreview.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$TARGET_HOST\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ socialreview.yaml
+        ../yaml w --inplace socialreview.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace socialreview.yaml x-ibm-configuration.properties.TARGET_HOST.value ${TARGET_HOST}
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        socialreview.yaml
         cat socialreview.yaml
         apic publish socialreview-product.yaml
         popd
 
         # publish customer
-        echo -e "publish customer.."
-        pushd customer
-        ./yaml w customer.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ customer.yaml
+        echo -e "update customer.."
+        pushd store-api
+        ../yaml w --inplace customer.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace customer.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        customer.yaml
         cat customer.yaml
-        apic publish customer-product.yaml
-        popd
 
         # publish orders
-        echo -e "publish orders.."
-        pushd order
-        ./yaml w order.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ order.yaml
+        echo -e "update orders.."
+        ../yaml w --inplace order.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace order.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        order.yaml
         cat order.yaml
-        apic publish order-product.yaml
-        popd
 
         # publish catalog
-        echo -e "publish catalog.."
-        pushd catalog
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ catalog.yaml
+        echo -e "update catalog.."
+        ../yaml w --inplace catalog.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        catalog.yaml
         cat catalog.yaml
-        apic publish catalog-product.yaml
+
+        # publish product
+        echo -e "publish store-api.."
+        apic publish store-api-product.yaml
+
         popd
 
 
@@ -211,13 +227,14 @@ stages:
         #npm install
         echo $PWD
         ls -al .
-
         # apic api url
         APIC_API_URL=api.${APIC_URL}
 
         # install yaml
-        curl https://github.com/mikefarah/yaml/releases/download/1.5/yaml_linux_amd64 -o yaml
-        chmod +x yaml
+        if [ ! -f ./yaml ]; then
+          wget https://github.com/mikefarah/yaml/releases/download/1.5/yaml_linux_amd64 -O yaml
+          chmod +x yaml
+        fi
 
         # install jq
         if [ ! -f ./jq ]; then
@@ -245,10 +262,10 @@ stages:
         # publish oauthProvider
         echo -e "publish oauthProvider.."
         pushd oauthProvider
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.custom-form.url "https://${AUTH_FQDN}/login.html"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.redirect-url "https://${AUTH_FQDN}/authenticate"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.authentication.x-ibm-authentication-url.url "https://${AUTH_FQDN}/authenticate"
-        ./yaml w oauth-provider.yaml x-ibm-configuration.oauth2.authorization.custom-form.url "https://${AUTH_FQDN}/grant.html"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.custom-form.url "https://${AUTH_FQDN}/login.html"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.identity-extraction.redirect-url "https://${AUTH_FQDN}/authenticate"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.authentication.x-ibm-authentication-url.url "https://${AUTH_FQDN}/authenticate"
+        ../yaml w --inplace oauth-provider.yaml x-ibm-configuration.oauth2.authorization.custom-form.url "https://${AUTH_FQDN}/grant.html"
         cat oauth-provider.yaml
         apic publish oauth-provider-product.yaml
         popd
@@ -258,11 +275,12 @@ stages:
         pushd socialreview
         # payload for openwhisk api
         echo -e "\nprepare payload to request openwhisk cli authkey..."
-        payload=$(curl -XPOST -H "Accept: application/json" -H "Authorization: Basic Y2Y6" -H "Content-Type: application/x-www-form-urlencoded" -d "response_type=token&grant_type=password&username=${APIC_USER}&password=${APIC_PASS}" "https://${BXLOGIN_API_ENDPOINT}/UAALoginServerWAR/oauth/token" | ./jq '{"accessToken": .access_token, "refreshToken": .refresh_token}')
+        payload=$(curl -XPOST -H "Accept: application/json" -H "Authorization: Basic Y2Y6" -H "Content-Type: application/x-www-form-urlencoded" -d "response_type=token&grant_type=password&username=${APIC_USER}&password=${APIC_PASS}" "https://${BXLOGIN_API_ENDPOINT}/UAALoginServerWAR/oauth/token" | ../jq -c '{"accessToken": .access_token, "refreshToken": .refresh_token}')
 
         # get openwhisk authkey
         echo -e "\nrequest openwhisk cli authkey..."
-        auth_key=$(curl -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "${payload}" "https://${OPENWHISK_API_ENDPOINT}/bluemix/v1/authenticate" | ./jq --arg namespace "${namespace}" '.namespaces[] | select(.name == $namespace) | [.uuid,":",.key] | add' | sed -e 's/"//g')
+        namespace="${ORG}_${SPACE}"
+        auth_key=$(curl -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "${payload}" "https://${OPENWHISK_API_ENDPOINT}/bluemix/v1/authenticate" | ../jq --arg namespace "${namespace}" '.namespaces[] | select(.name == $namespace) | [.uuid,":",.key] | add' | sed -e 's/"//g')
         echo -e "\nwsk-authkey= $auth_key"
 
         # setup openwhisk cli
@@ -275,36 +293,50 @@ stages:
         ./wsk action invoke /whisk.system/utils/echo -p message hello --blocking --result
         [ $? -eq 0 ] && echo "OpenWhisk CLI is successfully configured." || { echo "Failed to setup OpenWhisk CLI. Exit with error."; exit 1; }
 
-        TARGET_HOST=$(wsk api-experimental list|grep -v 'Verb\|APIs'|head -1|awk '{print $NF}'|cut -f1-3 -d'/')
+        TARGET_HOST=$(./wsk api-experimental list|grep -v 'Verb\|APIs'|head -1|awk '{print $NF}'|cut -f1-3 -d'/')
 
-        ./yaml w socialreview.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$TARGET_HOST\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ socialreview.yaml
+        ../yaml w --inplace socialreview.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace socialreview.yaml x-ibm-configuration.properties.TARGET_HOST.value ${TARGET_HOST}
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        socialreview.yaml
         cat socialreview.yaml
         apic publish socialreview-product.yaml
         popd
 
         # publish customer
-        echo -e "publish customer.."
-        pushd customer
-        ./yaml w customer.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ customer.yaml
+        echo -e "update customer.."
+        pushd store-api
+        ../yaml w --inplace customer.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace customer.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        customer.yaml
         cat customer.yaml
-        apic publish customer-product.yaml
-        popd
 
         # publish orders
-        echo -e "publish orders.."
-        pushd order
-        ./yaml w order.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ order.yaml
+        echo -e "update orders.."
+        ../yaml w --inplace order.yaml securityDefinitions.apic-oauth-provider.authorizationUrl "https://${APIC_API_URL}/${ORGS}/bluecompute/oauth20/authorize"
+        ../yaml w --inplace order.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        order.yaml
         cat order.yaml
-        apic publish order-product.yaml
-        popd
 
         # publish catalog
-        echo -e "publish catalog.."
-        pushd catalog
-        sed -i -e "/^x\-ibm\-configuration\:$/,/^.*\:$ /{/properties\:$/,/$/{/TARGET\_HOST\:$/{N;s/\(value\:\)\(.*$\)/\1 \'https\:\/\/$ZUUL_FQDN\'/}}}" -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET"/ catalog.yaml
+        echo -e "update catalog.."
+        ../yaml w --inplace catalog.yaml x-ibm-configuration.properties.TARGET_HOST.value "https://${ZUUL_FQDN}"
+        sed -i \
+        -e 's/\(\\ \\"k\\"\: \\"\)\(.*\)\(\\"\\\)/\1JSONWEBTOKENSHAREDSECRET\3/' \
+        -e "s/JSONWEBTOKENSHAREDSECRET/$JWT_SHARED_SECRET/" \
+        catalog.yaml
         cat catalog.yaml
-        apic publish catalog-product.yaml
+
+        # publish product
+        echo -e "publish store-api.."
+        apic publish store-api-product.yaml
+
         popd
