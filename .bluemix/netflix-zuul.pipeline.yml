@@ -177,7 +177,7 @@ stages:
         #                                    Default is 1
         # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         ROUTE_FQDN="$ROUTE_HOSTNAME.$ROUTE_DOMAIN"
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname= "
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname= -e hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=60000 -e ribbon.ConnectTimeout=10000 -e ribbon.ReadTimeout=30000"
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
         /bin/bash deployscripts/deploygroup.sh
 
@@ -384,7 +384,7 @@ stages:
         #                                    Default is 1
         # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         ROUTE_FQDN="$ROUTE_HOSTNAME.$ROUTE_DOMAIN"
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=60000 -e ribbon.ConnectTimeout=10000 -e ribbon.ReadTimeout=30000 -e eureka.instance.hostname= "
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname= -e hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=60000 -e ribbon.ConnectTimeout=10000 -e ribbon.ReadTimeout=30000"
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
         /bin/bash deployscripts/deploygroup.sh
 

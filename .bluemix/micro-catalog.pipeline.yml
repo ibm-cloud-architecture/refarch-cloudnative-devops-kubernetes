@@ -144,7 +144,7 @@ stages:
       region_id: ${REGION_US}
       organization: ${ORG}
       space: ${SPACE}
-    PORT: '8080'
+    PORT: 8081
     OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${NAME_US}
     DEPLOY_TYPE: red_black
@@ -384,7 +384,7 @@ stages:
       region_id: ${REGION_EU}
       organization: ${ORG}
       space: ${SPACE}
-    PORT: '8080'
+    PORT: 8081
     OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${NAME_EU}
     DEPLOY_TYPE: red_black

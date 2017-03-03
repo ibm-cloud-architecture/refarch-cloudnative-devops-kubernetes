@@ -338,6 +338,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     OPTIONAL_ARGS: -m ${MEMORY}
+    PORT: 8080    
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-

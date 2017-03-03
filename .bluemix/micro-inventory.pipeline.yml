@@ -379,7 +379,7 @@ stages:
         ######################################################################################
         echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
 
-- name: DEPLOY Inventory Microservice US-South
+- name: DEPLOY Inventory Microservice London
   inputs:
   - type: job
     stage: BUILD London
@@ -391,7 +391,7 @@ stages:
     value: 'inventory-microservice'
     type: text
   - name: REGION
-    value: ${REGION_US}
+    value: ${REGION_EU}
     type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
@@ -525,7 +525,7 @@ stages:
             -e eureka.client.fetchRegistry=false \
             -e eureka.client.registerWithEureka=false \
             -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
-            -e "spring.datasource.url=jdbc:mysql://${JDBC_URL}" \
+            -e "spring.datasource.url=${JDBC_URL}" \
             -e "spring.datasource.username=${MYSQL_USER}" \
             -e "spring.datasource.password=${MYSQL_PASSWORD}" \
             -e "elasticsearch.user=${es_user}" \

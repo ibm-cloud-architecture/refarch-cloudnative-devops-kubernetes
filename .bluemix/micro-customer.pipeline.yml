@@ -205,6 +205,7 @@ stages:
 
 
         OPTIONAL_ARGS="${OPTIONAL_ARGS} \
+              -e CG_NAME=${ROUTE_HOSTNAME} \
               -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
               -e eureka.client.fetchRegistry=true \
               -e eureka.client.registerWithEureka=true \
@@ -464,6 +465,7 @@ stages:
 
 
         OPTIONAL_ARGS="${OPTIONAL_ARGS} \
+              -e CG_NAME=${ROUTE_HOSTNAME} \
               -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
               -e eureka.client.fetchRegistry=true \
               -e eureka.client.registerWithEureka=true \
