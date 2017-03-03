@@ -105,6 +105,9 @@ stages:
   - name: APP_NAME
     value: 'orders-microservice'
     type: text
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text
@@ -156,6 +159,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     OPTIONAL_ARGS: -m ${MEMORY}
+    PORT: 9080,8080
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
@@ -187,11 +191,12 @@ stages:
         messagehub_creds=$(cf service-key "${messagehub_svc}" "${messagehub_cred_name}" | grep -v "Getting key ")
         kafka_username=`echo "${messagehub_creds}" | ./jq '.user' | sed -e 's/"//g'`
         kafka_password=`echo "${messagehub_creds}" | ./jq '.password' | sed -e 's/"//g'`
-        kafka_brokerlist=`echo "${messagehub_creds}" | ./jq '.kafka_brokers_sasl | join(" ")' | sed -e 's/"//g'`
+        kafka_brokerlist=`echo "${messagehub_creds}" | ./jq '.kafka_brokers_sasl | join(",")' | sed -e 's/"//g'`
         kafka_apikey=`echo "${messagehub_creds}" | ./jq '.api_key' | sed -e 's/"//g'`
         kafka_adminurl=`echo "${messagehub_creds}" | ./jq '.kafka_admin_url' | sed -e 's/"//g'`
 
         # get or create orders topic
+        set +e
         topicexists=`curl -I -H "X-Auth-Token: ${kafka_apikey}" ${kafka_adminurl}/topics/orders | grep HTTP | grep 404`
         if [ ! -z "${topicexists}" ]; then
             echo "creating \"orders\" topic on messagehub ..."
@@ -422,6 +427,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     OPTIONAL_ARGS: -m ${MEMORY}
+    PORT: 9080,8080
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-

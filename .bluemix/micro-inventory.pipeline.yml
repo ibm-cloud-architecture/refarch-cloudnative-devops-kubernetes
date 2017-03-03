@@ -95,6 +95,9 @@ stages:
   - name: APP_NAME
     value: 'inventory-microservice'
     type: text
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text
@@ -387,6 +390,9 @@ stages:
   - name: APP_NAME
     value: 'inventory-microservice'
     type: text
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
     type: text
@@ -485,6 +491,7 @@ stages:
         kafka_adminurl=`echo "${messagehub_creds}" | ./jq '.kafka_admin_url' | sed -e 's/"//g'`
 
         # get or create orders topic
+        set +e
         topicexists=`curl -I -H "X-Auth-Token: ${kafka_apikey}" ${kafka_adminurl}/topics/orders | grep HTTP | grep 404`
         if [ ! -z "${topicexists}" ]; then
             echo "creating \"orders\" topic on messagehub ..."

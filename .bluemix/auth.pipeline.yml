@@ -135,6 +135,7 @@ stages:
       region_id: ${REGION_US}
       organization: ${ORG}
       space: ${SPACE}
+    PORT: 8080
     OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black

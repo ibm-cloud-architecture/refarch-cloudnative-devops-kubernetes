@@ -100,6 +100,9 @@ stages:
   - name: APP_NAME
     value: 'catalog-microservice'
     type: text
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_US}
     type: text
@@ -337,6 +340,9 @@ stages:
   - name: APP_NAME
     value: 'catalog-microservice'
     type: text
+  - name: REGION
+    value: ${REGION_US}
+    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
     type: text
@@ -405,9 +411,9 @@ stages:
         [ $? -eq 0 ] && cf csk "${es_svc}" "${es_svc}-cred1"
         es_cred_name=$(cf service-keys "${es_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
         es_creds=$(cf service-key "${es_svc}" "${es_cred_name}" | grep -v "Getting key ")
-        es_url=$(echo "${es_creds}"|jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
-        es_user=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
-        es_password=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
+        es_url=$(echo "${es_creds}"|./jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
+        es_user=$(echo "${es_creds}"|./jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
+        es_password=$(echo "${es_creds}"|./jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
 
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
         echo -e "${label_color}Starting deployment script${no_color}"

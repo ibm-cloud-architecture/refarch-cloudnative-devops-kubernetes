@@ -121,6 +121,10 @@ pipeline-bluecompute-web:
        ROUTE_HOSTNAME_BFF_WEB: "{{deploy.parameters.route-hostname-bff-web}}"
        ROUTE_DOMAIN_BFF_WEB: "{{deploy.parameters.route-domain-bff-web}}"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+       APIC_URL_US: "{{deploy.parameters.apic-url-us}}"
+       APIC_URL_EU: "{{deploy.parameters.apic-url-eu}}"
+       APIC_USER: "{{deploy.parameters.ibmid-user}}"
+       APIC_PASS: "{{deploy.parameters.ibmid-pass}}"
       execute: false
 
 pipeline-netflix-eureka:

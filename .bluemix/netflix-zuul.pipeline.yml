@@ -116,7 +116,7 @@ stages:
     value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: '1'
+    value: '2'
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL_US}
@@ -138,7 +138,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m ${MEMORY} -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=false
+    OPTIONAL_ARGS: -m ${MEMORY} -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=true
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
@@ -177,7 +177,7 @@ stages:
         #                                    Default is 1
         # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         ROUTE_FQDN="$ROUTE_HOSTNAME.$ROUTE_DOMAIN"
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname=$ROUTE_FQDN -e spring.cloud.client.hostname=$ROUTE_FQDN"
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname= "
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
         /bin/bash deployscripts/deploygroup.sh
 
@@ -323,7 +323,7 @@ stages:
     value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: '1'
+    value: '2'
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL_EU}
@@ -345,7 +345,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m 128 -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=false
+    OPTIONAL_ARGS: -m 128 -e eureka.instance.nonSecurePort=80 -e eureka.instance.preferIpAddress=true
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
@@ -384,7 +384,7 @@ stages:
         #                                    Default is 1
         # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         ROUTE_FQDN="$ROUTE_HOSTNAME.$ROUTE_DOMAIN"
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e eureka.instance.hostname=$ROUTE_FQDN -e spring.cloud.client.hostname=$ROUTE_FQDN"
+        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e security.sharedSecret=${JWT_SHARED_SECRET} -e eureka.client.serviceUrl.defaultZone=$EUREKA_REGISTRY_URL -e hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=60000 -e ribbon.ConnectTimeout=10000 -e ribbon.ReadTimeout=30000 -e eureka.instance.hostname= "
         log_and_echo "Optional Args: $OPTIONAL_ARGS"
         /bin/bash deployscripts/deploygroup.sh
 
