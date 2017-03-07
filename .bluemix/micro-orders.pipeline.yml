@@ -329,6 +329,8 @@ stages:
         # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
 
         if [ -f Dockerfile ]; then
+            log_and_echo "$LABEL" "Updating FROM value in Dockerfile"
+            sed -i -e "s@^FROM registry.ng.bluemix.net/ibmliberty@FROM ${CCS_REGISTRY_HOST}/ibmliberty@" Dockerfile
             log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
             ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
             # build image
