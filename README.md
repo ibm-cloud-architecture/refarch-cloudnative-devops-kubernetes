@@ -58,14 +58,14 @@ provision a portal for you. You should receive a message like the one below. ![A
 ### Step 3: Create the Bluemix DevOps toolchain
 Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOps runtime will parse the toolchain template file that creates and integrates GitHub repos and Continuous Delivery pipelines to deploy to a targetted space in US-South and London Bluemix regions.
 
-[![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git&branch=master)
+[![Create BlueCompute Deployment Toolchain](https://new-console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://new-console.ng.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/ibm-cloud-architecture/refarch-cloudnative-devops.git&branch=integration)
 
 1. Enter toolchain name in the **Name:** field. ![Create Toolchain](static/imgs/create-toolchain.png)
 2. By default, the **GitHub** integration is configured to clone the associated git repos to your GitHub account. Click on **GitHub** integration to see the list of repos that are setup to clone to your account.
 3. Click on **Delivery Pipeline** integration to do the configuration. ![Configure Delivery Pipeline](static/imgs/configure-delivery-pipeline.png)
 4. By default the Bluemix Organization, and Space information will be filled with the logged in Region, Organization, and Space values. Double-check to ensure this is the desired Region, Organization, and Space this toolchain should deploy to and update __Region__, __Organization__, and __Space__ values accordingly.
 5. Enter __Customer Gateway__, __Customer Subnet__, __VPN Preshared key__, and __Onprem MySQL server__ addresses for both US-South and London regions based on information collected in Step 1.
-6. Enter __APIC Username__ and __Password__. These are Bluemix credentials, which are IBMid username and password with administrative access to API Developer Portal in the corresponding Bluemix space.
+6. Enter __IBMid Username__ and __Password__. These are Bluemix credentials, which are IBMid username and password with administrative access to API Developer Portal in the corresponding Bluemix space.
 7. Go to [JSON Web Key Generator](https://mkjwk.org/#shared). Switch to __Shared Secret__ tab, set __Key Size: 2048__, __Key Use: Signing__, __Algorithm: HS256__ and click on __New Key__ button. Copy the generated key displayed in the output box titled __Key__ identified by __"k"__ field. Paste this key value in the __JWT Shared Secret__ input field on the create toolchain form.
 8. Containers deployed by this toolchain are enabled for New Relic monitoring. Enter __New Relic License Key__ to monitor the deployed containers.
 9. Click **Create** to create the toolchain.
