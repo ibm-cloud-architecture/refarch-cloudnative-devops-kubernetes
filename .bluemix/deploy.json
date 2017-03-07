@@ -53,28 +53,36 @@
             "description": "Pre-Shared Key for VPN connection",
             "type": "string"
         },
-        "mysql-server-ipaddrs-us": {
-            "description": "MySQL Server Addresses <host_ip>:<port>[,<host_ip>:<port> ...] US-South",
+        "mysql-servers-us": {
+            "description": "MySQL Server Addresses <ip>:<port>[,<ip>:<port> ...] US-South",
             "type": "string"
         },
-        "mysql-server-ipaddrs-eu": {
-            "description": "MySQL Server Addresses <host_ip>:<port>[,<host_ip>:<port> ...] London",
+        "mysql-servers-eu": {
+            "description": "MySQL Server Addresses <ip>:<port>[,<ip>:<port> ...] London",
             "type": "string"
         },
-        "mysql-database": {
+        "inventory-db": {
             "description": "Inventory database name",
             "type": "string"
         },
-        "mysql-port": {
-            "description": "MySQL server port",
+        "inventory-dbuser": {
+            "description": "Inventory database user",
             "type": "string"
         },
-        "mysql-dbuser": {
-            "description": "MySQL database user",
+        "inventory-dbpass": {
+            "description": "Inventory database password",
+            "type": "password"
+        },
+        "orders-db": {
+            "description": "Orders database name",
             "type": "string"
         },
-        "mysql-dbpass": {
-            "description": "Password for MySQL database user",
+        "orders-dbuser": {
+            "description": "Orders database user",
+            "type": "string"
+        },
+        "orders-dbpass": {
+            "description": "Orders database password",
             "type": "password"
         },
         "apic-url-us": {
@@ -85,25 +93,13 @@
             "description": "APIC EU URL ",
             "type": "string"
         },
-        "apic-user": {
-            "description": "APIC username",
+        "ibmid-user": {
+            "description": "IBMid username",
             "type": "string"
         },
-        "apic-pass": {
-            "description": "APIC password",
+        "ibmid-pass": {
+            "description": "IBMid password",
             "type": "password"
-        },
-        "context-path": {
-            "description": "Context path for published APIs",
-            "type": "string"
-        },
-        "inventory-msname": {
-            "description": "Product name for Inventory Microservice APIs",
-            "type": "string"
-        },
-        "socialreview-msname": {
-            "description": "Product name for Socialreview Microservice APIs",
-            "type": "string"
         },
         "new-relic-lic-key": {
             "description": "New Relic License Key",
@@ -112,20 +108,47 @@
         "shared-secret": {
             "description": "JWT shared secret. Use https://mkjwk.org/ to generate a secret. Switch to Shared Secret and use Key Size:2048, Key Use:signing, Algorithm:HS256",
             "type": "string"
+        },
+        "openwhisk-api-endpoint-us": {
+            "description": "OpenWhisk API Endpoint - US",
+            "type": "string"
+        },
+        "openwhisk-api-endpoint-eu": {
+            "description": "OpenWhisk API Endpoint - EU",
+            "type": "string"
+        },
+        "bxlogin-api-endpoint-us": {
+            "description": "Bluemix Login API Endpoint - US",
+            "type": "string"
+        },
+        "bxlogin-api-endpoint-eu": {
+            "description": "Bluemix Login API Endpoint - EU",
+            "type": "string"
+        },
+        "route-domain-bff-web": {
+            "description": "Web BFF Domain",
+            "type": "string"
+        },
+        "route-hostname-bff-web": {
+            "description": "Web BFF Hostname",
+            "type": "string"
         }
     },
     "required": [
         "repo-branch",
         "deploy-org",
         "deploy-space",
-        "apic-user",
-        "apic-pass",
+        "ibmid-user",
+        "ibmid-pass",
         "shared-secret",
-        "mysql-server-ipaddrs-us",
-        "mysql-server-ipaddrs-eu",
-        "mysql-database",
-        "mysql-dbuser",
-        "mysql-dbpass"
+        "mysql-servers-us",
+        "mysql-servers-eu",
+        "inventory-db",
+        "inventory-dbuser",
+        "inventory-dbpass",
+        "orders-db",
+        "orders-dbuser",
+        "orders-dbpass"
         ],
     "form": [
         {
@@ -137,6 +160,24 @@
             "readonly": false,
             "title": "Git repo branch",
             "key": "repo-branch"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "IBMid Username",
+            "key": "ibmid-user"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": "IBMid Password",
+            "key": "ibmid-pass"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "VPN Pre-shared key",
+            "key": "customer-psk"
         },
         {
             "type": "text",
@@ -153,6 +194,12 @@
         {
             "type": "text",
             "readonly": false,
+            "title": "MySQL Server(s) in US <ip>:<port>[,<ip>:<port> ...]",
+            "key": "mysql-servers-us"
+        },
+        {
+            "type": "text",
+            "readonly": false,
             "title": "Customer Gateway - EU",
             "key": "customer-gateway-ip-eu"
         },
@@ -165,50 +212,44 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "VPN Pre-shared key",
-            "key": "customer-psk"
+            "title": "MySQL Server(s) in London <ip>:<port>[,<ip>:<port> ...]",
+            "key": "mysql-servers-eu"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "On-prem MySQL Server(s) <host_ip>:<port>[,<host_ip>:<port> ...] - US-South",
-            "key": "mysql-server-ipaddrs-us"
+            "title": "Inventory Database Name",
+            "key": "inventory-db"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "On-prem MySQL Server(s) <host_ip>:<port>[,<host_ip>:<port> ...] - London",
-            "key": "mysql-server-ipaddrs-eu"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "MySQL Database Name",
-            "key": "mysql-database"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "MySQL Database Username",
-            "key": "mysql-dbuser"
+            "title": "Inventory Database Username",
+            "key": "inventory-dbuser"
         },
         {
             "type": "password",
             "readonly": false,
-            "title": "MySQL Database Password",
-            "key": "mysql-dbpass"
+            "title": "Inventory Database Password",
+            "key": "inventory-dbpass"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "APIC Username",
-            "key": "apic-user"
+            "title": "Orders Database Name",
+            "key": "orders-db"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Orders Database Username",
+            "key": "orders-dbuser"
         },
         {
             "type": "password",
             "readonly": false,
-            "title": "APIC Password",
-            "key": "apic-pass"
+            "title": "Orders Database Password",
+            "key": "orders-dbpass"
         },
         {
             "type": "text",

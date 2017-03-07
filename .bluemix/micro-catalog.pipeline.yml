@@ -8,7 +8,7 @@ stages:
   triggers:
   - type: commit
   jobs:
-  - name: Register Eureka Container Image
+  - name: Build and Register Catalog Microservice Image
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
@@ -19,18 +19,18 @@ stages:
     USE_CACHED_LAYERS: 'true'
     COMMAND: |-
         #!/bin/bash
-
-        log_and_echo "Run gradle build..."
-        export JAVA_HOME=~/java8
-        export PATH=$JAVA_HOME/bin:$PATH
-        /bin/bash build-microservice.sh -d
-        ls -al docker
-        cp -R docker/* .
-        ls -al $PWD
-        echo "Gradle build complete."
-
         # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
         log_and_echo "$LABEL" "Starting build script"
+
+        export JAVA_HOME=~/java8
+        set -x
+        cd catalog; ./gradlew build docker
+        cd ..
+        pwd
+
+        cp -r catalog/docker/* .
+
+        find .
 
         # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
         # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
@@ -39,58 +39,67 @@ stages:
         #####################
         log_and_echo "$LABEL" "No unit tests cases have been checked in"
 
-        ######################################
-        # Build Container via Dockerfile     #
-        ######################################
-        SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/"
-        )
+        SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
         IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
         REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
         FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+
+        ######################################
+        # Build Container via Dockerfile     #
+        ######################################
+
+        # REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+        # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}
         # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
 
         if [ -f Dockerfile ]; then
-            log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
-            ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
-            # build image
-            BUILD_COMMAND=""
-            if [ "${USE_CACHED_LAYERS}" == "true" ]; then
-                BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
-                ice_retry ${BUILD_COMMAND}
-                RESULT=$?
-            else
-                BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
-                ice_retry ${BUILD_COMMAND}
-                RESULT=$?
-            fi
+          log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
+          ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
+          # build image
+          BUILD_COMMAND=""
+          if [ "${USE_CACHED_LAYERS}" == "true" ]; then
+              BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          else
+              BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          fi
 
-            if [ $RESULT -ne 0 ]; then
-                log_and_echo "$ERROR" "Error building image"
-                ice_retry info
-                ice_retry images
-                ${EXT_DIR}/print_help.sh
-                ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
-                exit 1
-            else
-                log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
-                ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
-            fi
+          if [ $RESULT -ne 0 ]; then
+              log_and_echo "$ERROR" "Error building image"
+              ice_retry info
+              ice_retry images
+              ${EXT_DIR}/print_help.sh
+              ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
+              exit 1
+          else
+              log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
+              ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
+          fi
         else
-            log_and_echo "$ERROR" "Dockerfile not found in project"
-            ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
-            exit 1
+          log_and_echo "$ERROR" "Dockerfile not found in project"
+          ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
+          exit 1
         fi
 
         ######################################################################################
         # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
         ######################################################################################
         echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
+
 - name: DEPLOY US-South
   inputs:
   - type: job
     stage: BUILD US-South
-    job: Register Eureka Container Image
+    job: Build and Register Catalog Microservice Image
+  triggers:
+  - type: stage
   properties:
+  - name: APP_NAME
+    value: 'catalog-microservice'
+    type: text
   - name: REGION
     value: ${REGION_US}
     type: text
@@ -99,6 +108,9 @@ stages:
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN_US}
+    type: text
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
     type: text
   - name: AUTO_RECOVERY
     value: 'true'
@@ -116,30 +128,16 @@ stages:
     value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: '1'
+    value: '2'
     type: text
-  - name: SERVER_SELF_PRESERVATION
-    value: 'true'
-    type: text
-  - name: CLIENT_HEALTH_CHECK
-    value: 'true'
-    type: text
-  - name: INSTANCE_LEASE_RENEWAL_INTERVAL_SECS
-    value: '30'
-    type: text
-  - name: INSTANCE_LEASE_EXPIRATION_DURATION_SECS
-    value: '90'
-    type: text
-  - name: SERVER_RENEWAL_THRESHOLD_PCT
-    value: '0.25'
+  - name: EUREKA_REGISTRY_URL
+    value: ${EUREKA_REGISTRY_URL_US}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}
     type: text
-  triggers:
-  - type: stage
   jobs:
-  - name: Deploy Eureka Container Group
+  - name: Deploy Catalog Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
@@ -147,16 +145,37 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m ${MEMORY} --env eureka.client.fetchRegistry=true --env eureka.client.registerWithEureka=true --env eureka.instance.nonSecurePort=80 --env eureka.port=80
-    CONTAINER_NAME: ${ROUTE_HOSTNAME}
+
+    OPTIONAL_ARGS: -m ${MEMORY}
+    CONTAINER_NAME: ${NAME_US}
     DEPLOY_TYPE: red_black
     COMMAND: |-
         #!/bin/sh
 
-        set -e
-        echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
-        $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
         set +e
+        # download jq
+        JQ_BIN=`which jq`
+        if [ -z "${JQ_BIN}" ]; then
+          if [ ! -f "./jq" ]; then
+              wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+              mv jq-linux64 jq
+              chmod u+x jq
+              JQ_BIN="./jq"
+          fi
+        fi
+
+        # get elasticsearch creds
+        cf services | grep compose-for-elasticsearch
+        [ $? -eq 1 ] && cf cs compose-for-elasticsearch Standard cloudnative-elasticsearch
+        es_svc=$(cf services | grep compose-for-elasticsearch | sed "s/\(.*\)\(compose-for-elasticsearch\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        cf service-keys "${es_svc}" | grep "No service key for service instance"
+        [ $? -eq 0 ] && cf csk "${es_svc}" "${es_svc}-cred1"
+        es_cred_name=$(cf service-keys "${es_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        es_creds=$(cf service-key "${es_svc}" "${es_cred_name}" | grep -v "Getting key ")
+        es_url=$(echo "${es_creds}"|jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
+        es_user=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
+        es_password=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
+
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
         echo -e "${label_color}Starting deployment script${no_color}"
 
@@ -164,6 +183,18 @@ stages:
         # git_retry will retry git calls to prevent pipeline failure on temporary github problems
         # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
         git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
+
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} \
+            -e CG_NAME=${ROUTE_HOSTNAME} \
+            -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
+            -e eureka.client.fetchRegistry=true \
+            -e eureka.client.registerWithEureka=true \
+            -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
+            -e "elasticsearch.user=${es_user}" \
+            -e "elasticsearch.password=${es_password}" \
+            -e "elasticsearch.url=${es_url}""
+
+        log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
         # Deploy Container Group:
         # Optional environment properties (can be set directly in this script, or defined as environment properties):
@@ -181,17 +212,14 @@ stages:
         #                                    Default is micro (256).
         #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
         #                                    Default is 1
-        ROUTE_FQDN=$ROUTE_HOSTNAME.$ROUTE_DOMAIN
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.server.enableSelfPreservation=${SERVER_SELF_PRESERVATION} -e eureka.server.renewalPercentThreshold=${SERVER_RENEWAL_THRESHOLD_PCT} -e eureka.instance.leaseRenewalIntervalInSeconds=${INSTANCE_LEASE_RENEWAL_INTERVAL_SECS} -e eureka.instance.leaseExpirationDurationInSeconds=${INSTANCE_LEASE_EXPIRATION_DURATION_SECS} -e eureka.client.healthcheck.enabled=${CLIENT_HEALTH_CHECK} -e eureka.client.serviceUrl.defaultZone=http://$ROUTE_FQDN/eureka/ -e eureka.instance.hostname=$ROUTE_FQDN"
-        log_and_echo "Optional Args: $OPTIONAL_ARGS"
-
+        # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         /bin/bash deployscripts/deploygroup.sh
 
         RESULT=$?
 
         # source the deploy property file
         if [ -f "${DEPLOY_PROPERTY_FILE}" ]; then
-          source "$DEPLOY_PROPERTY_FILE"
+        source "$DEPLOY_PROPERTY_FILE"
         fi
 
         #########################
@@ -203,9 +231,9 @@ stages:
 
         # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
         if [ $RESULT -ne 0 ]; then
-            echo -e "${red}Executed failed or had warnings ${no_color}"
-            ${EXT_DIR}/print_help.sh
-            exit $RESULT
+          echo -e "${red}Executed failed or had warnings ${no_color}"
+          ${EXT_DIR}/print_help.sh
+          exit $RESULT
         fi
         echo -e "${green}Execution complete${no_label}"
 
@@ -222,7 +250,7 @@ stages:
   triggers:
   - type: commit
   jobs:
-  - name: Register Eureka Container Image
+  - name: Build and Register Catalog Microservice Image
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
@@ -233,18 +261,18 @@ stages:
     USE_CACHED_LAYERS: 'true'
     COMMAND: |-
         #!/bin/bash
-
-        log_and_echo "Run gradle build..."
-        export JAVA_HOME=~/java8
-        export PATH=$JAVA_HOME/bin:$PATH
-        /bin/bash build-microservice.sh -d
-        ls -al docker
-        cp -R docker/* .
-        ls -al $PWD
-        echo "Gradle build complete."
-
         # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
         log_and_echo "$LABEL" "Starting build script"
+
+        export JAVA_HOME=~/java8
+        set -x
+        cd catalog; ./gradlew build docker
+        cd ..
+        pwd
+
+        cp -r catalog/docker/* .
+
+        find .
 
         # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
         # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
@@ -253,67 +281,77 @@ stages:
         #####################
         log_and_echo "$LABEL" "No unit tests cases have been checked in"
 
-        ######################################
-        # Build Container via Dockerfile     #
-        ######################################
-        SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/"
-        )
+        SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
         IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
         REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
         FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+
+        ######################################
+        # Build Container via Dockerfile     #
+        ######################################
+
+        # REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+        # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}
         # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
 
         if [ -f Dockerfile ]; then
-            log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
-            ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
-            # build image
-            BUILD_COMMAND=""
-            if [ "${USE_CACHED_LAYERS}" == "true" ]; then
-                BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
-                ice_retry ${BUILD_COMMAND}
-                RESULT=$?
-            else
-                BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
-                ice_retry ${BUILD_COMMAND}
-                RESULT=$?
-            fi
+          log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
+          ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
+          # build image
+          BUILD_COMMAND=""
+          if [ "${USE_CACHED_LAYERS}" == "true" ]; then
+              BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          else
+              BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          fi
 
-            if [ $RESULT -ne 0 ]; then
-                log_and_echo "$ERROR" "Error building image"
-                ice_retry info
-                ice_retry images
-                ${EXT_DIR}/print_help.sh
-                ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
-                exit 1
-            else
-                log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
-                ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
-            fi
+          if [ $RESULT -ne 0 ]; then
+              log_and_echo "$ERROR" "Error building image"
+              ice_retry info
+              ice_retry images
+              ${EXT_DIR}/print_help.sh
+              ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
+              exit 1
+          else
+              log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
+              ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
+          fi
         else
-            log_and_echo "$ERROR" "Dockerfile not found in project"
-            ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
-            exit 1
+          log_and_echo "$ERROR" "Dockerfile not found in project"
+          ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
+          exit 1
         fi
 
         ######################################################################################
         # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
         ######################################################################################
         echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
-
 - name: DEPLOY London
   inputs:
   - type: job
     stage: BUILD London
-    job: Register Eureka Container Image
+    job: Build and Register Catalog Microservice Image
+  triggers:
+  - type: stage
   properties:
+  - name: APP_NAME
+    value: 'catalog-microservice'
+    type: text
   - name: REGION
-    value: ${REGION_EU}
+    value: ${REGION_US}
     type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME_EU}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN_EU}
+    type: text
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
     type: text
   - name: AUTO_RECOVERY
     value: 'true'
@@ -331,30 +369,16 @@ stages:
     value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: '1'
+    value: '2'
     type: text
-  - name: SERVER_SELF_PRESERVATION
-    value: 'true'
-    type: text
-  - name: CLIENT_HEALTH_CHECK
-    value: 'true'
-    type: text
-  - name: INSTANCE_LEASE_RENEWAL_INTERVAL_SECS
-    value: '30'
-    type: text
-  - name: INSTANCE_LEASE_EXPIRATION_DURATION_SECS
-    value: '90'
-    type: text
-  - name: SERVER_RENEWAL_THRESHOLD_PCT
-    value: '0.25'
+  - name: EUREKA_REGISTRY_URL
+    value: ${EUREKA_REGISTRY_URL_EU}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
     value: ${NEW_RELIC_LICENSE}
     type: text
-  triggers:
-  - type: stage
   jobs:
-  - name: Deploy Eureka Container Group
+  - name: Deploy Catalog Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
@@ -362,16 +386,36 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${PORT}
-    OPTIONAL_ARGS: -m ${MEMORY} --env eureka.client.fetchRegistry=true --env eureka.client.registerWithEureka=true --env eureka.instance.nonSecurePort=80 --env eureka.port=80
-    CONTAINER_NAME: ${ROUTE_HOSTNAME}
+    OPTIONAL_ARGS: -m ${MEMORY}
+    CONTAINER_NAME: ${NAME_EU}
     DEPLOY_TYPE: red_black
     COMMAND: |-
         #!/bin/sh
 
-        set -e
-        echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
-        $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
         set +e
+        # download jq
+        JQ_BIN=`which jq`
+        if [ -z "${JQ_BIN}" ]; then
+          if [ ! -f "./jq" ]; then
+              wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+              mv jq-linux64 jq
+              chmod u+x jq
+              JQ_BIN="./jq"
+          fi
+        fi
+
+        # get elasticsearch creds
+        cf services | grep compose-for-elasticsearch
+        [ $? -eq 1 ] && cf cs compose-for-elasticsearch Standard cloudnative-elasticsearch
+        es_svc=$(cf services | grep compose-for-elasticsearch | sed "s/\(.*\)\(compose-for-elasticsearch\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        cf service-keys "${es_svc}" | grep "No service key for service instance"
+        [ $? -eq 0 ] && cf csk "${es_svc}" "${es_svc}-cred1"
+        es_cred_name=$(cf service-keys "${es_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        es_creds=$(cf service-key "${es_svc}" "${es_cred_name}" | grep -v "Getting key ")
+        es_url=$(echo "${es_creds}"|jq '.uri'|sed 's/"//g;s/\(http.*\/\)\(.*\)\(\@\)\(.*\)/\1\4/')
+        es_user=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f1 -d:)
+        es_password=$(echo "${es_creds}"|jq '.uri'|cut -f3 -d/|cut -f1 -d@|cut -f2 -d:)
+
         # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
         echo -e "${label_color}Starting deployment script${no_color}"
 
@@ -379,6 +423,18 @@ stages:
         # git_retry will retry git calls to prevent pipeline failure on temporary github problems
         # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
         git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
+
+        OPTIONAL_ARGS="${OPTIONAL_ARGS} \
+            -e CG_NAME=${ROUTE_HOSTNAME} \
+            -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
+            -e eureka.client.fetchRegistry=true \
+            -e eureka.client.registerWithEureka=true \
+            -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
+            -e "elasticsearch.user=${es_user}" \
+            -e "elasticsearch.password=${es_password}" \
+            -e "elasticsearch.url=${es_url}""
+
+        log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
         # Deploy Container Group:
         # Optional environment properties (can be set directly in this script, or defined as environment properties):
@@ -396,17 +452,14 @@ stages:
         #                                    Default is micro (256).
         #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
         #                                    Default is 1
-        ROUTE_FQDN=$ROUTE_HOSTNAME.$ROUTE_DOMAIN
-        OPTIONAL_ARGS="$OPTIONAL_ARGS -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.server.enableSelfPreservation=${SERVER_SELF_PRESERVATION} -e eureka.server.renewalPercentThreshold=${SERVER_RENEWAL_THRESHOLD_PCT} -e eureka.instance.leaseRenewalIntervalInSeconds=${INSTANCE_LEASE_RENEWAL_INTERVAL_SECS} -e eureka.instance.leaseExpirationDurationInSeconds=${INSTANCE_LEASE_EXPIRATION_DURATION_SECS} -e eureka.client.healthcheck.enabled=${CLIENT_HEALTH_CHECK} -e eureka.client.serviceUrl.defaultZone=http://$ROUTE_FQDN/eureka/ -e eureka.instance.hostname=$ROUTE_FQDN"
-        log_and_echo "Optional Args: $OPTIONAL_ARGS"
-
+        # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
         /bin/bash deployscripts/deploygroup.sh
 
         RESULT=$?
 
         # source the deploy property file
         if [ -f "${DEPLOY_PROPERTY_FILE}" ]; then
-          source "$DEPLOY_PROPERTY_FILE"
+        source "$DEPLOY_PROPERTY_FILE"
         fi
 
         #########################
@@ -418,9 +471,9 @@ stages:
 
         # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
         if [ $RESULT -ne 0 ]; then
-            echo -e "${red}Executed failed or had warnings ${no_color}"
-            ${EXT_DIR}/print_help.sh
-            exit $RESULT
+          echo -e "${red}Executed failed or had warnings ${no_color}"
+          ${EXT_DIR}/print_help.sh
+          exit $RESULT
         fi
         echo -e "${green}Execution complete${no_label}"
 

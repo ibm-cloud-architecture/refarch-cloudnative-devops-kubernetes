@@ -1,9 +1,17 @@
 ---
-name: "BlueCompute Toolchain"
-description: "BlueCompute sample application"
+name: "BlueCompute Toolchain R3"
+description: "BlueCompute sample omnichannel cloudnative application"
 version: 0.1
 required:
  - deploy
+
+git-bluecompute-web:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-bluecompute-web-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web"
+    type: clone
+    has_issues: true
 
 git-netflix-eureka:
   service_id: githubpublic
@@ -21,6 +29,38 @@ git-netflix-zuul:
     type: clone
     has_issues: true
 
+git-auth:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-auth-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-auth"
+    type: clone
+    has_issues: true
+
+git-api:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-api-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-api"
+    type: clone
+    has_issues: true
+
+git-micro-customer:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-micro-customer-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-customer"
+    type: clone
+    has_issues: true
+
+git-micro-orders:
+  service_id: githubpublic
+  parameters:
+    repo_name: "refarch-cloudnative-micro-orders-{{name}}"
+    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-orders"
+    type: clone
+    has_issues: true
+
 git-micro-inventory:
   service_id: githubpublic
   parameters:
@@ -34,38 +74,6 @@ git-micro-socialreview:
   parameters:
     repo_name: "refarch-cloudnative-micro-socialreview-{{name}}"
     repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-socialreview"
-    type: clone
-    has_issues: true
-
-git-bff-inventory:
-  service_id: githubpublic
-  parameters:
-    repo_name: "refarch-cloudnative-bff-inventory-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-inventory"
-    type: clone
-    has_issues: true
-
-git-bff-socialreview:
-  service_id: githubpublic
-  parameters:
-    repo_name: "refarch-cloudnative-bff-socialreview-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bff-socialreview"
-    type: clone
-    has_issues: true
-
-git-api:
-  service_id: githubpublic
-  parameters:
-    repo_name: "refarch-cloudnative-api-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-api"
-    type: clone
-    has_issues: true
-
-git-bluecompute-web:
-  service_id: githubpublic
-  parameters:
-    repo_name: "refarch-cloudnative-bluecompute-web-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web"
     type: clone
     has_issues: true
 
@@ -90,6 +98,35 @@ pipeline-vpn:
        CUSTOMER_PSK: "{{deploy.parameters.customer-psk}}"
       execute: false
 
+pipeline-bluecompute-web:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "bluecompute-web"
+    ui-pipeline: true
+    services: ["git-bluecompute-web"]
+    configuration:
+      content: $file(bluecompute-web.pipeline.yml)
+      env:
+       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
+       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
+       REPO: "git-bluecompute-web"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
+       REGION_US: "{{deploy.parameters.deploy-region-us}}"
+       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME_US: "us-{{pipeline-bluecompute-web.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME_EU: "eu-{{pipeline-bluecompute-web.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       ROUTE_HOSTNAME_BFF_WEB: "{{deploy.parameters.route-hostname-bff-web}}"
+       ROUTE_DOMAIN_BFF_WEB: "{{deploy.parameters.route-domain-bff-web}}"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+       APIC_URL_US: "{{deploy.parameters.apic-url-us}}"
+       APIC_URL_EU: "{{deploy.parameters.apic-url-eu}}"
+       APIC_USER: "{{deploy.parameters.ibmid-user}}"
+       APIC_PASS: "{{deploy.parameters.ibmid-pass}}"
+      execute: false
+
 pipeline-netflix-eureka:
   service_id: pipeline
   hidden: [form, description]
@@ -111,10 +148,6 @@ pipeline-netflix-eureka:
        NAME_US: "us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}"
        NAME_EU: "eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8761"
-       MEMORY: "128"
-       MIN_INSTANCES: "1"
-       MAX_INSTANCES: "1"
-       DESIRED_INSTANCES: "1"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
@@ -139,13 +172,91 @@ pipeline-netflix-zuul:
        NAME_US: "us-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}"
        NAME_EU: "eu-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8080"
-       MEMORY: "128"
-       MIN_INSTANCES: "1"
-       MAX_INSTANCES: "3"
-       DESIRED_INSTANCES: "2"
        EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
        EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
        JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+      execute: false
+
+pipeline-micro-customer:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "micro-customer"
+    ui-pipeline: true
+    services: ["git-micro-customer"]
+    configuration:
+      content: $file(micro-customer.pipeline.yml)
+      env:
+       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
+       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
+       REPO: "git-micro-customer"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
+       REGION_US: "{{deploy.parameters.deploy-region-us}}"
+       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME_US: "us-{{pipeline-micro-customer.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME_EU: "eu-{{pipeline-micro-customer.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       PORT: "8080"
+       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
+       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+      execute: false
+
+pipeline-micro-orders:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "micro-orders"
+    ui-pipeline: true
+    services: ["git-micro-orders"]
+    configuration:
+      content: $file(micro-orders.pipeline.yml)
+      env:
+       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
+       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
+       REPO: "git-micro-orders"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
+       REGION_US: "{{deploy.parameters.deploy-region-us}}"
+       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME_US: "us-{{pipeline-micro-orders.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME_EU: "eu-{{pipeline-micro-orders.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       PORT: "9080,8080"
+       MYSQL_JDBC_URL_US: "jdbc:mysql://{{deploy.parameters.mysql-servers-us}}/{{deploy.parameters.orders-db}}"
+       MYSQL_JDBC_URL_EU: "jdbc:mysql://{{deploy.parameters.mysql-servers-eu}}/{{deploy.parameters.orders-db}}"
+       MYSQL_USER: "{{deploy.parameters.orders-dbuser}}"
+       MYSQL_PASSWORD: "{{deploy.parameters.orders-dbpass}}"
+       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
+       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+      execute: false
+
+pipeline-micro-catalog:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "micro-catalog"
+    ui-pipeline: true
+    services: ["git-micro-inventory"]
+    configuration:
+      content: $file(micro-catalog.pipeline.yml)
+      env:
+       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
+       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
+       REPO: "git-micro-inventory"
+       BRANCH: "{{deploy.parameters.repo-branch}}"
+       REGION_US: "{{deploy.parameters.deploy-region-us}}"
+       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
+       ORG: "{{deploy.parameters.deploy-org}}"
+       SPACE: "{{deploy.parameters.deploy-space}}"
+       NAME_US: "us-{{pipeline-micro-catalog.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME_EU: "eu-{{pipeline-micro-catalog.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       PORT: "8081"
+       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
+       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
@@ -170,20 +281,10 @@ pipeline-micro-inventory:
        NAME_US: "us-{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
        NAME_EU: "eu-{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
        PORT: "8080"
-       MEMORY: "128"
-       MIN_INSTANCES: "1"
-       MAX_INSTANCES: "3"
-       DESIRED_INSTANCES: "2"
-       INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
-       CTXPATH: "/{{deploy.parameters.context-path}}"
-       ONPREM_MYSQL_JDBC_URL_US: "jdbc:mysql://{{deploy.parameters.mysql-server-ipaddrs-us}}/{{deploy.parameters.mysql-database}}"
-       ONPREM_MYSQL_JDBC_URL_EU: "jdbc:mysql://{{deploy.parameters.mysql-server-ipaddrs-eu}}/{{deploy.parameters.mysql-database}}"
-       MYSQL_CONTAINER_US: "us-mysql-inventorydb-{{deploy.parameters.deploy-space}}"
-       MYSQL_CONTAINER_EU: "eu-mysql-inventorydb-{{deploy.parameters.deploy-space}}"
-       MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
-       MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
-       MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
-       MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
+       MYSQL_JDBC_URL_US: "jdbc:mysql://{{deploy.parameters.mysql-servers-us}}/{{deploy.parameters.inventory-db}}"
+       MYSQL_JDBC_URL_EU: "jdbc:mysql://{{deploy.parameters.mysql-servers-eu}}/{{deploy.parameters.inventory-db}}"
+       MYSQL_USER: "{{deploy.parameters.inventory-dbuser}}"
+       MYSQL_PASSWORD: "{{deploy.parameters.inventory-dbpass}}"
        EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
        EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
@@ -199,8 +300,6 @@ pipeline-micro-socialreview:
     configuration:
       content: $file(micro-socialreview.pipeline.yml)
       env:
-       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
-       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
        REPO: "git-micro-socialreview"
        BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION_US: "{{deploy.parameters.deploy-region-us}}"
@@ -209,42 +308,38 @@ pipeline-micro-socialreview:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME_US: "us-{{pipeline-micro-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
        NAME_EU: "eu-{{pipeline-micro-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       PORT: "8080"
-       MEMORY: "128"
-       MIN_INSTANCES: "1"
-       MAX_INSTANCES: "3"
-       DESIRED_INSTANCES: "2"
-       SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
-       CTXPATH: "/{{deploy.parameters.context-path}}"
-       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
-       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
-       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+       BXLOGIN_API_ENDPOINT_US: "{{deploy.parameters.bxlogin-api-endpoint-us}}"
+       BXLOGIN_API_ENDPOINT_EU: "{{deploy.parameters.bxlogin-api-endpoint-eu}}"
+       OPENWHISK_API_ENDPOINT_US: "{{deploy.parameters.openwhisk-api-endpoint-us}}"
+       OPENWHISK_API_ENDPOINT_EU: "{{deploy.parameters.openwhisk-api-endpoint-eu}}"
+       IBMID_USER: "{{deploy.parameters.ibmid-user}}"
+       IBMID_PASS: "{{deploy.parameters.ibmid-pass}}"
       execute: false
 
-pipeline-bff-inventory:
+pipeline-auth:
   service_id: pipeline
   hidden: [form, description]
   parameters:
-    name: "bff-inventory"
+    name: "auth"
     ui-pipeline: true
-    services: ["git-bff-inventory"]
+    services: ["git-auth"]
     configuration:
-      content: $file(bff-inventory.pipeline.yml)
+      content: $file(auth.pipeline.yml)
       env:
        DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
        DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
-       REPO: "git-bff-inventory"
+       REPO: "git-auth"
        BRANCH: "{{deploy.parameters.repo-branch}}"
        REGION_US: "{{deploy.parameters.deploy-region-us}}"
        REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME_US: "us-{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       NAME_EU: "eu-{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       ZUUL_PROXY_URL_US: "us-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}"
-       ZUUL_PROXY_URL_EU: "eu-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}"
-       CTXPATH: "{{deploy.parameters.context-path}}"
-       INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
+       NAME_US: "us-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       NAME_EU: "eu-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       PORT: "8080"
+       EUREKA_REGISTRY_URL_US: "http://us-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}/eureka/"
+       EUREKA_REGISTRY_URL_EU: "http://eu-{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}/eureka/"
+       NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
       execute: false
 
 pipeline-api:
@@ -265,66 +360,19 @@ pipeline-api:
        REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME_US: "us-{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       NAME_EU: "eu-{{pipeline-bff-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       AUTH_FQDN_US: "us-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}"
+       AUTH_FQDN_EU: "eu-{{pipeline-auth.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}"
+       ZUUL_FQDN_US: "us-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}"
+       ZUUL_FQDN_EU: "eu-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}"
        APIC_URL_US: "{{deploy.parameters.apic-url-us}}"
        APIC_URL_EU: "{{deploy.parameters.apic-url-eu}}"
-       APIC_USER: "{{deploy.parameters.apic-user}}"
-       APIC_PASS: "{{deploy.parameters.apic-pass}}"
+       APIC_USER: "{{deploy.parameters.ibmid-user}}"
+       APIC_PASS: "{{deploy.parameters.ibmid-pass}}"
+       BXLOGIN_API_ENDPOINT_US: "{{deploy.parameters.bxlogin-api-endpoint-us}}"
+       BXLOGIN_API_ENDPOINT_EU: "{{deploy.parameters.bxlogin-api-endpoint-eu}}"
+       OPENWHISK_API_ENDPOINT_US: "{{deploy.parameters.openwhisk-api-endpoint-us}}"
+       OPENWHISK_API_ENDPOINT_EU: "{{deploy.parameters.openwhisk-api-endpoint-eu}}"
        JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
-      execute: false
-
-pipeline-bff-socialreview:
-  service_id: pipeline
-  hidden: [form, description]
-  parameters:
-    name: "bff-socialreview"
-    ui-pipeline: true
-    services: ["git-bff-socialreview"]
-    configuration:
-      content: $file(bff-socialreview.pipeline.yml)
-      env:
-       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
-       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
-       REPO: "git-bff-socialreview"
-       BRANCH: "{{deploy.parameters.repo-branch}}"
-       REGION_US: "{{deploy.parameters.deploy-region-us}}"
-       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
-       SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME_US: "us-{{pipeline-bff-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       NAME_EU: "eu-{{pipeline-bff-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       ZUUL_PROXY_URL_US: "us-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-us}}"
-       ZUUL_PROXY_URL_EU: "eu-{{pipeline-netflix-zuul.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain-eu}}"
-       APIC_URL_US: "{{deploy.parameters.apic-url-us}}"
-       APIC_URL_EU: "{{deploy.parameters.apic-url-eu}}"
-       APIC_USER: "{{deploy.parameters.apic-user}}"
-       APIC_PASS: "{{deploy.parameters.apic-pass}}"
-       CTXPATH: "{{deploy.parameters.context-path}}"
-       SOCIALREVIEW_MSNAME: "{{deploy.parameters.socialreview-msname}}"
-       JWT_SHARED_SECRET: "{{deploy.parameters.shared-secret}}"
-      execute: false
-
-pipeline-bluecompute-web:
-  service_id: pipeline
-  hidden: [form, description]
-  parameters:
-    name: "bluecompute-web"
-    ui-pipeline: true
-    services: ["git-bluecompute-web"]
-    configuration:
-      content: $file(bluecompute-web.pipeline.yml)
-      env:
-       DOMAIN_US: "{{deploy.parameters.route-domain-us}}"
-       DOMAIN_EU: "{{deploy.parameters.route-domain-eu}}"
-       REPO: "git-bluecompute-web"
-       BRANCH: "{{deploy.parameters.repo-branch}}"
-       REGION_US: "{{deploy.parameters.deploy-region-us}}"
-       REGION_EU: "{{deploy.parameters.deploy-region-eu}}"
-       ORG: "{{deploy.parameters.deploy-org}}"
-       SPACE: "{{deploy.parameters.deploy-space}}"
-       NAME_US: "us-{{pipeline-bluecompute-web.parameters.name}}-{{deploy.parameters.deploy-space}}"
-       NAME_EU: "eu-{{pipeline-bluecompute-web.parameters.name}}-{{deploy.parameters.deploy-space}}"
       execute: false
 
 deploy:
@@ -343,18 +391,23 @@ deploy:
     customer-subnet-us: ""
     customer-subnet-eu: ""
     customer-psk: ""
-    mysql-server-ipaddrs-us: ""
-    mysql-server-ipaddrs-eu: ""
-    mysql-port: "3306"
-    mysql-database: "inventorydb"
-    mysql-dbuser: "dbuser"
-    mysql-dbpass: "Pass4dbus3r"
+    mysql-servers-us: ""
+    mysql-servers-eu: ""
+    inventory-db: "inventorydb"
+    inventory-dbuser: "dbuser"
+    inventory-dbpass: "Pass4dbus3r"
+    orders-db: "ordersdb"
+    orders-dbuser: "orders_dbuser"
+    orders-dbpass: "Pass4ordersus3r"
     apic-url-us: "us.apiconnect.ibmcloud.com"
     apic-url-eu: "eu.apiconnect.ibmcloud.com"
-    apic-user: ""
-    apic-pass: ""
-    shared-secret: ""
-    context-path: "micro"
-    inventory-msname: "inventory-microservice"
-    socialreview-msname: "socialreview-microservice"
+    ibmid-user: ""
+    ibmid-pass: ""
     new-relic-lic-key: ""
+    shared-secret: ""
+    openwhisk-api-endpoint-us: "openwhisk.ng.bluemix.net"
+    openwhisk-api-endpoint-eu: "openwhisk.eu-gb.bluemix.net"
+    bxlogin-api-endpoint-us: "login.ng.bluemix.net"
+    bxlogin-api-endpoint-eu: "login.eu-gb.bluemix.net"
+    route-domain-bff-web: "case.com.akadns.net"
+    route-hostname-bff-web: "bluecompute"
