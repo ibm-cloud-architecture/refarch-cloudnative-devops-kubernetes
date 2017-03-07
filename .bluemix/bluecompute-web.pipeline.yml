@@ -56,10 +56,6 @@ stages:
     type: text
   - name: ROUTE_DOMAIN_BFF_WEB
     value: ${ROUTE_DOMAIN_BFF_WEB}
-    type: text
-  - name: OBJSTORAGE_CONTAINER
-    value: 'bluecompute'
-    type: text
   - name: APIC_CATALOG
     value: 'bluecompute'
     type: text
@@ -105,6 +101,7 @@ stages:
         if [ $? -eq 1 ]; then
             set -e
             cf cs Object-Storage standard cloudnative-objstore
+            set +e
             for i in {1..5}
             do
                 status=$(cf service "${objstorage_svc}"|grep -i 'status:'|awk '{print $NF}')
@@ -112,7 +109,7 @@ stages:
                     "progress") sleep 10;;
                     "succeeded") break;;
                     *) sleep 10;;
-                 esac
+                esac
             done
         fi
         objstorage_svc=$(cf services | grep Object-Storage | sed "s/\(.*\)\(Object-Storage\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
@@ -260,7 +257,7 @@ stages:
           [ $? -eq 0 ] && echo "Domain exists" || cf create-domain ${CF_ORG} ${ROUTE_DOMAIN_BFF_WEB}
           cf map-route ${CF_APP} ${ROUTE_DOMAIN_BFF_WEB} --hostname ${ROUTE_HOSTNAME_BFF_WEB}
         fi
-        
+
         # start app
         cf bind-service "${CF_APP}" "${objstorage_svc}"
         cf set-env "${CF_APP}" NEW_RELIC_LICENSE_KEY "${NEW_RELIC_LICENSE}"
@@ -268,7 +265,7 @@ stages:
         cf start "${CF_APP}"
 
         # add app to CMDB
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CF_APP}&apptype=cf_app&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CF_APP}&apptype=cf_app&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
 
 - name: VALIDATE US-South
   inputs:
@@ -346,9 +343,6 @@ stages:
   - name: ROUTE_DOMAIN_BFF_WEB
     value: ${ROUTE_DOMAIN_BFF_WEB}
     type: text
-  - name: OBJSTORAGE_CONTAINER
-    value: 'bluecompute'
-    type: text
   - name: APIC_CATALOG
     value: 'bluecompute'
     type: text
@@ -388,21 +382,30 @@ stages:
         fi
 
         # create objectstorage service and key
-        objstorage_svc="cloudnative-objstore"
+        set +e
+        cf services | grep Object-Storage
+        if [ $? -eq 1 ]; then
+            set -e
+            cf cs Object-Storage standard cloudnative-objstore
+            set +e
+            for i in {1..5}
+            do
+                status=$(cf service "${objstorage_svc}"|grep -i 'status:'|awk '{print $NF}')
+                case $status in
+                    "progress") sleep 10;;
+                    "succeeded") break;;
+                    *) sleep 10;;
+                 esac
+            done
+        fi
+        objstorage_svc=$(cf services | grep Object-Storage | sed "s/\(.*\)\(Object-Storage\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
+        cf service-keys "${objstorage_svc}" | grep "No service key for service instance"
+        [ $? -eq 0 ] && cf csk "${objstorage_svc}" "admin1"
+        set -e
+        objstorage_key_name=$(cf service-keys "${objstorage_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        objstorage_keys=$(cf service-key "${objstorage_svc}" "${objstorage_key_name}" | grep -v "Getting key ")
         objstorage_container="bluecompute"
-        cf create-service Object-Storage Free ${objstorage_svc}
-        for i in {1..5}
-        do
-            status=$(cf service ${objstorage_svc}|grep -i 'status:'|awk '{print $NF}')
-            case $status in
-                 "progress") sleep 10;;
-                 "succeeded") break;;
-                 *) sleep 10;;
-            esac
-        done
-        cf create-service-key ${objstorage_svc} admin1
-
-        set -x
 
         # set orgs
         CHARLST="[@|.|-|_]"
@@ -412,7 +415,8 @@ stages:
         CATALOG=bluecompute
         AUTH_HEADER=`echo -n "${APIC_USER}:${APIC_PASS}" | base64`
 
-        # create org for user with apic
+        # create org for user with apic in EU
+        APIC_URL=${APIC_URL_EU}
         ORG_ID=`curl -k \
             -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
             -H "Authorization: Basic ${AUTH_HEADER}" \
@@ -489,15 +493,44 @@ stages:
                 ./jq
         done
 
+        # get client id from US
+        CF_APP_US=$(echo ${CF_APP}|sed 's/^eu-/us-/')
+        ORG_ID_US=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL_US}/v1/portal/orgs | \
+            ./jq '.[].id' | \
+            sed -e 's/"//g' | \
+            head -1`
+        CLIENT_ID=`curl -k \
+            -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
+            https://developer.${APIC_URL_US}/v1/portal/orgs/${ORG_ID_US}/apps | ./jq -c '.[] | select(.name == "'${CF_APP_US}'")' | ./jq '.credentials.clientID' | sed -e 's/"//g'`
+
+        if [ -z "${CLIENT_ID}" ]; then
+            # US client id not found, use EU client id instead
+            CLIENT_ID=`echo ${app_json} | ./jq '.credentials.clientID' | sed -e 's/"//g'`
+        else
+            # set US client id to EU
+            APP_ID=`echo ${app_json} | ./jq '.id' | sed -e 's/"//g'`
+            curl -k \
+                -H "X-IBM-APIManagement-Context: ${ORGS}.${CATALOG}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Basic ${AUTH_HEADER}" \
+                -X PUT \
+                -d '{ "clientID": "${CLIENT_ID}", "description": "Default"}' \
+                https://developer.${APIC_URL}/v1/portal/orgs/${ORG_ID}/apps/${APP_ID}/credentials
+        fi
+
         # update default.json with my catalog and client id
-        CLIENT_ID=`echo ${app_json} | ./jq '.credentials.clientID' | sed -e 's/"//g'`
         cat config/default.json | grep -v '^[ ]*//' | \
             ./jq 'setpath(["Application", "ObjectStorage", "container"]; "'${objstorage_container}'")' | \
             ./jq 'setpath(["API-Server", "host"]; "api.'${APIC_URL}'")' | \
             ./jq 'setpath(["API-Server", "org"]; "'${ORGS}'")' | \
             ./jq 'setpath(["API-Server", "catalog"]; "'${CATALOG}'")' | \
             ./jq 'setpath(["Application", "client_id"]; "'${CLIENT_ID}'")' > \
-         config/default.json.new
+            config/default.json.new
 
         mv config/default.json.new config/default.json
 
@@ -547,7 +580,7 @@ stages:
         cf start "${CF_APP}"
 
         # add app to CMDB
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CF_APP}&apptype=cf_app&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CF_APP}&apptype=cf_app&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
 
 - name: VALIDATE London
   inputs:

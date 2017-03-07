@@ -135,7 +135,7 @@ stages:
       region_id: ${REGION_US}
       organization: ${ORG}
       space: ${SPACE}
-    PORT: 8080
+    PORT: ${PORT}
     OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
@@ -200,7 +200,7 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
 
 - name: BUILD London
   inputs:
@@ -338,7 +338,8 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     OPTIONAL_ARGS: -m ${MEMORY}
-    PORT: 8080    
+    PORT: ${PORT}
+
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
@@ -402,4 +403,4 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0

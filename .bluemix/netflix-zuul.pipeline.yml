@@ -205,7 +205,7 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
 
 - name: BUILD London
   inputs:
@@ -412,4 +412,4 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"

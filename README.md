@@ -76,7 +76,7 @@ Click the following button to deploy the toolchain to Bluemix. The Bluemix DevOp
 2. After the VPN connections are established successfully, execute the remaining pipelines. Its recommended to start with __netflix-eureka__.
 3. For each pipeline, start deployment with __BUILD US-South__ stage. While that deployment is running, click on  __BUILD London__ to start deployment to London region.
 2. For each pipeline, the __DEPLOY__ stages will follow successful __BUILD__. On the pipeline page to ensure both the BUILD and DEPLOY stages completed successfully. ![Successfully Deployed Pipeline](static/imgs/netflix-eureka-pipeline.png)
-3. Repeat above steps for each delivery pipeline in the following order: **netflix-zuul**, **micro-inventory**, **micro-socialreview**, **bff-inventory**, **api**, **bff-socialreview**.
+3. Repeat above steps for each delivery pipeline in the following order: **netflix-zuul**, **auth**, **micro-socialreview**, **micro-inventory**, **micro-catalog**, **micro-customer**, **micro-orders**, **api**, and **bluecompute-web**.
 
 This completes the creation of Bluemix DevOps toolchain to deploy the BlueCompute omnichannel application.
 

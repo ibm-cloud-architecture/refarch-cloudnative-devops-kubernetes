@@ -180,10 +180,10 @@ stages:
   - type: commit
   properties:
   - name: OPENWHISK_API_ENDPOINT
-    value: ${OPENWHISK_API_ENDPOINT_EU}
+    value: ${OPENWHISK_API_ENDPOINT_US}
     type: text
   - name: BXLOGIN_API_ENDPOINT
-    value: ${BXLOGIN_API_ENDPOINT_EU}
+    value: ${BXLOGIN_API_ENDPOINT_US}
     type: text
   - name: APIC_URL
     value: ${APIC_URL_EU}

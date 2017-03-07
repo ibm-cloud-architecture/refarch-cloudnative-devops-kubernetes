@@ -260,7 +260,7 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
 
 
 - name: BUILD London
@@ -426,12 +426,16 @@ stages:
 
         set -x
         # get cloudant credentials
+        set +e
         cf services | grep cloudantNoSQLDB
         [ $? -eq 1 ] && cf cs cloudantNoSQLDB Lite cloudnative-cloudantDB
+        set -e
         cloudant_svc=$(cf services | grep cloudantNoSQLDB | sed "s/\(.*\)\(cloudantNoSQLDB\)\(.*\)/\1/" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        set +e
         cf service-keys "${cloudant_svc}" | grep "No service key for service instance"
+        set -e
         [ $? -eq 0 ] && cf csk "${cloudant_svc}" "${cloudant_svc}-cred1"
-        cloudant_svc_key_name=`cf service-keys "${cloudant_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
+        cloudant_svc_key_name=$(cf service-keys "${cloudant_svc}" | tail -1 | sed 's/^[ \t]*//;s/[ \t]*$//')
         cloudantdb_creds=$(cf service-key "${cloudant_svc}" "${cloudant_svc_key_name}" | grep -v "Getting key ")
         cloudant_host=`echo ${cloudantdb_creds} | ./jq '.host' | sed -e 's/"//g'`
         cloudant_port=`echo ${cloudantdb_creds} | ./jq '.port' | sed -e 's/"//g'`
@@ -520,4 +524,4 @@ stages:
 
         # add to CMDB
         echo -e "Sending request to CMDB API to adding container group ${CONTAINER_NAME}..."
-        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}"
+        curl "http://cmdbdevops.mybluemix.net/add?appname=${CONTAINER_NAME}&apptype=container&regionname=${REGION}&envname=${CF_SPACE}&version=3.0"
