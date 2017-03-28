@@ -44,7 +44,7 @@ After setting up the vpn tunnel and MySQL servers, get following information to 
 
 ### Step 2:  Provision the API Connect Service
 
-1. Click on the Bluemix console and select API.  
+1. In the Bluemix console, click on Catalog and select API.  
 2. Select the API Connect service.  
 3. Click "Create" in the Getting Started with API Connect page. In API Connect creation page, specify the Service name for example cloudnative-apic-service. Then select the Essentials plan for this walkthrough.
 4. After the API Connect service is created, launch the API Connect service.  
