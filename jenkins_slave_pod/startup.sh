@@ -1,15 +1,14 @@
 #!/bin/bash
 
 # Getting config values from secret
-CF_EMAIL=$(cat /var/run/secrets/bx-auth-secret/CF_EMAIL)
-CF_PASSWORD=$(cat /var/run/secrets/bx-auth-secret/CF_PASSWORD)
+export BLUEMIX_API_KEY=$(cat /var/run/secrets/bx-auth-secret/BLUEMIX_API_KEY)
 CF_ACCOUNT=$(cat /var/run/secrets/bx-auth-secret/CF_ACCOUNT)
 CF_ORG=$(cat /var/run/secrets/bx-auth-secret/CF_ORG)
 CF_SPACE=$(cat /var/run/secrets/bx-auth-secret/CF_SPACE)
 
 # Login to Bluemix CLI
 printf "\n\nLogging into Bluemix CLI\n"
-bx login -a api.ng.bluemix.net -u ${CF_EMAIL} -p ${CF_PASSWORD} -c ${CF_ACCOUNT} -o ${CF_ORG} -s ${CF_SPACE}
+bx login -a api.ng.bluemix.net -c ${CF_ACCOUNT} -o ${CF_ORG} -s ${CF_SPACE}
 
 # Init Container Service
 printf "\n\nInitializing plug-ins\n"

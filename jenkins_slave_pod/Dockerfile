@@ -48,11 +48,15 @@ RUN mv ./kubectl /usr/local/bin/kubectl
 #RUN useradd -m jenkins
 #USER jenkins
 
-# Install Kubernetes Container Service plugin 
+# Install Kubernetes Container Service plugin
 RUN bx plugin install container-service -r Bluemix
 
 # Install Container Rervice plugin
 RUN bx plugin install container-registry -r Bluemix
+
+# Install helm
+ADD https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get /tmp/get_helm.sh
+RUN sh /tmp/get_helm.sh
 
 #USER root
 
