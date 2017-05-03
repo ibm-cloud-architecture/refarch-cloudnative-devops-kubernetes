@@ -1,0 +1,6 @@
+dependencies:
+  - name: catalog
+    version: 0.1.1
+    repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/stable
+    # Comment out the above and uncomment the repo below if you feel adventurous
+    #repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/edge
