@@ -3,8 +3,9 @@ apiVersion: v1
 metadata:
   name: bluemix-target
 data:
-  devops-repo: github.com/fabiogomezdiaz/refarch-cloudnative-devops.git
-  bluemix-api-endpoint  : api.ng.bluemix.net
-  bluemix-org : cent@us.ibm.com
-  bluemix-space : kyanite-int    
-  kube-cluster-name : kyanite-int
+  bluemix-api-endpoint: api.ng.bluemix.net
+  bluemix-org: cent@us.ibm.com
+  bluemix-space: kyanite-int
+  bluemix-registry: registry.ng.bluemix.net
+  bluemix-namespace: kyanite_int
+  kube-cluster-name: kyanite-int
