@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{.Release.Name}}-create-config-map"
+  name: "{{.Chart.Name}}-create-config-map"
   labels:
     app: bluecompute
     heritage: {{.Release.Service | quote }}
@@ -15,7 +15,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: "{{.Release.Name}}-create-config-map"
+      name: "{{.Chart.Name}}-create-config-map"
       labels:
         app: bluecompute
         heritage: {{.Release.Service | quote }}
@@ -27,7 +27,7 @@ spec:
       - name: create-config-map
         image: ibmcase/kube-cluster-settings:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["bash /create_secret.sh"]
+        args: ["bash /create_config_map.sh"]
         imagePullPolicy: Always
         env:
         - name: BLUEMIX_API_ENDPOINT
