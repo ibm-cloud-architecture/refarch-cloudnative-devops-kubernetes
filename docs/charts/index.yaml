@@ -2,20 +2,20 @@ apiVersion: v1
 entries:
   catalog:
   - apiVersion: v1
-    created: 2017-05-04T16:04:37.810813781-05:00
+    created: 2017-05-04T16:39:06.622961806-05:00
     description: A Helm chart for Catalog Microservice
-    digest: 5d20472a947710126801dac721d2a7e330cca821c730c761aeb84c99a4d52a25
+    digest: 601917530ccb56b1353f5a5e79b6661209d79a5c3c0c02e6715a02de969e55af
     name: catalog
     urls:
     - catalog-0.1.1.tgz
     version: 0.1.1
   inventory:
   - apiVersion: v1
-    created: 2017-05-04T16:04:37.811514072-05:00
+    created: 2017-05-04T16:39:06.623240485-05:00
     description: A Helm chart for Inventory Microservice
-    digest: a855e18530be4283a37278abd0d9e7c138aa8ca5dad1e09118f7ed79f753f18a
+    digest: 6b6944b7a8a23b54c55aa40aa0b8b16fe755040d5c277687334f7bc31c3444cf
     name: inventory
     urls:
     - inventory-0.1.1.tgz
     version: 0.1.1
-generated: 2017-05-04T16:04:37.810402763-05:00
+generated: 2017-05-04T16:39:06.622482172-05:00
