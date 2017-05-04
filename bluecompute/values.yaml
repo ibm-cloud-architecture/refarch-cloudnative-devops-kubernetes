@@ -12,4 +12,4 @@ configMap:
 
 # All values pasted here will be base64 encoded by the charts
 secret:
-  apiKey: PUT_YOUR_API_KEY_HERE
+  apiKey: PUT_BASE64_ENCODED_API_KEY_HERE
