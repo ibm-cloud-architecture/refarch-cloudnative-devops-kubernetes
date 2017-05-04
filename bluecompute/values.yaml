@@ -2,28 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-global:
-  registry:
-    name: registry.ng.bluemix.net
-    namespace: chrisking
+configMap:
+  bluemixAPIEndpoint: api.ng.bluemix.net
+  bluemixOrg: cent@us.ibm.com
+  bluemixSpace: kyanite-int
+  bluemixRegistry: registry.ng.bluemix.net
+  bluemixRegistryNamespace: kyanite_int
+  kubeClusterName: kyanite-int
 
-# Services
-catalog:
-  replicaCount: 2
-  pullPolicy: IfNotPresent
-  tag: 12
-
-inventory:
-  replicaCount: 3
-  pullPolicy: IfNotPresent
-  tag: 4
-
-# Secrets for bound Bluemix Services
-# These services need to be bound to cluster's "integration"
-# namespace before trying to install the chart
-elasticsearch:
-  secret: binding-refarch-compose-for-elasticsearch
-mysql:
-  secret: binding-refarch-compose-for-mysql
-messagehub:
-  secret: binding-refarch-messagehub
+# All values pasted here will be base64 encoded by the charts
+secret:
+  apiKey: PUT_YOUR_API_KEY_HERE
