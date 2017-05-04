@@ -7,5 +7,5 @@ data:
   bluemix-org: cent@us.ibm.com
   bluemix-space: kyanite-int
   bluemix-registry: registry.ng.bluemix.net
-  bluemix-namespace: kyanite_int
+  bluemix-registry-namespace: kyanite_int
   kube-cluster-name: kyanite-int
