@@ -5,6 +5,9 @@ dependencies:
   - name: bluecompute-catalog
     version: 0.1.1
     repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
+  - name: bluecompute-customer
+    version: 0.1.0
+    repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
   - name: bluecompute-inventory
     version: 0.1.1
     repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
