@@ -8,6 +8,9 @@ dependencies:
   - name: bluecompute-inventory
     version: 0.1.1
     repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
+  - name: bluecompute-orders
+    version: 0.1.0
+    repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
   - name: bluecompute-web
     version: 0.1.0
     repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-devops/charts
