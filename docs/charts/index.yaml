@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   bluecompute-auth:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.829090957-05:00
+    created: 2017-05-09T15:12:54.168190182-05:00
     description: BlueCompute Auth Microservice
     digest: cfd7af4d3b0883a2ea3c3a1a76d5ef52b921fb0cb893a9fbb6ff33f07b09c54e
     name: bluecompute-auth
@@ -11,7 +11,7 @@ entries:
     version: 0.1.0
   bluecompute-catalog:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.829463368-05:00
+    created: 2017-05-09T15:12:54.168504276-05:00
     description: BlueCompute Catalog Microservice
     digest: 0f7805be42837d683a55658348bc8295e24f77216d353f037d24c8e12a56734b
     name: bluecompute-catalog
@@ -20,7 +20,7 @@ entries:
     version: 0.1.1
   bluecompute-customer:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.829695609-05:00
+    created: 2017-05-09T15:12:54.16888964-05:00
     description: BlueCompute Customer Microservice
     digest: 04b9a25475ef35f7d36827cc6bf26a7d6c1d2a23eef302ae0f03cb26493669a0
     name: bluecompute-customer
@@ -29,7 +29,7 @@ entries:
     version: 0.1.0
   bluecompute-inventory:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.829890255-05:00
+    created: 2017-05-09T15:12:54.169207465-05:00
     description: BlueCompute Inventory Microservice
     digest: 854d4b016785a4aa04df0ea3cc4455c9aad37a07e1f9d62221e5eb0da5ac5e4c
     name: bluecompute-inventory
@@ -38,20 +38,20 @@ entries:
     version: 0.1.1
   bluecompute-orders:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.830115055-05:00
+    created: 2017-05-09T15:12:54.169512112-05:00
     description: Bluecompute Orders Microservice
-    digest: 92d719ac9219f7c774ed0583c78c88a08adc1d81b71664d213cca1b4c61f4024
+    digest: d2c578a2791bf0c95b31fda02438ab77c5f9ca4a1699476c11dd02eefd0aece6
     name: bluecompute-orders
     urls:
     - bluecompute-orders-0.1.0.tgz
     version: 0.1.0
   bluecompute-web:
   - apiVersion: v1
-    created: 2017-05-05T15:29:33.830318052-05:00
+    created: 2017-05-09T15:12:54.16969286-05:00
     description: BlueCompute Web BFF app
-    digest: f6bb749af7692ef34629a17b201d5ece3f28acd9cf29aaf58edf5c225e740c4b
+    digest: 71a9d4ecd102c9251b1aee33787cfa2a47182cd9b9d522946e2971b151940ef5
     name: bluecompute-web
     urls:
     - bluecompute-web-0.1.0.tgz
     version: 0.1.0
-generated: 2017-05-05T15:29:33.828189095-05:00
+generated: 2017-05-09T15:12:54.167687254-05:00
