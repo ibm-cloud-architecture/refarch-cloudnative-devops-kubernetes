@@ -10,3 +10,21 @@ configMap:
 # All values pasted here will be base64 encoded by the charts
 secret:
   apiKey: PASTE_BLUEMIX_API_KEY_HERE
+
+bluecompute-auth:
+  replicaCount: 1
+
+bluecompute-catalog:
+  replicaCount: 1
+
+bluecompute-customer:
+  replicaCount: 1
+
+bluecompute-inventory:
+  replicaCount: 1
+
+bluecompute-orders:
+  replicaCount: 1
+
+bluecompute-web:
+  replicaCount: 1
