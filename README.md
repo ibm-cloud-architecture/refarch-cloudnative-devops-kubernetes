@@ -9,7 +9,7 @@ DevOps, specifically automated Continuous Integration and Continuous Deployment 
 
 The project uses [Bluemix DevOps open toolchains](https://new-console.ng.bluemix.net/docs/toolchains/toolchains_overview.html) to implement the CI/CD. The goal is to standup most of the application components as part of an automated pipeline. So you don't have to go through the manual setup as outlined in the project main repository page. The toolchain for BlueCompute application looks like this:
 
-![DevOps Toolchain](static/imgs/bluemix_devops_toolchain.png?raw=true)  
+![DevOps Toolchain](static/imgs/architecture.png?raw=true)  
 
 To read more about the Open Toolchains, please check out this [Blog post](https://developer.ibm.com/devops-services/2016/06/16/open-toolchain-with-ibm-bluemix-devops-services/)
 
