@@ -3,11 +3,11 @@
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
 https://github.com/ibm-cloud-architecture/refarch-cloudnative*
 
-##Table of Contents
+## Table of Contents
 - **[Introduction](#introduction)**
 - **[Pre-Requisites](#pre-requisites)**
-- **[Install and Setup Jenkins on Kubernetes](#install_and_setup_jenkins_on_kubernetes)**
-- **[Create and Run a Sample CICD Pipeline](#create_and_run_a_sample_cicd_pipeline)**
+- **[Install and Setup Jenkins on Kubernetes](#install-and-setup-jenkins-on-kubernetes)**
+- **[Create and Run a Sample CI/CD Pipeline](#create-and-run-a-sample-cicd-pipeline)**
 
 ## Introduction
 DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Bluemix to implement the CI/CD for the BlueCompute reference application.
@@ -61,7 +61,7 @@ With this option enabled, communication with kubernetes API master will rely on 
 
 That's it! You now have a fully working version of Jenkins on your Kubernetes Deployment
 
-## Create and Run a Sample CICD Pipeline
+## Create and Run a Sample CI/CD Pipeline
 Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using our sample [Inventory Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/kube-int) from BlueCompute.
 
 Since the pipeline will create a Kubernetes Deployment, we will be using the [Kubernetes Plugin Pipeline Convention](https://github.com/jenkinsci/kubernetes-plugin#pipeline-support). This will allow us to define the Docker images (i.e. Java to build Gradle projects) to be used in the Jenkins Slave Pods to run the pipelines and also the configurations (ConfigMaps, Secrets, or Environment variables) to do so, if needed.
