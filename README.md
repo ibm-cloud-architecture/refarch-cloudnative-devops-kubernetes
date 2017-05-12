@@ -5,6 +5,7 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative*
 
 ## Table of Contents
 - **[Introduction](#introduction)**
+- **[Architecture and CI/CD Workflow](#architecture-and-cicd-workflow)**
 - **[Pre-Requisites](#pre-requisites)**
 - **[Install and Setup Jenkins on Kubernetes](#install-and-setup-jenkins-on-kubernetes)**
 - **[Create and Run a Sample CI/CD Pipeline](#create-and-run-a-sample-cicd-pipeline)**
@@ -14,16 +15,18 @@ DevOps, specifically automated Continuous Integration and Continuous Deployment 
 
 The project uses the [Jenkins Helm Chart](https://github.com/kubernetes/charts/tree/master/stable/jenkins) to install a Jenkins Master pod with the [Kubernetes Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Kubernetes+Plugin) in a Kubernetes Cluster. [**Helm**](https://github.com/kubernetes/helm) is Kubernetes's package manager, which facilitates deployment of prepackaged Kubernetes resources that are reusable. This setup allows Jenkins to spin up ephemeral pods to run Jenkins jobs and pipelines without the need of Always-On dedicated Jenkins slave/worker servers, which reduces Jenkins's infrastructural costs.
 
-Here is the DevOps Architecture Diagram for the Jenkins setup on Kubernetes, along with a typical CI/CD workflow:
+Let's get started.
+
+## Architecture & CI/CD Workflow
+Here is the High Level DevOps Architecture Diagram for the Jenkins setup on Kubernetes, along with a typical CI/CD workflow:
 
 ![DevOps Toolchain](static/imgs/architecture.png?raw=true)  
 
-Let's get started.
-
-## This guide will install the following resources:
-* 1 x 20GB persistent volume claim to Store Jenkins data.
-* 1 x Jenkins Master with port 8080 exposed on an external LoadBalancer.
-* All using Kubernetes Deployments.
+This guide will install the following resources:
+* 1 x 20GB [Bluemix Kubernetes Persistent Volume Claim](https://console.ng.bluemix.net/docs/containers/cs_apps.html#cs_apps_volume_claim) to Store Jenkins data and builds' information.
+* 1 x Jenkins Master Kubernetes Pod with Kubernetes Plugin Installed.
+* 1 x Kubernetes Service for above Jenkins Master Pod with port 8080 exposed to a LoadBalancer.
+* All using Kubernetes Resources.
 
 ## Pre-Requisites
 1. **CLIs for Bluemix, Kubernetes, Helm, JQ, and YAML:** Run the following script to install the CLIs:
@@ -52,6 +55,16 @@ The output of the above script will provide instructions on how to access the ne
 
 **Note** that the Jenkins Master itself takes a few minutes initialize even after showing installation success
 
+The `install_jenkins.sh` script does the following:
+* **Log into Bluemix.**
+* **Creates Container Registry Namespace**, which is used by Jenkins Pipelines to push new Docker images for new builds.
+* **Set Terminal Context to Kubernetes Cluster.**
+* **Initialize Helm Client and Server (Tiller).**
+* **Create Config Map,** which the Slave Pods use to know log into Bluemix and Push new Build Images to the private Bluemix Container Registry.
+* **Create Secret,** which is needed to authenticate against Bluemix and Container Registry Service.
+* **Create Jenkins Persistent Volume Claim,** which is where all Jenkins and build related data is stored and read by Jenkins Master Pods and Slave Pods.
+* **Install Jenkins Chart on Kubernetes Cluster using Helm.**
+
 ### Step 2: Disable Kubernetes HTTPS Certificate Check
 This is a quick and easy way to get Jenkins to create slave pods using Kubernetes API and kill them when no longer needed.
 
@@ -67,6 +80,8 @@ Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [
 Since the pipeline will create a Kubernetes Deployment, we will be using the [Kubernetes Plugin Pipeline Convention](https://github.com/jenkinsci/kubernetes-plugin#pipeline-support). This will allow us to define the Docker images (i.e. Java to build Gradle projects) to be used in the Jenkins Slave Pods to run the pipelines and also the configurations (ConfigMaps, Secrets, or Environment variables) to do so, if needed.
 
 Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/kube-int/inventory/Jenkinsfile) to see the sample Pipeline we will be using.
+
+Also, feel free to checkout the images we created to run the pipelines that deploy the different microservices in Bluecompute app. They are located in the `docker_images` folder.
 
 ### Step 1: Create a Sample Job
 ![Create a Sample Job](static/imgs/1_create_job.png?raw=true)
