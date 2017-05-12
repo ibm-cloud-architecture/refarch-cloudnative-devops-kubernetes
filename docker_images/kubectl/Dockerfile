@@ -12,3 +12,6 @@ RUN apk add --update ca-certificates \
 
 ADD https://github.com/mikefarah/yaml/releases/download/1.8/yaml_linux_amd64 /usr/local/bin/yaml
 RUN chmod a+x /usr/local/bin/yaml
+
+ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
+RUN chmod a+x /usr/local/bin/jq
