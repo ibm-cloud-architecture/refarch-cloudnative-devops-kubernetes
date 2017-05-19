@@ -133,7 +133,17 @@ function install_jenkins_chart {
 	if [[ "${JENKINS_EXISTS}" == "" ]]; then
 		printf "\n\n${grn}Installing Jenkins Chart...${end} ${coffee3}\n"
 		PVC_NAME=$(yaml read storage.yaml metadata.name)
-		helm install --name jenkins --set Persistence.ExistingClaim=${PVC_NAME} stable/jenkins --wait &> /dev/null
+
+		helm install --name jenkins --set Persistence.ExistingClaim=${PVC_NAME} \
+		--set Master.ImageTag=2.61 stable/jenkins --wait
+
+		status=$?
+
+		if [ $status -ne 0 ]; then
+			printf "\n\n${red}Error installing Jenkins... Exiting.${end}\n"
+			exit 1
+		fi
+
 		echo "${grn}Success!${end}"
 	else
 		printf "\n\n${grn}Jenkins Chart is already Installed!${end}\n"
@@ -154,6 +164,7 @@ function create_config_map {
 	string_to_replace=$(yaml read config.yaml data.bluemix-space)
 	sed -i.bak s%${string_to_replace}%${SPACE}%g config.yaml
 
+	# Replace Registry Namespace
 	string_to_replace=$(yaml read config.yaml data.bluemix-registry-namespace)
 	sed -i.bak s%${string_to_replace}%${REGISTRY_NAMESPACE}%g config.yaml
 
