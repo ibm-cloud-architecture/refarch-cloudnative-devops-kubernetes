@@ -70,7 +70,6 @@ else
     uri_parser $mysql_uri
 
     # Construct elasticsearch url
-    mysql_url="jdbc:${uri_schema}://${uri_host}:${uri_port}/inventorydb"
     mysql_user=${uri_user}
     mysql_password=${uri_password}
     mysql_host=${uri_host}
