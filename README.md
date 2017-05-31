@@ -46,10 +46,10 @@ As mentioned in the [**Introduction Section**](#introduction), we will be using 
 
 Here is a script that installs the Jenkins Chart for you:
 
-    ```
-    $ cd jenkins
-    $ ./install_jenkins.sh <cluster-name> <Optional:bluemix-space-name> <Optional:bluemix-api-key>
-    ```
+```
+$ cd jenkins
+$ ./install_jenkins.sh <cluster-name> <Optional:bluemix-space-name> <Optional:bluemix-api-key>
+```
 
 The output of the above script will provide instructions on how to access the newly installed Jenkins Pod.
 
@@ -65,10 +65,8 @@ The `install_jenkins.sh` script does the following:
 * **Create Jenkins Persistent Volume Claim,** which is where all Jenkins and build related data is stored and read by Jenkins Master Pods and Slave Pods.
 * **Install Jenkins Chart on Kubernetes Cluster using Helm.**
 
-### Step 2: Disable Kubernetes HTTPS Certificate Check
-This is a quick and easy way to get Jenkins to create slave pods using Kubernetes API and kill them when no longer needed.
-
-With this option enabled, communication with kubernetes API master will rely on HTTPS but will fully ignore ssl certificate verification. This is useful for quick setup but does make your installation unsecured, so please consider twice before using this in a Production system.
+### Step 2: Enable HTTPS Certificate Validation
+In order for the Jenkins master pod to establish and verify a secure connection with the slave pods, you must set the **Kubernetes URL** to `https://10.10.10.1/`. Please follow the steps in the diagram below.
 
 ![HTTPS Certificate Check](static/imgs/certificate.png?raw=true)  
 
