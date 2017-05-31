@@ -68,7 +68,7 @@ The `install_jenkins.sh` script does the following:
 ### Step 2: Enable HTTPS Certificate Validation
 In order for the Jenkins master pod to establish and verify a secure connection with the slave pods, you must set the **Kubernetes URL** to `https://10.10.10.1/`. Please follow the steps in the diagram below.
 
-![HTTPS Certificate Check](static/imgs/certificate.png?raw=true)  
+![HTTPS Certificate Check](static/imgs/kubernetes.png?raw=true)  
 
 That's it! You now have a fully working version of Jenkins on your Kubernetes Deployment
 
