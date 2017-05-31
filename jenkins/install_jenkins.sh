@@ -135,7 +135,7 @@ function install_jenkins_chart {
 		PVC_NAME=$(yaml read storage.yaml metadata.name)
 
 		helm install --name jenkins --set Persistence.ExistingClaim=${PVC_NAME} \
-		--set Master.ImageTag=2.61 stable/jenkins --wait
+		--set Master.ImageTag=2.61 stable/jenkins --wait --timeout 600
 
 		status=$?
 
