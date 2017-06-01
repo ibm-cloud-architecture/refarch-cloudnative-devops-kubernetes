@@ -1,7 +1,7 @@
 FROM alpine
 
 RUN apk --no-cache update \
- && apk add --update bash mysql-client jq
+ && apk add --update bash mysql-client jq curl
 
 ADD helper.sh /
 ADD startup.sh /
