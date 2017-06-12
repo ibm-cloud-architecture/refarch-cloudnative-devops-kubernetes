@@ -1,4 +1,5 @@
-# Checking if bx is installed
+#!/bin/bash
+# Terminal Colors
 red=$'\e[1;31m'
 grn=$'\e[1;32m'
 yel=$'\e[1;33m'
@@ -9,24 +10,28 @@ end=$'\e[0m'
 coffee=$'\xE2\x98\x95'
 coffee3="${coffee} ${coffee} ${coffee}"
 
-BLUEMIX_API_ENDPOINT="api.ng.bluemix.net"
 CLUSTER_NAME=$1
-SPACE=$2
-API_KEY=$3
+BX_SPACE=$2
+BX_API_KEY=$3
+BX_REGION=$4
+BX_API_ENDPOINT=""
 
-REGISTRY_NAMESPACE=""
+if [[ -z "${BX_REGION// }" ]]; then
+	BX_API_ENDPOINT="api.ng.bluemix.net"
+	echo "Using DEFAULT endpoint ${grn}${BX_API_ENDPOINT}${end}."
 
-function check_pvc {
-	kubectl get pvc jenkins-home | grep Bound
-}
+else
+	BX_API_ENDPOINT="api.${BX_REGION}.bluemix.net"
+	echo "Using endpoint ${grn}${BX_API_ENDPOINT}${end}."
+fi
 
 function check_tiller {
-	kubectl --namespace=kube-system get pods | grep tiller | grep Runnin | grep 1/1
+	kubectl --namespace=kube-system get pods | grep tiller | grep Running | grep 1/1
 }
 
 function print_usage {
 	printf "\n\n${yel}Usage:${end}\n"
-	printf "\t${cyn}./delete_jenkins.sh <cluster-name> <bluemix-space-name> <bluemix-api-key>${end}\n\n"
+	printf "\t${cyn}./install_jenkins.sh <cluster-name> <bluemix-space-name> <bluemix-api-key>${end}\n\n"
 }
 
 function bluemix_login {
@@ -60,21 +65,6 @@ function bluemix_login {
 	fi
 }
 
-function get_cluster_name {
-	printf "\n\n${grn}Login into Container Service${end}\n\n"
-	bx cs init
-
-	if [[ -z "${CLUSTER_NAME// }" ]]; then
-		echo "${yel}No cluster name provided. Will try to get an existing cluster...${end}"
-		CLUSTER_NAME=$(bx cs clusters | tail -1 | awk '{print $1}')
-
-		if [[ "$CLUSTER_NAME" == "Name" ]]; then
-			echo "No Kubernetes Clusters exist in your account. Please provision one and then run this script again."
-			exit 1
-		fi
-	fi
-}
-
 function set_cluster_context {
 	# Getting Cluster Configuration
 	unset KUBECONFIG
@@ -102,7 +92,6 @@ function initialize_helm {
 
 # Setup Stuff
 bluemix_login
-get_cluster_name
 set_cluster_context
 initialize_helm
 
@@ -113,5 +102,10 @@ kubectl delete -f storage.yaml
 # Delete Jenkins Chart
 printf "\n\n${grn}Deleting Jenkins Chart.${end}\n"
 helm delete jenkins --purge
+
+# Delete Region based Config Maps
+printf "\n\n${grn}Deleting Config Maps.${end}\n"
+kubectl delete configmaps bluemix-target-ng
+kubectl delete configmaps bluemix-target-eu-de
 
 printf "\n\n${grn}Done.${end}\n"
