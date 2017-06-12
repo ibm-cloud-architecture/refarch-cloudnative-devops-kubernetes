@@ -108,4 +108,7 @@ printf "\n\n${grn}Deleting Config Maps.${end}\n"
 kubectl delete configmaps bluemix-target-ng
 kubectl delete configmaps bluemix-target-eu-de
 
+printf "\n\n${grn}Deleting Secrets.${end}\n"
+kubectl delete secrets registry-token
+
 printf "\n\n${grn}Done.${end}\n"
