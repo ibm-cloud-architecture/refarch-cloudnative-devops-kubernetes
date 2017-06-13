@@ -18,6 +18,7 @@ BX_API_ENDPOINT=""
 REGISTRY_NAMESPACE=""
 
 if [[ -z "${BX_REGION// }" ]]; then
+	BX_REGION="ng"
 	BX_API_ENDPOINT="api.ng.bluemix.net"
 	echo "Using DEFAULT endpoint ${grn}${BX_API_ENDPOINT}${end}."
 
@@ -198,15 +199,20 @@ function create_config_map {
 	fi
 }
 
-function create_registry-secret {
+function create_registry_secret {
 	printf "\n\n${grn}Creating Registry Token Secret...${end}\n"
 	secret_name="registry-token"
 
-	token_id=$(bx cr token-list | grep $CLUSTER_NAME | awk '{print $1}')
-	#echo "token_id = ${token_id}"
-	
+	tokens=$(bx cr token-list | grep "$CLUSTER_NAME")
+	printf "${yel}tokens matching ${CLUSTER_NAME}:${end}\n${tokens}\n\n"
+
+	token_description=$(echo $tokens | awk '{print $4}' | head -1)
+	token_id=$(echo $tokens | awk '{print $1}' | head -1)
+	echo "token for ${token_description} = ${token_id}"
+
 	token=$(bx cr token-get ${token_id} | grep Token | tail -1 | awk '{print $2}')
-	#echo "token = ${token}"
+	echo "token = ${token}"
+	exit 1
 
 	# Email is required to create secret, but it won't be used to pull images
 	registry="registry.${BX_REGION}.bluemix.net"
@@ -274,10 +280,10 @@ initialize_helm
 
 # Create CICD Configuration
 create_config_map
-create_config_map ng
-create_config_map eu-de
+#create_config_map ng
+#create_config_map eu-de
 
-create_registry-secret
+#create_registry_secret
 create_secret
 
 # Create Jenkins Resources
@@ -309,4 +315,4 @@ printf "\nUse these credentials to login:"
 printf "\n${cyn}username:${end} admin"
 printf "\n${cyn}password:${end} ${password}\n"
 
-printf "\n${yel}Note:${end} It may take a few minutes for Jenkins to fully initialize before you see anything on the browser."
+printf "\n${yel}Note:${end} It may take a few minutes for Jenkins to fully initialize before you see anything on the browser.\n"
