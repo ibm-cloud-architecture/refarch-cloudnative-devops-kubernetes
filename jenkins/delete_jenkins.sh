@@ -13,10 +13,13 @@ coffee3="${coffee} ${coffee} ${coffee}"
 CLUSTER_NAME=$1
 BX_SPACE=$2
 BX_API_KEY=$3
-BX_REGION=$4
+BX_ORG=$4
+BX_REGION=$5
 BX_API_ENDPOINT=""
+REGISTRY_NAMESPACE=""
 
 if [[ -z "${BX_REGION// }" ]]; then
+	BX_REGION="ng"
 	BX_API_ENDPOINT="api.ng.bluemix.net"
 	echo "Using DEFAULT endpoint ${grn}${BX_API_ENDPOINT}${end}."
 
@@ -31,7 +34,7 @@ function check_tiller {
 
 function print_usage {
 	printf "\n\n${yel}Usage:${end}\n"
-	printf "\t${cyn}./install_jenkins.sh <cluster-name> <bluemix-space-name> <bluemix-api-key>${end}\n\n"
+	printf "\t${cyn}./delete_jenkins.sh <cluster-name> <bluemix-space-name> <bluemix-api-key> <bluemix-org> <bluemix-region>${end}\n\n"
 }
 
 function bluemix_login {
@@ -50,12 +53,17 @@ function bluemix_login {
 		print_usage
 		echo "${red}Please provide Bluemix API Key. Exiting..${end}"
 		exit 1
+
+	elif [[ -z "${BX_ORG// }" ]]; then
+		print_usage
+		echo "${red}Please provide Bluemix Org. Exiting..${end}"
+		exit 1
 	fi
 
 	printf "${grn}Login into Bluemix${end}\n"
 
 	export BLUEMIX_API_KEY=${BX_API_KEY}
-	bx login -a ${BX_API_ENDPOINT} -s ${BX_SPACE}
+	bx login -a ${BX_API_ENDPOINT} -s ${BX_SPACE} -o ${BX_ORG}
 
 	status=$?
 
@@ -102,11 +110,6 @@ kubectl delete -f storage.yaml
 # Delete Jenkins Chart
 printf "\n\n${grn}Deleting Jenkins Chart.${end}\n"
 helm delete jenkins --purge
-
-# Delete Region based Config Maps
-printf "\n\n${grn}Deleting Config Maps.${end}\n"
-kubectl delete configmaps bluemix-target-ng
-kubectl delete configmaps bluemix-target-eu-de
 
 printf "\n\n${grn}Deleting Secrets.${end}\n"
 kubectl delete secrets registry-token

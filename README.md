@@ -47,8 +47,12 @@ As mentioned in the [**Introduction Section**](#introduction), we will be using 
 Here is a script that installs the Jenkins Chart for you:
 
 ```
+# Bluemix Regions
+#  -     ng: US South
+#  -  eu-de: Germany
+#  - au-syd: Sydney
 $ cd jenkins
-$ ./install_jenkins.sh <cluster-name> <Optional:bluemix-space-name> <Optional:bluemix-api-key>
+$ ./install_jenkins.sh <cluster-name> <bluemix-space-name> <bluemix-api-key> <bluemix-org> <bluemix-region>
 ```
 
 The output of the above script will provide instructions on how to access the newly installed Jenkins Pod.
