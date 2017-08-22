@@ -111,7 +111,7 @@ kubectl delete -f storage.yaml
 printf "\n\n${grn}Deleting Jenkins Chart.${end}\n"
 helm delete jenkins --purge
 
-printf "\n\n${grn}Deleting Secrets.${end}\n"
-kubectl delete secrets registry-token
+#printf "\n\n${grn}Deleting Secrets.${end}\n"
+#kubectl delete secrets registry-token
 
 printf "\n\n${grn}Done.${end}\n"
