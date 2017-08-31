@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: docker-repository
+  name: registry-config
   labels:
     tier: config
 data:
