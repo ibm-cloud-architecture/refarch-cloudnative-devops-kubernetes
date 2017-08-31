@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docker-repository
+  labels:
+    tier: config
+data:
+  namespace: PUT_YOUR_DOCKER_NAMESPACE_HERE
+  registry: dockerhub
