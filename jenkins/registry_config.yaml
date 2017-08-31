@@ -6,4 +6,4 @@ metadata:
     tier: config
 data:
   namespace: PUT_YOUR_DOCKER_NAMESPACE_HERE
-  registry: dockerhub
+  registry: docker.io
