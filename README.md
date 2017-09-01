@@ -5,10 +5,18 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 
 ## Table of Contents
 - **[Introduction](#introduction)**
-- **[Architecture and CI/CD Workflow](#architecture-and-cicd-workflow)**
+- **[Architecture and CI/CD Workflow](#architecture--cicd-workflow)**
 - **[Pre-Requisites](#pre-requisites)**
-- **[Install and Setup Jenkins on Kubernetes](#install-and-setup-jenkins-on-kubernetes)**
+    * [Download required CLIs](#download-required-clis)
+    * [Create a Kubernetes Cluster](#create-a-kubernetes-cluster)
+- **[Deploy Jenkins to Kubernetes Cluster](#deploy-jenkins-to-kubernetes-cluster)**
+    - [Install Jenkins Chart](#install-jenkins-chart)
+    - [Validate Jenkins Deployment](#validate-jenkins-deployment)**
+- **[Delete Jenkins Deployment](#delete-jenkins-deployment)**
 - **[Create and Run a Sample CI/CD Pipeline](#create-and-run-a-sample-cicd-pipeline)**
+- **[Optional Deployments](#optional-deployments)**
+    - [Deploy Jenkins to IBM Cloud private](#ddeploy-jenkins-to-ibm-cloud-private)
+
 
 ## Introduction
 DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Bluemix to implement the CI/CD for the BlueCompute reference application.
@@ -23,80 +31,264 @@ Here is the High Level DevOps Architecture Diagram for the Jenkins setup on Kube
 ![DevOps Toolchain](static/imgs/architecture.png?raw=true)  
 
 This guide will install the following resources:
-* 1 x 20GB [Bluemix Kubernetes Persistent Volume Claim](https://console.ng.bluemix.net/docs/containers/cs_apps.html#cs_apps_volume_claim) to Store Jenkins data and builds' information.
+* 1 x 8GB [Persistent Volume Claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) (PVC) to Store Jenkins data and builds' information.
+    * Be sure that your Kubernetes Cluster can support PVCs size of 8GB
 * 1 x Jenkins Master Kubernetes Pod with Kubernetes Plugin Installed.
 * 1 x Kubernetes Service for above Jenkins Master Pod with port 8080 exposed to a LoadBalancer.
 * All using Kubernetes Resources.
 
 ## Pre-Requisites
-1. **CLIs for Bluemix, Kubernetes, Helm, JQ, and YAML:** Run the following script to install the CLIs:
+### Download required CLIs
 
-    `$ ./install_cli.sh`
+To deploy the application, you require the following tools:
 
-2. **Bluemix Account.**
-    * Login to your Bluemix account or register for a new account [here](https://bluemix.net/registration).
-    * Once you have logged in, create a new space for hosting the application in US-Southregions.
-3. **Paid Kubernetes Cluster:** If you don't already have a paid Kubernetes Cluster in Bluemix, please go to the following links and follow the steps to create one.
-    * [Log into the Bluemix Container Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#step-2-provision-a-kubernetes-cluster-on-ibm-bluemix-container-service).
-    * [Create a paid Kubernetes Cluster](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#paid-cluster).
+- [kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
+- [helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
 
-## Install and Setup Jenkins on Kubernetes
-### Step 1: Install Jenkins on Kubernetes Cluster
-As mentioned in the [**Introduction Section**](#introduction), we will be using a Jenkins Helm Chart to deploy Jenkins into a Bluemix Kubernetes Cluster. Before you do so, make sure that you installed all the required CLIs as indicated in the [**Pre-Requisites**](#pre-requisites).
+### Create a Kubernetes Cluster
 
-Here is a script that installs the Jenkins Chart for you:
+The following clusters have been tested with this sample application:
+
+- [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) - Create a single node virtual cluster on your workstation
+- [IBM Bluemix Container Service](https://www.ibm.com/cloud-computing/bluemix/containers) - Create a Kubernetes cluster in IBM Cloud.  The application runs in the Lite cluster, which is free of charge.  Follow the instructions [here](https://console.bluemix.net/docs/containers/container_index.html).
+- [IBM Cloud private](https://www.ibm.com/cloud-computing/products/ibm-cloud-private/) - Create a Kubernetes cluster in an on-premise datacenter.  The community edition (IBM Cloud private-ce) is free of charge.  Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_1.2.0/installing/install_containers_CE.html) to install IBM Cloud private-ce.
+
+
+## Deploy Jenkins to Kubernetes Cluster
+### Install Jenkins Chart
+
+As mentioned in the [**Introduction Section**](#introduction), we will be using a [Jenkins Helm Chart](#https://github.com/kubernetes/charts/tree/master/stable/jenkins) to deploy Jenkins into a Kubernetes Cluster. Before you do so, make sure that you installed all the required CLIs as indicated in the [**Pre-Requisites**](#pre-requisites).
+
+#### 1. Initialize `helm` in your cluster:
+   
+```
+$ helm init
+```
+   
+This initializes the `helm` client as well as the server side component called `tiller`.
+   
+#### 2. Install Jenkins Chart:
+
+```
+$ helm install --name jenkins --set Master.ImageTag=2.67 stable/jenkins
+```
+
+This downloads the jenkins chart from Kubernetes Stable Charts [Repository](https://github.com/kubernetes/charts/tree/master/stable), which comes pre-installed with `helm`.
+
+**Note** that the Jenkins Master itself takes a few minutes initialize even after showing installation success. The output of the above command will provide instructions on how to access the newly installed Jenkins Pod. For more information on the additional options for the chart, see this [document](https://github.com/kubernetes/charts/tree/master/stable/jenkins#configuration).
+
+### Validate Jenkins Deployment
+To validate Jenkins, you must obtain the Jenkins `admin` password, and the Jenkins URL.
+
+#### 1. Obtain Jenkins `admin` password:
+
+After you install the chart, you will see a command to receive the password that looks like follows:
+
+```
+$ printf $(kubectl get secret --namespace default jenkins-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
+```
+
+Save that password as you will need it to login into Jenkins UI
+
+#### 2. Obtain Jenkins URL:
+
+After you install the chart, you will see a few commands to obtain the Jenkins URL that look like follows:
+
+```
+$ export SERVICE_IP=$(kubectl get svc --namespace default jenkins-jenkins --template "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}")
+$ echo http://$SERVICE_IP:8080/login
+```
+
+Make sure that your kubernetes cluster supports service type of `LoadBalancer`.
+
+#### 2.a Minikube Deployment 
+
+If using `minikube`, the URL commands above might not work. To open a browser to the Jenkins web portal, use the following command:
+
+```
+$ minikube service jenkins-jenkins
+```
+
+#### 3. Login to Jenkins URL
+Open a new browser window and paste the URL obtained in Step 2. Then make sure you see a page that looks as follows:
+
+![Jenkins Login](static/imgs/jenkins_login.png?raw=true)
+
+Use the following test credentials to login:
+
+- **Username:** admin
+- **Password:** Password obtained in Step 2
+
+If login is successful, you should see a page that looks like this
+
+![Jenkins Login](static/imgs/jenkins_dashboard.png?raw=true)
+
+Congratulations, you have successfully installed a Jenkins instance in your Kubernetes cluster!
+
+## Delete Jenkins Deployment
+To delete the Jenkins chart from your cluster, run the following:
+
+```
+$ helm delete jenkins --purge
+```
+
+
+## Create and Run a Sample CI/CD Pipeline
+Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using our sample [Bluecompute Web Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/tree/dev) from BlueCompute.
+
+Since the pipeline will create a Kubernetes Deployment, we will be using the [Kubernetes Plugin Pipeline Convention](https://github.com/jenkinsci/kubernetes-plugin#pipeline-support). This will allow us to define the Docker images (i.e. Node.js) to be used in the Jenkins Slave Pods to run the pipelines and also the configurations (ConfigMaps, Secrets, or Environment variables) to do so, if needed.
+
+Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/blob/dev/Jenkinsfile) to see the sample Pipeline we will be using.
+
+### Step 1: Create Docker Secret and ConfigMap
+If you don't already have a `Docker ID`, create one at https://hub.docker.com/
+
+In order to be able to build and push new images to a Docker Registry (Docker Hub or private), you will need the following information:
+- **Registry Location** Docker Hub or a privately hosted Repository.
+- **Registry Username** 
+    - If using Docker Hub, then it is your `Docker ID`.
+- **Registry Password**
+- **Registry Namespace:** An isolated location inside the registry in which to push new images
+    - If using Docker Hub, then it is the same as your `Docker ID`
+
+The following 2 sections will instruct you to create a `ConfigMap` and a `Secret` in Kubernetes cluster to withold the information above, which will be used by the pipeline.
+
+#### Step 1-a: Create Registry Config Map:
+Open the `registry_config.yaml` file in `jenkins` folder, then enter a value for `namespace` (`Docker_ID` if using Docker Hub):
 
 ```
 $ cd jenkins
-$ ./install_jenkins.sh <cluster-name> <Optional:bluemix-space-name> <Optional:bluemix-api-key>
+$ kubectl create -f registry_config.yaml
 ```
 
-The output of the above script will provide instructions on how to access the newly installed Jenkins Pod.
+#### Step 1-b: Create Registry Secret:
+Open the `registry_secret.yaml` file in `jenkins` folder, then enter [base64 encoded](https://www.base64encode.org/) values for registry `username` and `password` (`Docker_ID` and `Docker_Password` if using Docker Hub). To `base64` encode each value, feel free to use this [tool](https://www.base64encode.org/):
 
-**Note** that the Jenkins Master itself takes a few minutes initialize even after showing installation success
+```
+$ cd jenkins
+$ kubectl create -f registry_secret.yaml
+```
 
-The `install_jenkins.sh` script does the following:
-* **Log into Bluemix.**
-* **Creates Container Registry Namespace**, which is used by Jenkins Pipelines to push new Docker images for new builds.
-* **Set Terminal Context to Kubernetes Cluster.**
-* **Initialize Helm Client and Server (Tiller).**
-* **Create Config Map,** which the Slave Pods use to know log into Bluemix and Push new Build Images to the private Bluemix Container Registry.
-* **Create Secret,** which is needed to authenticate against Bluemix and Container Registry Service.
-* **Create Jenkins Persistent Volume Claim,** which is where all Jenkins and build related data is stored and read by Jenkins Master Pods and Slave Pods.
-* **Install Jenkins Chart on Kubernetes Cluster using Helm.**
-
-### Step 2: Enable HTTPS Certificate Validation
-In order for the Jenkins master pod to establish and verify a secure connection with the slave pods, you must set the **Kubernetes URL** to `https://10.10.10.1/`. Please follow the steps in the diagram below.
-
-![HTTPS Certificate Check](static/imgs/kubernetes.png?raw=true)  
-
-That's it! You now have a fully working version of Jenkins on your Kubernetes Deployment
-
-## Create and Run a Sample CI/CD Pipeline
-Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using our sample [Inventory Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/kube-int) from BlueCompute.
-
-Since the pipeline will create a Kubernetes Deployment, we will be using the [Kubernetes Plugin Pipeline Convention](https://github.com/jenkinsci/kubernetes-plugin#pipeline-support). This will allow us to define the Docker images (i.e. Java to build Gradle projects) to be used in the Jenkins Slave Pods to run the pipelines and also the configurations (ConfigMaps, Secrets, or Environment variables) to do so, if needed.
-
-Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/kube-int/inventory/Jenkinsfile) to see the sample Pipeline we will be using.
-
-Also, feel free to checkout the images we created to run the pipelines that deploy the different microservices in Bluecompute app. They are located in the `docker_images` folder.
-
-### Step 1: Create a Sample Job
+### Step 2: Create a Sample Job
 ![Create a Sample Job](static/imgs/1_create_job.png?raw=true)
 
-### Step 2: Select Pipeline Type
+### Step 3: Select Pipeline Type
 ![Select Pipeline Type](static/imgs/2_select_pipeline_type.png?raw=true)
 
-### Step 3: Setup Sample Pipeline
+### Step 4: Setup Sample Pipeline
+Please enter the following for git repository details:
+- **Repository URL:** `https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web`
+- **Branch:** `dev`
+- **Script Path**: `Jenkinsfile`
+
 ![Setup Sample Pipeline](static/imgs/3_setup_pipeline.png?raw=true)
 
-### Step 4: Launch Pipeline Build
+### Step 5: Launch Pipeline Build
 ![Launch Pipeline Build](static/imgs/4_launch_build.png?raw=true)
 
-### Step 5: Open Pipeline Console Output
+### Step 6: Open Pipeline Console Output
 ![Open Pipeline Console Output](static/imgs/5_open_console_output.png?raw=true)
 
-### Step 6: Monitor Console Output
+### Step 7: Monitor Console Output
 ![Monitor Console Output](static/imgs/6_see_console_output.png?raw=true)
 
 That's it! You now have setup a fully working Jenkins CI/CD pipeline for Kubernetes deployments.
+
+## Optional Deployments
+
+### Deploy Jenkins to IBM Cloud private
+#### Install Jenkins Chart
+##### 1. Create MountPoint from NFS server:
+You will need to create a mountpoint from NFS server. SSH to your NFS server and do the following:
+
+```
+$ cd /storage
+$ mkdir jenkins-home
+```
+
+##### 2. Create Persistent Volume
+Create a Persistent Volume at the mountpoint from step above as follows:
+
+1. Click on the three bars in the top left corner, and go to `Infrastructure > Storage`.
+2. Click on the `Storage` tab
+3. Click on `Create Storage` button. Then enter the following values:
+
+![1. Create Persistent Volume](static/imgs/icp_1.png?raw=true)
+
+![2. Create Persistent Volume](static/imgs/icp_2.png?raw=true)
+   
+You should now see a new entry for `jenkins-home` with a status of `Available`, which means it can now be claimed by a Persitent Volume Claim.
+
+##### 3. Create Persistent Volume Claim (PVC)
+In order to use the newly created `jenkins-home` volume, you will need to create a Persistent Volume Claim (PVC) as follows:
+
+1. Click on the `Volume` tab.
+2. Click on the `Create Volume` button. Then enter the following values:
+
+![3. Create Persistent Volume Claim](static/imgs/icp_3.png?raw=true)
+    
+You should now see a new entry for `jenkins-home` with a status of `Bound`, which means that the PVC is ready to be used to install the Jenkins Chart.
+
+##### 4. Install Jenkins Chart
+To install the Jenkins Chart, SSH into the NFS/Jumpbox and do the following.
+
+1. Open ICp Dashboard, then click the `User` icon on top right.
+2. Click `Configure Client` and copy all the CLI contents shown.
+3. SSH into the NFS/Jumpbox.
+4. Paste the contents of `Configure Client` and press enter. `kubectl` is now configured to install the chart.
+5. Enter the following command to Install Jenkins chart:
+
+```
+$ helm install --name jenkins --set Persistence.ExistingClaim=jenkins-home --set Master.ImageTag=2.67 stable/jenkins
+```
+
+Where `jenkins-home` is the PVC created in previous steps.
+
+**Note** that the Jenkins pod takes a while to fully initialyze after successful installation.
+
+##### 5. Increase Container Cap Count
+Jenkins creates pods from containers in order to run jobs, sometimes creating multiple containers until one is able to run successfully. The default container cap is set to `10`, which can cause errors if multiple containers fail to create. Increase it to `1000` as follows:
+
+![4. Increase Container Cap](static/imgs/icp_4.png?raw=true)
+
+
+#### Setup Private Docker Registry
+You will need perform additional setup in order to be able to build and push new images to ICp's Private Registry. The following 3 section will instruct you to create the following:
+
+- Dedicated registry `user` for `jenkins`
+- Configmap for `registry` and `namespace`
+- Secret for registry `username` and `password`
+
+##### 1. Create Jenkins User:
+The `jenkins` user will have access to create, push, and deploy images from the Private Registry in a CICD pipeline. To create user, do the following:
+
+1. Click on the three bars in the top left corner, and go to `System`.
+2. Click on the `Users` tab
+3. Click on `New User` button. Then enter the following values:
+    - **Namespace:** `default`
+    - **Name:** `jenkins`
+    - **Password:** `passw0rd`
+    - **Email:** Enter your email address.
+
+##### 2. Create Registry Config Map:
+The `registry_config_icp.yaml` file in `jenkins/ibm_cloud_private` already contains the appropriate values for `registry` and `namespace`. To create config map, enter the commands below from `NFS/Jumpbox`:
+
+```
+$ cd jenkins/ibm_cloud_private
+$ kubectl create -f registry_config_icp.yaml
+```
+
+##### 3. Create Registry Secret:
+Open the `registry_secret.yaml` file in `jenkins` folder, then enter the following [base64 encoded](https://www.base64encode.org/) values for registry `username` and `password`:
+
+- **username:** `amVua2lucwo=`
+    - base64 for `jenkins`
+- **password:** `cGFzc3cwcmQK`
+    - base64 for `passw0rd`
+
+```
+$ cd jenkins
+$ kubectl create -f registry_secret.yaml
+```
+
+Congratulations, you have succesfully installed configured Private Registry access and are now ready to create and run [Sample CICD Pipelines](#create-and-run-a-sample-cicd-pipeline)

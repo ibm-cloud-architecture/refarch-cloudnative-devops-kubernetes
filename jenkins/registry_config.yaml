@@ -5,5 +5,5 @@ metadata:
   labels:
     tier: config
 data:
-  namespace: PUT_YOUR_DOCKER_NAMESPACE_HERE
+  namespace: fabiogomezdiaz
   registry: docker.io
