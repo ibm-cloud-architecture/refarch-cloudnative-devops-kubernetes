@@ -11,10 +11,11 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
     * [Create a Kubernetes Cluster](#create-a-kubernetes-cluster)
 - **[Deploy Jenkins to Kubernetes Cluster](#deploy-jenkins-to-kubernetes-cluster)**
     - [Install Jenkins Chart](#install-jenkins-chart)
-    - [Validate Jenkins Deployment](#validate-jenkins-deployment)**
+    - [Validate Jenkins Deployment](#validate-jenkins-deployment)
 - **[Delete Jenkins Deployment](#delete-jenkins-deployment)**
 - **[Create and Run a Sample CI/CD Pipeline](#create-and-run-a-sample-cicd-pipeline)**
 - **[Optional Deployments](#optional-deployments)**
+    - [Deploy Jenkins to IBM Bluemix Container Service using IBM Bluemix Services](#deploy-jenkins-to-ibm-bluemix-container-service-using-ibm-bluemix-services)
     - [Deploy Jenkins to IBM Cloud private](#ddeploy-jenkins-to-ibm-cloud-private)
 
 
@@ -180,6 +181,7 @@ Please enter the following for git repository details:
 - **Repository URL:** `https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web`
 - **Branch:** `dev`
 - **Script Path**: `Jenkinsfile`
+    - If using a cluster from `Bluemix Container Service`, use `JenkinsfileBluemix` as your `Script Path`
 
 ![Setup Sample Pipeline](static/imgs/3_setup_pipeline.png?raw=true)
 
@@ -195,6 +197,86 @@ Please enter the following for git repository details:
 That's it! You now have setup a fully working Jenkins CI/CD pipeline for Kubernetes deployments.
 
 ## Optional Deployments
+
+### Deploy Jenkins to IBM Bluemix Container Service using IBM Bluemix Services
+#### Install Jenkins Chart
+##### 1. Create Persistent Volume Claim (PVC)
+To create a Persistent Volume Claim (PVC), use the commands below:
+
+```
+$ cd jenkins/bluemix
+$ kubectl create -f bluemix_pvc.yaml
+```
+
+**Note:** that the minimum PVC size for Bluemix is `20GB`.
+
+Before you are able to use your PVC, it needs to be `Bound` to the cluster. To check it's provisioning status, use the following command:
+
+```
+$ kubectl get pvc jenkins-home
+NAME           STATUS    VOLUME                                     CAPACITY   ACCESSMODES   STORAGECLASS       AGE
+jenkins-home   Bound     pvc-a888eb22-926e-11e7-a061-86e0215fba28   20Gi       RWO           ibmc-file-silver   1m
+```
+
+You should now see a new entry for `jenkins-home` with a status of `Bound`, which means that the PVC is ready to be used to install the Jenkins Chart.
+
+##### 2. Install Jenkins Chart
+Use the following command to install the Jenkins chart:
+
+```
+$ helm install --name jenkins --version=0.8.7 --set Persistence.ExistingClaim=jenkins-home stable/jenkins 
+```
+
+Where `jenkins-home` is the PVC created in previous step.
+
+**Note** that the Jenkins pod takes a while to fully initialyze after successful installation.
+
+##### 3. Enable HTTPS Certificate Validation
+In order for the Jenkins master pod to establish and verify a secure connection with the slave pods, you must set the **Kubernetes URL** to `https://10.10.10.1/`. Please follow the steps in the diagram below.
+
+![HTTPS Certificate Check](static/imgs/kubernetes.png?raw=true)
+
+That's it! You now have a fully working version of Jenkins on your Kubernetes Deployment
+
+#### Setup Private Docker Registry
+##### 1. Create Namespace in Bluemix Registry
+In order to be able to push and pull images from Bluemix's private registry, you will need to create a namespace. To do so, use the following commands:
+
+```
+$ bx cr login
+$ bx cr namespace-add <unique_namespace_id>
+```
+
+Where,
+
+- `<unique_namespace_id>` is a globally unique namespace id within Bluemix's private registry.
+
+##### 2. Create Bluemix Config Map:
+In order to push/pull images from Bluemix Registry, we need to create a config map in Kubernetes cluster. To do so, open `bluemix_config.yaml` file in `jenkins/bluemix` and enter values for the following fields under `data`:
+
+- **bluemix-api-endpoint**: Please enter Bluemix API Endpoint if using a region other than `US South`.
+- **bluemix-org:** Bluemix Org for your account.
+- **bluemix-space:** Bluemix Space for your account.
+- **bluemix-registry:** Please enter Bluemix Registry Endpoint if using a region other than `US South`.
+- **bluemix-registry-namespace:** Enter the `unique_namespace_id` from last step.
+- **kube-cluster-name:** Enter your kubernetes cluster name.
+
+To create the config map, use the following commands:
+
+```
+$ cd jenkins/bluemix
+$ kubectl create -f bluemix_config.yaml.yaml
+```
+
+##### 3. Create Bluemix API Key Secret:
+Open the `bluemix_secret.yaml` file in `jenkins/bluemix` folder, then enter your Bluemix API key in [base64 format](https://www.base64encode.org/) in the `api-key` field under `data`. To create the secret, use the following command
+
+```
+$ cd jenkins/bluemix
+$ kubectl create -f registry_secret.yaml
+```
+
+Congratulations, you have succesfully installed configured Private Registry access and are now ready to create and run [Sample CICD Pipelines](#create-and-run-a-sample-cicd-pipeline)
 
 ### Deploy Jenkins to IBM Cloud private
 #### Install Jenkins Chart
