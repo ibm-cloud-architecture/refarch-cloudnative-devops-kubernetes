@@ -64,21 +64,21 @@ if [ -z "${SQL_URL}" ]; then
     exit 0
 fi
 
-wget ${SQL_URL} -O load-data.sql
-if [ $? -ne 0 ]; then
-    echo "Failed to download ${SQL_URL}"
-    exit 1
-fi
+#wget ${SQL_URL} -O /load-data.sql
+#if [ $? -ne 0 ]; then
+#    echo "Failed to download ${SQL_URL}"
+#    exit 1
+#fi
 
 echo "Executing MySQL script ${SQL_URL} on MySQL database ${mysql_host}:${mysql_port} ..."
 
 # load data
-while !(mysql -v -u${mysql_user} -p${mysql_password} --host ${mysql_host} --port ${mysql_port} <load-data.sql)
+while !(mysql -v -u${mysql_user} -p${mysql_password} --host ${mysql_host} --port ${mysql_port} </load-data.sql)
 do
   printf "Waiting for MySQL to fully initialize\n\n"
   sleep 1
     echo "trying to load data again"
 done
 
-#rm load-data.sql testdata
+#rm /load-data.sql testdata
 printf "\n\nExecuted script at ${SQL_URL} on database %s\n\n" "${mysql_database}"
