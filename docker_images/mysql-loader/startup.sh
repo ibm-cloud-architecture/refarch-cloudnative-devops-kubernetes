@@ -59,16 +59,18 @@ fi
 
 # wget the URL of the sql file to execute
 SQL_URL=$1
-if [ -z "${SQL_URL}" ]; then
-    echo "No SQL Script was provided"
-    exit 0
+if [ ! -z "${SQL_URL}" ]; then
+    wget ${SQL_URL} -O /load-data.sql
+    if [ $? -ne 0 ]; then
+        echo "Failed to download ${SQL_URL}"
+        exit 1
+    fi
 fi
 
-#wget ${SQL_URL} -O /load-data.sql
-#if [ $? -ne 0 ]; then
-#    echo "Failed to download ${SQL_URL}"
-#    exit 1
-#fi
+if [ ! -f "/load-data.sql" ]; then
+    echo "No SQL file to execute"
+    exit 0
+fi
 
 echo "Executing MySQL script ${SQL_URL} on MySQL database ${mysql_host}:${mysql_port} ..."
 

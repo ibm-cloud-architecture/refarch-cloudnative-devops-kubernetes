@@ -61,13 +61,13 @@ The following clusters have been tested with this sample application:
 As mentioned in the [**Introduction Section**](#introduction), we will be using a [Jenkins Helm Chart](#https://github.com/kubernetes/charts/tree/master/stable/jenkins) to deploy Jenkins into a Kubernetes Cluster. Before you do so, make sure that you installed all the required CLIs as indicated in the [**Pre-Requisites**](#pre-requisites).
 
 #### 1. Initialize `helm` in your cluster:
-   
+
 ```
 $ helm init
 ```
-   
+
 This initializes the `helm` client as well as the server side component called `tiller`.
-   
+
 #### 2. Install Jenkins Chart:
 
 ```
@@ -102,7 +102,7 @@ $ echo http://$SERVICE_IP:8080/login
 
 Make sure that your kubernetes cluster supports service type of `LoadBalancer`.
 
-#### 2.a Minikube Deployment 
+#### 2.a Minikube Deployment
 
 If using `minikube`, the URL commands above might not work. To open a browser to the Jenkins web portal, use the following command:
 
@@ -146,7 +146,7 @@ If you don't already have a `Docker ID`, create one at https://hub.docker.com/
 
 In order to be able to build and push new images to a Docker Registry (Docker Hub or private), you will need the following information:
 - **Registry Location** Docker Hub or a privately hosted Repository.
-- **Registry Username** 
+- **Registry Username**
     - If using Docker Hub, then it is your `Docker ID`.
 - **Registry Password**
 - **Registry Namespace:** An isolated location inside the registry in which to push new images
@@ -224,7 +224,7 @@ You should now see a new entry for `jenkins-home` with a status of `Bound`, whic
 Use the following command to install the Jenkins chart:
 
 ```
-$ helm install --name jenkins --version=0.8.7 --set Persistence.ExistingClaim=jenkins-home stable/jenkins 
+$ helm install --name jenkins --version=0.8.7 --set Persistence.ExistingClaim=jenkins-home stable/jenkins
 ```
 
 Where `jenkins-home` is the PVC created in previous step.
@@ -298,7 +298,7 @@ Create a Persistent Volume at the mountpoint from step above as follows:
 ![1. Create Persistent Volume](static/imgs/icp_1.png?raw=true)
 
 ![2. Create Persistent Volume](static/imgs/icp_2.png?raw=true)
-   
+
 You should now see a new entry for `jenkins-home` with a status of `Available`, which means it can now be claimed by a Persitent Volume Claim.
 
 ##### 3. Create Persistent Volume Claim (PVC)
@@ -308,7 +308,7 @@ In order to use the newly created `jenkins-home` volume, you will need to create
 2. Click on the `Create Volume` button. Then enter the following values:
 
 ![3. Create Persistent Volume Claim](static/imgs/icp_3.png?raw=true)
-    
+
 You should now see a new entry for `jenkins-home` with a status of `Bound`, which means that the PVC is ready to be used to install the Jenkins Chart.
 
 ##### 4. Install Jenkins Chart

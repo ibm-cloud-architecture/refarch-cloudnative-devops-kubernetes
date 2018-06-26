@@ -1,17 +1,9 @@
 FROM alpine
 
-ENV KUBE_LATEST_VERSION="v1.6.2"
+ENV KUBE_LATEST_VERSION="v1.10.3"
 
-RUN apk add --update ca-certificates \
- && apk add --update -t deps curl \
- && apk add --update bash \
- && curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
- && chmod +x /usr/local/bin/kubectl \
- && apk del --purge deps \
- && rm /var/cache/apk/*
+RUN apk add --no-cache --update ca-certificates curl jq 
 
-ADD https://github.com/mikefarah/yaml/releases/download/1.8/yaml_linux_amd64 /usr/local/bin/yaml
-RUN chmod a+x /usr/local/bin/yaml
+ADD https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
-ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
-RUN chmod a+x /usr/local/bin/jq
+RUN chmod +x /usr/local/bin/kubectl 
