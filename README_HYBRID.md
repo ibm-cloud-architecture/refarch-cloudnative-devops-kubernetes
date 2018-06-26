@@ -27,6 +27,7 @@ Use hosted Jenkins to build and deploy containers to multiple clouds.
 	+ [Run the Build Pipeline](#run-the-build-pipeline)
 	+ [Run the IKS Deploy Pipeline](#run-the-iks-deploy-pipeline)
 	+ [Run the ICP Deploy Pipeline](#run-the-icp-deploy-pipeline)
+* [Conclusion](#conclusion)
 
 ## Overview
 When adopting new technologies, like Kubernetes, most companies want to be able to integrate them with their existing toolchain. For example, most companies who use their own hosted Jenkins as their CI/CD server also expect to be able to use it for CI/CD on Kubernetes.
@@ -42,7 +43,7 @@ A common use case is to use the public IKS cluster as a Development environment,
 **NOTE:** It is a best practice to separate build and deploy by using separate clusters. So the ideal architecture would be something like the following:
 * 1 Jenkins deployment.
 	+ Will trigger build pipelines on the ICP build cluster.
-	+ Will trigger deploy pipeline on the ICP production cluster.
+	+ Will trigger deploy pipelines on the ICP production cluster.
 	+ Will run deploy pipelines locally and deploy to IKS.
 * 1 ICP cluster to run the build pipelines.
 * 1 ICP cluster to run ICP deploy pipelines and Production workloads.
@@ -78,14 +79,14 @@ A common use case is to use the public IKS cluster as a Development environment,
 * An [IBM Cloud Container Service Cluster](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create).
 	+ There is an option for a FREE cluster.
 * An [IBM Cloud Private Cluster](https://github.com/IBM/deploy-ibm-cloud-private).
-	+ For more install options, check out this [document](https://github.com/IBM/deploy-ibm-cloud-private).
+	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html).
 
 ## Installing bluecompute-ce charts
-This document assumes you have already installed the `helm` charts for our microservices reference architecture app, which is known as `bluecompute-ce`. To learn about the app's architecture, checkout it's repo [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#deploy-bluecompute-to-ibm-cloud-container-service).
+This document assumes you have already installed the `helm` charts for our microservices reference architecture app, which is known as `bluecompute-ce`. To learn about the app's architecture, checkout it's repo [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#introduction).
 
 * To install the chart on IKS, checkout the instructions [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#deploy-bluecompute-to-ibm-cloud-container-service).
 	+ To access the `bluecompute-web` front end, follow these [instructions](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#access-and-validate-the-application).
-* To install the chart on IKS, checkout the instructions [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#deploy-bluecompute-to-ibm-cloud-container-service).
+* To install the chart on ICP, checkout the instructions [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#deploy-bluecompute-to-ibm-cloud-private).
 	+ To access the `bluecompute-web` front end, follow these [instructions](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#access-and-validate-the-application-1).
 
 If you want to checkout the umbrella chart for `bluecompute-ce`, check it out [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/master/bluecompute-ce).
@@ -437,4 +438,20 @@ Where `${IMAGE_TAG}` is the image tag that you entered right before running the 
 
 Lastly, verify that you can access the web front end by following these [instructions](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#access-and-validate-the-application-1)
 
-If you can access the web app, then you have successfully ran the deploy pipeline! 
+If you can access the web app, then you have successfully ran the deploy pipeline!
+
+## Conclusion
+Congratulations on getting to the end of this document! The journey to fully automated CI/CD for Kubernetes is a bit tedious but it is worth it in the end. Here is an overview of what you have done so far:
+* Provisioned 1 IKS and 1 ICP cluster.
+* Setup your Docker Registry on IBM Cloud.
+* Created service accounts on both clusters, which will be used by Jenkins pipelines.
+* Setup kubectl access on a deployment for both IKS and ICP clusters.
+* Setup build pipeline to run on ICP using Kubernetes Plugin.
+* Setup IKS pipeline, which runs from Jenkins deployment.
+* Setup ICP pipeline, which runs from ICP using Kubernetes Plugin.
+* Ran build pipeline.
+* Ran IKS and ICP deploy pipelines by specifying the image tag to deploy.
+
+With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines. 
+
+All that remains is to use this knowledge to put together your own pipelines and create webhooks that will trigger the pipelines via the `git push` command. There are plently of tutorials online that explain how to setup GitHub (or any other source control) to trigger Jenkins pipelines via webhooks. We recommend that you checkout our [Microclimate guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate), specifically the [Create GitHub Web Hook](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate#create-github-web-hook), if you are interested in setting this up.
