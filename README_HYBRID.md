@@ -450,7 +450,7 @@ Congratulations on getting to the end of this document! The journey to fully aut
 * Setup IKS pipeline, which runs from Jenkins deployment.
 * Setup ICP pipeline, which runs from ICP using Kubernetes Plugin.
 * Ran build pipeline.
-* Rand IKS and ICP deploy pipelines by specifying the image tag to deploy.
+* Ran IKS and ICP deploy pipelines by specifying the image tag to deploy.
 
 With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines. 
 
