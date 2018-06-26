@@ -1,4 +1,5 @@
-# External Jenkins Setup
+# Hybrid Cloud DevOps
+Use hosted Jenkins to build and deploy containers to multiple clouds.
 
 ## Table of Contents
 * [Overview](#overview)
