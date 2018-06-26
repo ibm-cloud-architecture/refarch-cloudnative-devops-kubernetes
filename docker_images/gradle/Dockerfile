@@ -1,43 +1,35 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk
 
 CMD ["gradle"]
 
 ENV GRADLE_HOME /opt/gradle
-ENV GRADLE_VERSION 4.3.1
+ENV GRADLE_VERSION 4.7
 
-ARG GRADLE_DOWNLOAD_SHA256=15ebe098ce0392a2d06d252bff24143cc88c4e963346582c8d88814758d93ac7
+ARG GRADLE_DOWNLOAD_SHA256=fca5087dc8b50c64655c000989635664a73b11b9bd3703c7d6cabd31b7dcdb04
 RUN set -o errexit -o nounset \
-	&& echo "Installing build dependencies" \
-	&& apk add --no-cache --virtual .build-deps \
-		ca-certificates \
-		openssl \
-		unzip \
-	\
 	&& echo "Downloading Gradle" \
-	&& wget -O gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+	&& wget --no-verbose --output-document=gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
 	\
 	&& echo "Checking download hash" \
-	&& echo "${GRADLE_DOWNLOAD_SHA256} *gradle.zip" | sha256sum -c - \
+	&& echo "${GRADLE_DOWNLOAD_SHA256} *gradle.zip" | sha256sum --check - \
 	\
 	&& echo "Installing Gradle" \
 	&& unzip gradle.zip \
 	&& rm gradle.zip \
-	&& mkdir /opt \
 	&& mv "gradle-${GRADLE_VERSION}" "${GRADLE_HOME}/" \
-	&& ln -s "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle \
-	\
-	&& apk del .build-deps \
+	&& ln --symbolic "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle \
 	\
 	&& echo "Adding gradle user and group" \
-	&& addgroup -S -g 1000 gradle \
-	&& adduser -D -S -G gradle -u 1000 -s /bin/ash gradle \
+	&& groupadd --system --gid 1000 gradle \
+	&& useradd --system --gid gradle --uid 1000 --shell /bin/bash --create-home gradle \
 	&& mkdir /home/gradle/.gradle \
-	&& chown -R gradle:gradle /home/gradle \
+	&& chown --recursive gradle:gradle /home/gradle \
 	\
 	&& echo "Symlinking root Gradle cache to gradle Gradle cache" \
 	&& ln -s /home/gradle/.gradle /root/.gradle
 
 # Create Gradle volume
+#USER gradle
 VOLUME "/home/gradle/.gradle"
 WORKDIR /home/gradle
 
