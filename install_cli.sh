@@ -18,7 +18,7 @@ if [[ $? -ne 0 ]]; then
 		tar zxvf Bluemix_CLI.tar.gz
 		Bluemix_CLI/install_bluemix_cli
 		rm -f /tmp/Bluemix_CLI.tar.gz
-		rm -rf /tmp/Bluemix_CLI 
+		rm -rf /tmp/Bluemix_CLI
 	fi
 fi
 
@@ -54,7 +54,7 @@ if [[ $? -ne 0 ]]; then
 	chmod +x ./kubectl
 	sudo mv ./kubectl /usr/local/bin/kubectl
 fi
-		
+
 # Checking if helm is installed
 KUBE_PATH=$(command -v helm)
 
