@@ -76,7 +76,7 @@ A common use case is to use the public IKS cluster as a Development environment,
 * Install the [`kubectl CLI`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your Jenkis host.
 * An [IBM Cloud Account](https://console.bluemix.net/registration/).
 	+ Needed for the IKS cluster and the Containter Registry Service.
-* An [IBM Cloud Container Service Cluster](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create).
+* An [IBM Cloud Kubernetes Service Cluster](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create).
 	+ There is an option for a FREE cluster.
 * An [IBM Cloud Private Cluster](https://github.com/IBM/deploy-ibm-cloud-private).
 	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html).
@@ -96,10 +96,10 @@ Lastly, if you want to checkout the individual project's code and charts, checko
 ## Docker Registry Setup
 For this guide, we are going to use the `IBM Cloud Container Registry` service to host our docker images. With an IBM Cloud account, you have access to a generous FREE tier. To do the initial setup, we recommend you follow their [Registry Quick Start](https://console.bluemix.net/containers-kubernetes/registry/start) guide, in which you will setup the required CLI components and push your first image to the registry!
 
-Now that your registry is setup we can proceed to creating a `Registry Token`, which will be used by the Jenkins pipeline to push and pull images from the registry. This token can be made non-expiring, which is ideal for CI/CD servers that run 24/7. Also, this token is not tied to a user account, so no need to constanly enter username and passwords manually to login into docker registry.
+Now that your registry is setup we can proceed to creating a `Registry Token`, which will be used by the Jenkins pipeline to push and pull images from the registry. This token can be made non-expiring, which is ideal for CI/CD servers that run 24/7. Also, this token is not tied to a user account, so no need to constantly enter username and passwords manually to login into docker registry.
 
 ### Create a Registry Namespace
-In order to push Docker images to the IBMCloud Container Registry, you will first need to create a globally unique namespace:
+In order to push Docker images to the IBM Cloud Container Registry, you will first need to create a globally unique namespace:
 ```bash
 $ bx cr namespace-add ${NAMESPACE}
 ```
@@ -107,14 +107,14 @@ $ bx cr namespace-add ${NAMESPACE}
 Where `${NAMESPACE}` is the globally unique name for your namespace.
 
 ### Create Docker Registry Token
-To create a Registry Token on , run the following command:
+To create a Registry Token on IBM Cloud Container Registry, run the following command:
 ```bash
 $ bx cr token-add --non-expiring --readwrite --description "For Hybrid Deployment"
 ```
 
 ### Upload the Docker Token to Jenkins
-For Jenkins to be able to use the Docker Registry Token, we must create a `Username with password` credentials in Jenkins. To do so, open a browser windows and do the following:
-* Enter the URL to your jenkins instance and go to `Jenkins->Credentials->System->Global credentials (unrestricted)`
+For Jenkins to be able to use the Docker Registry Token, we must create a `Username with password` credentials in Jenkins. To do so, open a browser window and do the following:
+* Enter the URL to your Jenkins instance and go to `Jenkins->Credentials->System->Global credentials (unrestricted)`
 	+ Or you can use the following URL:
 	+ `http://JENKINS_IP:PORT/credentials/store/system/domain/_/`
 * Click on `Add Credentials`
@@ -127,9 +127,9 @@ For Jenkins to be able to use the Docker Registry Token, we must create a `Usern
 		+ When doing `docker login`, this is the username associated with the token.
 	+ Enter the token that you obtained in the previous step as the `Password`.
 	+ Enter `registry-credentials` as the `ID`.
-	+ Optional: Enter a description for the secret file.
+	+ Optional: Enter a description for the credentials.
 	+ Press the `OK` button.
-+ If successful, you should see the `token/******` credentials entry listed.
+	+ If successful, you should see the `token/******` credentials entry listed.
 
 ### Create Docker Registry Secret
 On both IKS and ICP clusters, create the following Docker Config secret using the token from previous step:
@@ -215,7 +215,7 @@ Where `${SECRET_NAME}` is the secret name, which is the result for the first com
 
 #### Upload the IKS CA Certificate to Jenkins
 Now open a browser windows and do the following:
-* Enter the URL to your jenkins instance and go to `Jenkins->Credentials->System->Global credentials (unrestricted)`
+* Enter the URL to your Jenkins instance and go to `Jenkins->Credentials->System->Global credentials (unrestricted)`
 	+ Or you can use the following URL:
 	+ `http://JENKINS_IP:PORT/credentials/store/system/domain/_/`
 * Click on `Add Credentials`
@@ -228,7 +228,7 @@ Now open a browser windows and do the following:
 	+ Enter `iks-ca` as the `ID`.
 	+ Optional: Enter a description for the secret file
 	+ Press the `OK` button.
-+ If successful, you should see the `iks-ca.crt` Secret file entry listed.
+	+ If successful, you should see the `iks-ca.crt` Secret file entry listed.
 	 
 #### Upload the IKS Token to Jenkins
 Now let's upload the token as a `Secret text` as follows:
@@ -240,12 +240,12 @@ Now let's upload the token as a `Secret text` as follows:
 	+ Enter `iks-token` as the `ID`.
 	+ Optional: Enter a description for the secret text
 	+ Press the `OK` button.
-+ If successful, you should see the `iks-token` Secret text entry listed.
+	+ If successful, you should see the `iks-token` Secret text entry listed.
 
 Now Jenkins has all it needs to access the IKS cluster.
 
 ### Setting up ICP Cluster Access in Jenkins
-Now let's do the same, but for the ICP cluster. Again, since we will be using the `Kubernetes Plugin` to run the Pipelines on ICP pods, the steps for connecting to the cluster will vary slightly. But essentially we are doing the same thing, which is to get the ICP CA certificate and the service account token and storying it in Jenkins.
+Now let's do the same, but for the ICP cluster. Again, since we will be using the `Kubernetes Plugin` to run the Pipelines on ICP pods, the steps for connecting to the cluster will vary slightly. But essentially we are doing the same thing, which is to get the ICP CA certificate and the service account token and storing it in Jenkins.
 
 #### Get the ICP CA Certificate and the Token
 For this step, you can follow the same instructions in [Get the IKS CA Certificate and the Token](#get-the-iks-ca-certificate-and-the-token), but make sure to name the CA certificate as `icp-ca.crt` and the token file as `icp-token`.
@@ -454,4 +454,4 @@ Congratulations on getting to the end of this document! The journey to fully aut
 
 With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines. 
 
-All that remains is to use this knowledge to put together your own pipelines and create webhooks that will trigger the pipelines via the `git push` command. There are plently of tutorials online that explain how to setup GitHub (or any other source control) to trigger Jenkins pipelines via webhooks. We recommend that you checkout our [Microclimate guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate), specifically the [Create GitHub Web Hook](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate#create-github-web-hook), if you are interested in setting this up.
+All that remains is to use this knowledge to put together your own pipelines and create webhooks that will trigger the pipelines via the `git push` command. There are plenty of tutorials online that explain how to setup GitHub (or any other source control) to trigger Jenkins pipelines via webhooks. We recommend that you checkout our [Microclimate guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate), specifically the [Create GitHub Web Hook](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate#create-github-web-hook), if you are interested in setting this up.
