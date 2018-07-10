@@ -6,4 +6,4 @@ metadata:
     tier: config
 data:
   namespace: default
-  registry: master.cfc:8500
+  registry: mycluster.icp:8500
