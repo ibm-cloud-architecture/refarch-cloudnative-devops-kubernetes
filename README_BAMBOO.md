@@ -55,7 +55,7 @@ The goal of this document is to teach you how you can, on a basic level, use an 
 
 ## Architecture Diagram
 Here is a diagram of what we will be playing with today:
-COMING SOON
+![Diagram](static/imgs/atlassian/atlassian.png?raw=true)
 
 The end-goal workflow we are going to run through, after setting up and configuring all the tools and infrastructure, is the following:
 1. Commit a new change in code and write the JIRA issue as part of the commit message, which will make it show on JIRA issue.
