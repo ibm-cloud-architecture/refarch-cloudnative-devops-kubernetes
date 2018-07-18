@@ -132,8 +132,11 @@ $ TOKEN=$(kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{
 
 Now let's create the configuration file itself:
 ```bash
+# Get Current Context
+CONTEXT=$(kubectl config current-context)
+
 # Get ICP Cluster name
-$ CLUSTER_NAME=$(kubectl config get-contexts "$context" | awk '{print $3}' | tail -n 1)
+$ CLUSTER_NAME=$(kubectl config get-contexts "$CONTEXT" | awk '{print $3}' | tail -n 1)
 
 # Get ICP URL
 $ ICP_URL=$(kubectl config view -o jsonpath="{.clusters[?(@.name == \"${CLUSTER_NAME}\")].cluster.server}")
@@ -145,15 +148,15 @@ $ kubectl config set-cluster "${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/co
 $ kubectl config set-credentials "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --token="${TOKEN}"
 
 # Create a context for cluster
-$ kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml}" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
+$ kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
 
 # Set the current-context to the above context
-$ kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml}"
+$ kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml"
 ```
 
 That should be it. Now to make sure everything works, run the following command to get pods using the service account:
 ```bash
-$ KUBECONFIG="${CONFIG_FOLDER}/config.yaml}" kubectl get pods
+$ KUBECONFIG="${CONFIG_FOLDER}/config.yaml" kubectl get pods
 ```
 
 **NOTE:** We also provided a script that does the above for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh). There is also a script that deletes the service accounts for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh).
