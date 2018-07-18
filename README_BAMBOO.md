@@ -352,8 +352,10 @@ $ mkdir ~/.kube
 
 Now from your laptop or wherever you have the kubeconfig file, run the following command:
 ```bash
-$ scp /path/to/config.yml bamboo@${BAMBOO_IP}:~/.kube
+$ scp "${CONFIG_FOLDER}/config.yaml" bamboo@${BAMBOO_IP}:~/.kube
 ```
+
+Where `${CONFIG_FOLDER}` is the path where you created service account kubeconfig file.
 
 Log back into Bamboo host as the `bamboo` user and run the following commands:
 ```bash
