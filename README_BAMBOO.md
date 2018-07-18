@@ -133,7 +133,7 @@ $ TOKEN=$(kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{
 Now let's create the configuration file itself:
 ```bash
 # Get Current Context
-CONTEXT=$(kubectl config current-context)
+$ CONTEXT=$(kubectl config current-context)
 
 # Get ICP Cluster name
 $ CLUSTER_NAME=$(kubectl config get-contexts "$CONTEXT" | awk '{print $3}' | tail -n 1)
