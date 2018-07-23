@@ -47,7 +47,7 @@
   * [Conclusion](#conclusion)
 
 ## Introduction
-Adopting new technology, such as IBM Cloud Private (ICP), is easier when you can integrate it with your existing technology stack. The Atlassian suite of software development tools (JIRA, Bamboo, and Bitbucket, amongst others) are widely adopted amongst organizations and are used for end-to-end software development cycles, amongst other things.
+Adopting new technology, such as IBM Cloud Private (ICP), is easier when you can integrate it with your existing technology stack. The Atlassian suite of software development tools (JIRA, Bamboo, Bitbucket, etc) are widely adopted by multiple organizations and are used for end-to-end software development cycles, amongst other things.
 
 The goal of this document is to teach you how you can, on a basic level, use an existing Atlassian (JIRA, Bamboo, and Bitbucket) to:
 * Trigger a Bamboo CI/CD Pipeline from Bitbucket that will update an existing Kubernetes deployment on ICP.
@@ -69,7 +69,7 @@ On a basic level, the above is the workflow we want to prove. Later on you will 
 ## Pre-Requisites
 This guide will require some infrastructure to host ICP along with JIRA, Bamboo, and Bitbucket and will assume that you already have that infrastructure available at your disposal. Here is what you will need:
 * An [IBM Cloud Private Cluster](https://github.com/IBM/deploy-ibm-cloud-private).
-	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html).
+	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.3/installing/install_containers_CE.html).
 * 3 Ubuntu VMs: This guide was tested on Ubuntu 16.04.4 Xenial
 	+ Create a root password on all of them
 	```bash
@@ -88,7 +88,7 @@ This guide will require some infrastructure to host ICP along with JIRA, Bamboo,
 	```
 
 ## 1. ICP Setup
-Before we start using Bamboo to update an ICP Kubernetes Deployment, we need to have a deployment to update in the first place. Then we need to provide Bamboo with the access/priviledges it needs to do so.
+Before we start using Bamboo to update an ICP Kubernetes Deployment, we need to have a deployment to update in the first place. Then we need to provide Bamboo with the access/privileges it needs to do so.
 
 ### a. Install Microservices Reference Architecture Chart on ICP
 As our deployment, we are going to install our microservices reference architecture app, called `bluecompute-ce`, in the `default` namespace on our ICP cluster. To Install `bluecompute-ce`, follow the instructions in the link below:
@@ -107,7 +107,7 @@ $ kubectl create sa bamboo --namespace default
 $ kubectl create clusterrolebinding "bamboo-binding" --clusterrole=admin --serviceaccount="default:bamboo"
 ```
 
-**NOTE:** In a real world scenario, we recommend you assing a non-admin role with less priviledges to your service account.
+**NOTE:** In a real world scenario, we recommend you assing a non-admin role with less privileges to your service account.
 
 Now we need download the Certificate of Authority (CA) and the Service Account Token so that we can create a configuration file that we can upload to Bamboo later.
 ```bash
@@ -132,8 +132,11 @@ $ TOKEN=$(kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{
 
 Now let's create the configuration file itself:
 ```bash
+# Get Current Context
+$ CONTEXT=$(kubectl config current-context)
+
 # Get ICP Cluster name
-$ CLUSTER_NAME=$(kubectl config get-contexts "$context" | awk '{print $3}' | tail -n 1)
+$ CLUSTER_NAME=$(kubectl config get-contexts "$CONTEXT" | awk '{print $3}' | tail -n 1)
 
 # Get ICP URL
 $ ICP_URL=$(kubectl config view -o jsonpath="{.clusters[?(@.name == \"${CLUSTER_NAME}\")].cluster.server}")
@@ -145,15 +148,15 @@ $ kubectl config set-cluster "${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/co
 $ kubectl config set-credentials "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --token="${TOKEN}"
 
 # Create a context for cluster
-$ kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml}" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
+$ kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
 
 # Set the current-context to the above context
-$ kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml}"
+$ kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml"
 ```
 
 That should be it. Now to make sure everything works, run the following command to get pods using the service account:
 ```bash
-$ KUBECONFIG="${CONFIG_FOLDER}/config.yaml}" kubectl get pods
+$ KUBECONFIG="${CONFIG_FOLDER}/config.yaml" kubectl get pods
 ```
 
 **NOTE:** We also provided a script that does the above for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh). There is also a script that deletes the service accounts for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh).
@@ -349,8 +352,10 @@ $ mkdir ~/.kube
 
 Now from your laptop or wherever you have the kubeconfig file, run the following command:
 ```bash
-$ scp /path/to/config.yml bamboo@${BAMBOO_IP}:~/.kube
+$ scp "${CONFIG_FOLDER}/config.yaml" bamboo@${BAMBOO_IP}:~/.kube
 ```
+
+Where `${CONFIG_FOLDER}` is the path where you created service account kubeconfig file.
 
 Log back into Bamboo host as the `bamboo` user and run the following commands:
 ```bash
