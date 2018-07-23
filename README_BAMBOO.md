@@ -47,7 +47,7 @@
   * [Conclusion](#conclusion)
 
 ## Introduction
-Adopting new technology, such as IBM Cloud Private (ICP), is easier when you can integrate it with your existing technology stack. The Atlassian suite of software development tools (JIRA, Bamboo, and Bitbucket, amongst others) are widely adopted amongst organizations and are used for end-to-end software development cycles, amongst other things.
+Adopting new technology, such as IBM Cloud Private (ICP), is easier when you can integrate it with your existing technology stack. The Atlassian suite of software development tools (JIRA, Bamboo, Bitbucket, etc) are widely adopted by multiple organizations and are used for end-to-end software development cycles, amongst other things.
 
 The goal of this document is to teach you how you can, on a basic level, use an existing Atlassian (JIRA, Bamboo, and Bitbucket) to:
 * Trigger a Bamboo CI/CD Pipeline from Bitbucket that will update an existing Kubernetes deployment on ICP.
@@ -69,7 +69,7 @@ On a basic level, the above is the workflow we want to prove. Later on you will 
 ## Pre-Requisites
 This guide will require some infrastructure to host ICP along with JIRA, Bamboo, and Bitbucket and will assume that you already have that infrastructure available at your disposal. Here is what you will need:
 * An [IBM Cloud Private Cluster](https://github.com/IBM/deploy-ibm-cloud-private).
-	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html).
+	+ For more install options, check out this [document](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.3/installing/install_containers_CE.html).
 * 3 Ubuntu VMs: This guide was tested on Ubuntu 16.04.4 Xenial
 	+ Create a root password on all of them
 	```bash
@@ -88,7 +88,7 @@ This guide will require some infrastructure to host ICP along with JIRA, Bamboo,
 	```
 
 ## 1. ICP Setup
-Before we start using Bamboo to update an ICP Kubernetes Deployment, we need to have a deployment to update in the first place. Then we need to provide Bamboo with the access/priviledges it needs to do so.
+Before we start using Bamboo to update an ICP Kubernetes Deployment, we need to have a deployment to update in the first place. Then we need to provide Bamboo with the access/privileges it needs to do so.
 
 ### a. Install Microservices Reference Architecture Chart on ICP
 As our deployment, we are going to install our microservices reference architecture app, called `bluecompute-ce`, in the `default` namespace on our ICP cluster. To Install `bluecompute-ce`, follow the instructions in the link below:
@@ -107,7 +107,7 @@ $ kubectl create sa bamboo --namespace default
 $ kubectl create clusterrolebinding "bamboo-binding" --clusterrole=admin --serviceaccount="default:bamboo"
 ```
 
-**NOTE:** In a real world scenario, we recommend you assing a non-admin role with less priviledges to your service account.
+**NOTE:** In a real world scenario, we recommend you assing a non-admin role with less privileges to your service account.
 
 Now we need download the Certificate of Authority (CA) and the Service Account Token so that we can create a configuration file that we can upload to Bamboo later.
 ```bash
