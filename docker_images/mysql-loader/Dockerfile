@@ -6,7 +6,7 @@ RUN apk --no-cache update \
 
 ADD helper.sh /
 ADD startup.sh /
-ADD https://raw.githubusercontent.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/master/mysql/scripts/load-data.sql /
+ADD load-data.sql /
 
 RUN chmod a+x helper.sh
 RUN chmod a+x startup.sh

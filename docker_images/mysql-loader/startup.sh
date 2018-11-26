@@ -21,13 +21,18 @@
 source ./helper.sh
 
 # Checks for mysql "variable" set by Kubernetes secret
-if [ -z ${mysql+x} ]; then 
-    echo "Secret not in \"mysql\" variable. Aborting...";
-    exit 1
-fi
+if [ -n "$mysql" ]; then
+    echo "Found mysql environment variable"
+    mysql_uri=$(echo $mysql | jq -r '.uri')
 
-echo "Found mysql secret"
-mysql_uri=$(echo $mysql | jq -r '.uri')
+elif [ -n "$MYSQL_URI" ]; then
+    echo "Getting elements from MYSQL_URI"
+    mysql_uri=$MYSQL_URI
+
+else
+    echo "Using MySQL Community Chart"
+    mysql_uri="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
+fi
 
 # Do the URL parsing
 uri_parser $mysql_uri
@@ -79,7 +84,7 @@ while !(mysql -v -u${mysql_user} -p${mysql_password} --host ${mysql_host} --port
 do
   printf "Waiting for MySQL to fully initialize\n\n"
   sleep 1
-    echo "trying to load data again"
+  echo "trying to load data again"
 done
 
 #rm /load-data.sql testdata
