@@ -1,7 +1,7 @@
 # DevOps for Cloud Native Reference Application
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
+https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring*
 
 ## Table of Contents
   * [Introduction](#introduction)
@@ -132,7 +132,7 @@ For IKS, you need to download your cluster configuration first, setup `KUBECONFI
 ```bash
 # Download cluster configuration to your workstation
 # Make sure to run the "export KUBECONFIG=" command it spits out in the end
-$ bx cs cluster-config ${CLUSTER_NAME}
+$ ibmcloud ks cluster-config ${CLUSTER_NAME}
 
 # Init helm in your cluster
 $ helm init
@@ -144,20 +144,18 @@ If using `IBM Cloud Private`, we recommend you follow these [instructions](https
 ### 2. Install Jenkins Chart:
 Each of the following `helm install` options downloads the Jenkins chart from Kubernetes Stable Charts [Repository](https://github.com/kubernetes/charts/tree/master/stable) (which comes by default with helm) and installs it on your cluster.
 
-**Note** that the Jenkins Master itself takes a few minutes initialize even after showing installation success. The output of the commands below will provide instructions on how to access the newly installed Jenkins Pod. For more information on the additional options for the chart, see this [document](https://github.com/kubernetes/charts/tree/master/stable/jenkins#configuration).
+**IMPORTANT:**
+* The Jenkins Master itself takes a few minutes to initialize even after showing installation success. The output of the `helm install` command will provide instructions on how to access the newly installed Jenkins Pod. For more information on the additional options for the chart, see this [document](https://github.com/kubernetes/charts/tree/master/stable/jenkins#configuration).
+* For Jenkins to work properly, the chart also installs these [plugins](https://github.com/helm/charts/blob/master/stable/jenkins/values.yaml#L92).
+  + Because Jenkins and these plugins get updated regularly, you might be required to update these plugins before you start creating pipelines. To update the plugins, please follow these intructions from the official Jenkins documentation after installing the Jenkins chart.
+    - https://jenkins.io/doc/book/managing/plugins/#from-the-web-ui
+  + If the Jenkins version that you installed is very outdated, the latest plugin versions might not work at all. This means that you might have to install a chart with the latest supported version of Jenkins before you upgrade the plugins.
 
 #### Install the Jenkins Chart and Provision a PVC dynamically
 The following command assumes you have [Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) enabled, which will not only install jenkins, but also provision a [Persistent Volume Claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) where Jenkins can store its build data:
 ```bash
-$ helm install --namespace default --name jenkins --version 0.16.3 \
-    --set Master.ImageTag=2.129 \
+$ helm install --namespace default --name jenkins \
     --set Master.ServiceType=NodePort \
-    --set Master.InstallPlugins.0=kubernetes:1.9.2 \
-    --set Master.InstallPlugins.1=workflow-aggregator:2.5 \
-    --set Master.InstallPlugins.2=workflow-job:2.21 \
-    --set Master.InstallPlugins.3=credentials-binding:1.16 \
-    --set Master.InstallPlugins.4=git:3.9.1 \
-    --set Agent.ImageTag=3.19-1 \
     --set rbac.install=true \
     stable/jenkins # If ICP, add the --tls flag
 ```
@@ -165,17 +163,10 @@ $ helm install --namespace default --name jenkins --version 0.16.3 \
 #### Install the Jenkins Chart and Pass an Existing PVC
 To Install the Jenkins Chart and Pass an Existing PVC, use the following command:
 ```bash
-$ helm install --namespace default --name jenkins --version 0.16.3 \
-    --set Master.ImageTag=2.129 \
+$ helm install --namespace default --name jenkins \
     --set Master.ServiceType=NodePort \
-    --set Master.InstallPlugins.0=kubernetes:1.9.2 \
-    --set Master.InstallPlugins.1=workflow-aggregator:2.5 \
-    --set Master.InstallPlugins.2=workflow-job:2.21 \
-    --set Master.InstallPlugins.3=credentials-binding:1.16 \
-    --set Master.InstallPlugins.4=git:3.9.1 \
-    --set Persistence.ExistingClaim=${EXISTING_PVC} \
-    --set Agent.ImageTag=3.19-1 \
     --set rbac.install=true \
+    --set Persistence.ExistingClaim=${EXISTING_PVC} \
     stable/jenkins # If ICP, add the --tls flag
 ```
 
@@ -184,17 +175,10 @@ Where `${EXISTING_PVC}` is the name of an existing PVC, which is usually named `
 #### Install the Jenkins Chart without a PVC
 To Install the Jenkins Chart without a PVC, use the following command:
 ```bash
-$ helm install --namespace default --name jenkins --version 0.16.3 \
-    --set Master.ImageTag=2.129 \
+$ helm install --namespace default --name jenkins \
     --set Master.ServiceType=NodePort \
-    --set Master.InstallPlugins.0=kubernetes:1.9.2 \
-    --set Master.InstallPlugins.1=workflow-aggregator:2.5 \
-    --set Master.InstallPlugins.2=workflow-job:2.21 \
-    --set Master.InstallPlugins.3=credentials-binding:1.16 \
-    --set Master.InstallPlugins.4=git:3.9.1 \
-    --set Persistence.Enabled=false \
-    --set Agent.ImageTag=3.19-1 \
     --set rbac.install=true \
+    --set Persistence.Enabled=false \
     stable/jenkins # If ICP, add the --tls flag
 ```
 
@@ -230,7 +214,7 @@ $ minikube service jenkins
 ##### 2.b. IBM Cloud Kubernetes Service
 If using IKS, then you must use the following command to obtain the public IPs of your worker nodes as the default Jenkins install output will return the worker nodes' private IPs, which are not publicly accessible:
 ```bash
-$ bx cs workers ${CLUSTER_NAME}
+$ ibmcloud ks workers ${CLUSTER_NAME}
 ```
 
 Where `${CLUSTER_NAME}` is the cluster name assigned to your cluster.
@@ -375,13 +359,13 @@ For Jenkins to be able to safely use the Docker Registry Credentials in the pipe
     + If successful, you should see the `username/******` credentials entry listed.
 
 ## Create and Run a Sample CI/CD Pipeline
-Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using our sample [Bluecompute Web Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/tree/master) from BlueCompute.
+Now that we have a fully configured Jenkins setup. Let's create a sample CI/CD [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using our sample [Bluecompute Web Service](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/tree/spring) from BlueCompute.
 
 **NOTE:** Make sure you already installed the `bluecompute-ce` chart in the `default` namespace. To do so, follow the instructions in the [Install Bluecompute Reference Architecture Chart](#install-bluecompute-reference-architecture-chart) section.
 
 Since the pipeline will create a Kubernetes Deployment, we will be using the [Kubernetes Plugin Pipeline Convention](https://github.com/jenkinsci/kubernetes-plugin#pipeline-support). This will allow us to define the Docker images (i.e. Node.js) to be used in the Jenkins Slave Pods to run the pipelines and also the configurations (ConfigMaps, Secrets, or Environment variables) to do so, if needed.
 
-Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/blob/master/Jenkinsfile) to see the sample Pipeline we will be using.
+Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/blob/spring/Jenkinsfile) to see the sample Pipeline we will be using.
 
 ### Step 1: Create a Sample Job
 ![Create a Sample Job](static/imgs/1_create_job.png?raw=true)
@@ -413,7 +397,7 @@ Do the above for all 5 parameters.
 
 Now scroll down to `Pipeline` section and enter the following for git repository details:
 * **Repository URL:** `https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web`
-* **Branch:** `master`
+* **Branch:** `spring`
 * **Script Path**: `Jenkinsfile`
 
 ![Create Pipeline](static/imgs/3_setup_pipeline.png?raw=true)
