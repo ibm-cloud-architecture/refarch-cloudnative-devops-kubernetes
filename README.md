@@ -51,7 +51,7 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/sp
   * [Further Reading: Hybrid Cloud Setup](#further-reading-hybrid-cloud-setup)
 
 ## Introduction
-DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Bluemix to implement the CI/CD for the BlueCompute reference application.
+DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Cloud to implement the CI/CD for the BlueCompute reference application.
 
 The project uses the [Jenkins Helm Chart](https://github.com/kubernetes/charts/tree/master/stable/jenkins) to install a Jenkins Master pod with the [Kubernetes Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Kubernetes+Plugin) in a Kubernetes Cluster. [**Helm**](https://github.com/kubernetes/helm) is Kubernetes's package manager, which facilitates deployment of prepackaged Kubernetes resources that are reusable. This setup allows Jenkins to spin up ephemeral pods to run Jenkins jobs and pipelines without the need of Always-On dedicated Jenkins slave/worker servers, which reduces Jenkins's infrastructural costs.
 
@@ -60,7 +60,7 @@ Let's get started.
 ## Architecture & CI/CD Workflow
 Here is the High Level DevOps Architecture Diagram for the Jenkins setup on Kubernetes, along with a typical CI/CD workflow:
 
-![DevOps Toolchain](static/imgs/architecture.png?raw=true)  
+![DevOps Toolchain](static/imgs/architecture.png?raw=true)
 
 This guide will install the following resources:
 * 1 x 8GB [Persistent Volume Claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) (PVC) to Store Jenkins data and builds' information.
@@ -101,15 +101,14 @@ If you would like Jenkins to use a PVC, you must provision a PVC from IBM Cloud 
 
 To create a Persistent Volume Claim (PVC), use the commands below:
 ```bash
-$ cd jenkins/bluemix
-$ kubectl apply -f jenkins/ibm_cloud_container_service/pvc.yaml
+kubectl apply -f jenkins/ibm_cloud_container_service/pvc.yaml
 ```
 
-**Note:** that the minimum PVC size for Bluemix is `20GB`.
+**Note:** that the minimum PVC size for IBM Cloud Kubernetes Service is `20GB`.
 
 Before you are able to use your PVC, it needs to be `Bound` to the cluster. To watch for changes in its provisioning status, use the following command:
 ```bash
-$ kubectl get pvc jenkins-home -o wide -w
+kubectl get pvc jenkins-home -o wide -w
 NAME           STATUS    VOLUME                                     CAPACITY  ACCESS MODES   STORAGECLASS       AGE
 jenkins-home   Pending                                                                       ibmc-file-silver   3s
 jenkins-home   Bound     pvc-f62fdc8a-797c-11e8-896e-02c97f163c96   20Gi      RWO            ibmc-file-silver   3m
@@ -122,7 +121,7 @@ Though not necessary to install Jenkins chart, we highly recommend that you setu
 
 ### 1. Initialize `helm` in your cluster:
 ```bash
-$ helm init
+helm init
 ```
 
 This initializes the `helm` client as well as the server side component called `tiller`.
@@ -132,10 +131,10 @@ For IKS, you need to download your cluster configuration first, setup `KUBECONFI
 ```bash
 # Download cluster configuration to your workstation
 # Make sure to run the "export KUBECONFIG=" command it spits out in the end
-$ ibmcloud ks cluster-config ${CLUSTER_NAME}
+ibmcloud ks cluster-config ${CLUSTER_NAME}
 
 # Init helm in your cluster
-$ helm init
+helm init
 ```
 
 #### IBM Cloud Private
@@ -154,7 +153,7 @@ Each of the following `helm install` options downloads the Jenkins chart from Ku
 #### Install the Jenkins Chart and Provision a PVC dynamically
 The following command assumes you have [Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) enabled, which will not only install jenkins, but also provision a [Persistent Volume Claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) where Jenkins can store its build data:
 ```bash
-$ helm install --namespace default --name jenkins \
+helm upgrade --install jenkins --namespace default \
     --set Master.ServiceType=NodePort \
     --set rbac.install=true \
     stable/jenkins # If ICP, add the --tls flag
@@ -163,7 +162,7 @@ $ helm install --namespace default --name jenkins \
 #### Install the Jenkins Chart and Pass an Existing PVC
 To Install the Jenkins Chart and Pass an Existing PVC, use the following command:
 ```bash
-$ helm install --namespace default --name jenkins \
+helm upgrade --install jenkins --namespace default \
     --set Master.ServiceType=NodePort \
     --set rbac.install=true \
     --set Persistence.ExistingClaim=${EXISTING_PVC} \
@@ -175,7 +174,7 @@ Where `${EXISTING_PVC}` is the name of an existing PVC, which is usually named `
 #### Install the Jenkins Chart without a PVC
 To Install the Jenkins Chart without a PVC, use the following command:
 ```bash
-$ helm install --namespace default --name jenkins \
+helm upgrade --install jenkins --namespace default \
     --set Master.ServiceType=NodePort \
     --set rbac.install=true \
     --set Persistence.Enabled=false \
@@ -190,7 +189,7 @@ To validate Jenkins, you must obtain the Jenkins `admin` password, and the Jenki
 #### 1. Obtain Jenkins `admin` password:
 After you install the chart, you will see a command to receive the password that looks like follows. Note that this command might look different based on which namespace you installed it in and the chart version:
 ```bash
-$ printf $(kubectl get secret --namespace default jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
+printf $(kubectl get secret --namespace default jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
 ```
 
 Save that password as you will need it to login into Jenkins UI
@@ -208,13 +207,13 @@ After you install the chart, you will see a few commands to obtain the Jenkins U
 ##### 2.a. Minikube Deployment
 If using `minikube`, the URL commands above might not work. To open a browser to the Jenkins web portal, use the following command:
 ```bash
-$ minikube service jenkins
+minikube service jenkins
 ```
 
 ##### 2.b. IBM Cloud Kubernetes Service
 If using IKS, then you must use the following command to obtain the public IPs of your worker nodes as the default Jenkins install output will return the worker nodes' private IPs, which are not publicly accessible:
 ```bash
-$ ibmcloud ks workers ${CLUSTER_NAME}
+ibmcloud ks workers ${CLUSTER_NAME}
 ```
 
 Where `${CLUSTER_NAME}` is the cluster name assigned to your cluster.
@@ -256,7 +255,7 @@ Jenkins creates pods from containers in order to run jobs, sometimes creating mu
 ### Delete Jenkins Deployment
 To delete the Jenkins chart from your cluster, run the following:
 ```bash
-$ helm delete jenkins --purge
+helm delete jenkins --purge
 ```
 
 ## Setup Docker Registry
@@ -274,7 +273,7 @@ If you don't already have a `Docker ID`, create one at https://hub.docker.com/
 
 This information will go in a `docker-registry secret`, which you can create using the following:
 ```bash
-$ kubectl create secret docker-registry registry-creds --docker-server=https://index.docker.io/v1/ --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=${EMAIL}
+kubectl create secret docker-registry registry-creds --docker-server=https://index.docker.io/v1/ --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=${EMAIL}
 ```
 
 Where:
@@ -292,7 +291,7 @@ Now that your registry is setup we can proceed to creating a `Registry Token`, w
 ##### 1. Create a Registry Namespace
 In order to push Docker images to the IBM Cloud Container Registry, you will first need to create a globally unique namespace:
 ```bash
-$ bx cr namespace-add ${NAMESPACE}
+bx cr namespace-add ${NAMESPACE}
 ```
 
 Where `${NAMESPACE}` is the globally unique name for your namespace.
@@ -300,13 +299,13 @@ Where `${NAMESPACE}` is the globally unique name for your namespace.
 ##### 2. Create Docker Registry Token
 To create a Registry Token on IBM Cloud Container Registry, run the following command:
 ```bash
-$ bx cr token-add --non-expiring --readwrite --description "For Science"
+bx cr token-add --non-expiring --readwrite --description "For Science"
 ```
 
 ##### 3. Create Docker Secret
 ```bash
 # Create docker registry secret
-$ kubectl create secret docker-registry registry-creds --docker-server=registry.ng.bluemix.net --docker-username=token --docker-password=${TOKEN} --docker-email=test@test.com
+kubectl create secret docker-registry registry-creds --docker-server=registry.ng.bluemix.net --docker-username=token --docker-password=${TOKEN} --docker-email=test@test.com
 ```
 
 Where:
@@ -319,7 +318,7 @@ Where:
 #### IBM Cloud Private
 This information will go in a `docker-registry secret`, which you can create using the following:
 ```bash
-$ kubectl create secret docker-registry registry-creds --docker-server=mycluster.icp:8500 --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=test@test.com
+kubectl create secret docker-registry registry-creds --docker-server=mycluster.icp:8500 --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=test@test.com
 ```
 
 Where:
@@ -335,7 +334,7 @@ When you installed the Jenkins helm chart, you also created a [service account](
 
 In our case, we are going to use the service account to update existing deployments with a Docker image from our private registry. Since the repository is private, the service account needs acccess to the Docker Secret (which we created in Step 1) to authenticate against Docker Hub and pull down the image into our deployment. In service account terms, this kind of secret is known as an `imagePullSecret`. To patch the service account, run the following command:
 ```bash
-$ kubectl patch serviceaccount jenkins -p '{"imagePullSecrets": [{"name": "registry-creds"}]}'
+kubectl patch serviceaccount jenkins -p '{"imagePullSecrets": [{"name": "registry-creds"}]}'
 ```
 
 **NOTE:** This step is not necessary if the Docker images are public. However, it is a best practice to secure your Docker registry with authentication.
@@ -423,7 +422,7 @@ Congratulations on getting to the end of this document! The journey to fully aut
 * Setup a CI/CD pipeline, which runs from Kubernetes using Kubernetes Plugin.
 * Ran the CI/CD pipeline.
 
-With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines. 
+With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines.
 
 All that remains is to use this knowledge to put together your own pipelines and create webhooks that will trigger the pipelines via the `git push` command. There are plenty of tutorials online that explain how to setup GitHub (or any other source control) to trigger Jenkins pipelines via webhooks. We recommend that you checkout our [Microclimate guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate), specifically the [Create GitHub Web Hook](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate#create-github-web-hook), if you are interested in setting this up.
 
