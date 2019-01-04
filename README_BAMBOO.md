@@ -73,18 +73,18 @@ This guide will require some infrastructure to host ICP along with JIRA, Bamboo,
 * 3 Ubuntu VMs: This guide was tested on Ubuntu 16.04.4 Xenial
 	+ Create a root password on all of them
 	```bash
-	$ sudo su
-	$ passwd
+	sudo su
+	passwd
 	```
 	+ Enable root ssh on all of them
 	```bash
 	# Install openssh
-	$ sudo su
-	$ apt-get update
-	$ apt-get install -y openssh-server
+	sudo su
+	apt-get update
+	apt-get install -y openssh-server
 	# Enable root ssh
-	$ sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
-	$ systemctl restart ssh
+	sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
+	systemctl restart ssh
 	```
 
 ## 1. ICP Setup
@@ -101,10 +101,10 @@ To learn more about the reference architecture application, feel free to check o
 In order for Bamboo to be able to update a deployment on ICP, we are going to create a [Service Account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) and are going to assign to it the `admin` role as a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 ```bash
 # Create the bamboo service account in the default namespace
-$ kubectl create sa bamboo --namespace default
+kubectl create sa bamboo --namespace default
 
 # Bind the admin cluster role to the bamboo service account
-$ kubectl create clusterrolebinding "bamboo-binding" --clusterrole=admin --serviceaccount="default:bamboo"
+kubectl create clusterrolebinding "bamboo-binding" --clusterrole=admin --serviceaccount="default:bamboo"
 ```
 
 **NOTE:** In a real world scenario, we recommend you assing a non-admin role with less privileges to your service account.
@@ -113,50 +113,50 @@ Now we need download the Certificate of Authority (CA) and the Service Account T
 ```bash
 # Specify path where config file will reside
 # Mac
-$ CONFIG_FOLDER="/Users/${USER}/.kube/config-default-bamboo"
+CONFIG_FOLDER="/Users/${USER}/.kube/config-default-bamboo"
 # Linux
-$ CONFIG_FOLDER="/home/${USER}/.kube/config-default-bamboo"
+CONFIG_FOLDER="/home/${USER}/.kube/config-default-bamboo"
 
 # Create config folder
-$ mkdir -p "${CONFIG_FOLDER}"
+mkdir -p "${CONFIG_FOLDER}"
 
 # Get Service Account Secret Name
-$ SECRET_NAME=$(kubectl get sa bamboo --namespace default -o=jsonpath='{.secrets[0].name}';echo)
+SECRET_NAME=$(kubectl get sa bamboo --namespace default -o=jsonpath='{.secrets[0].name}';echo)
 
 # Extract CA certificate from secret
-$ kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{.data.ca\.crt}' | base64 -D > "${CONFIG_FOLDER}/ca.crt"
+kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{.data.ca\.crt}' | base64 -D > "${CONFIG_FOLDER}/ca.crt"
 
 # Extract Service Account Token
-$ TOKEN=$(kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{.data.token}' | base64 -D)
+TOKEN=$(kubectl get secret "${SECRET_NAME}" --namespace default -o=jsonpath='{.data.token}' | base64 -D)
 ```
 
 Now let's create the configuration file itself:
 ```bash
 # Get Current Context
-$ CONTEXT=$(kubectl config current-context)
+CONTEXT=$(kubectl config current-context)
 
 # Get ICP Cluster name
-$ CLUSTER_NAME=$(kubectl config get-contexts "$CONTEXT" | awk '{print $3}' | tail -n 1)
+CLUSTER_NAME=$(kubectl config get-contexts "$CONTEXT" | awk '{print $3}' | tail -n 1)
 
 # Get ICP URL
-$ ICP_URL=$(kubectl config view -o jsonpath="{.clusters[?(@.name == \"${CLUSTER_NAME}\")].cluster.server}")
+ICP_URL=$(kubectl config view -o jsonpath="{.clusters[?(@.name == \"${CLUSTER_NAME}\")].cluster.server}")
 
 # Create the kubeconfig file for cluster name
-$ kubectl config set-cluster "${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --server="${ICP_URL}" --certificate-authority="${CONFIG_FOLDER}/ca.crt" --embed-certs=true
+kubectl config set-cluster "${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --server="${ICP_URL}" --certificate-authority="${CONFIG_FOLDER}/ca.crt" --embed-certs=true
 
 # Put the service account token in the config file
-$ kubectl config set-credentials "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --token="${TOKEN}"
+kubectl config set-credentials "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --token="${TOKEN}"
 
 # Create a context for cluster
-$ kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
+kubectl config set-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml" --cluster="${CLUSTER_NAME}" --user="bamboo-default-${CLUSTER_NAME}" --namespace="${NAMESPACE}"
 
 # Set the current-context to the above context
-$ kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml"
+kubectl config use-context "bamboo-default-${CLUSTER_NAME}" --kubeconfig="${CONFIG_FOLDER}/config.yaml"
 ```
 
 That should be it. Now to make sure everything works, run the following command to get pods using the service account:
 ```bash
-$ KUBECONFIG="${CONFIG_FOLDER}/config.yaml" kubectl get pods
+KUBECONFIG="${CONFIG_FOLDER}/config.yaml" kubectl get pods
 ```
 
 **NOTE:** We also provided a script that does the above for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh). There is also a script that deletes the service accounts for you in [scripts/k8s_create_service_account.sh](scripts/k8s_create_service_account.sh).
@@ -216,13 +216,13 @@ The above tools will allow us to build and push new docker Images to ICP's Priva
 To run Bamboo as a service (which you'll learn how to do later on) you need to create a dedicated `bamboo`. To do so, run the following command:
 ```bash
 # Create bamboo user
-$ sudo /usr/sbin/useradd --create-home --home-dir /usr/local/bamboo --shell /bin/bash bamboo
+sudo /usr/sbin/useradd --create-home --home-dir /usr/local/bamboo --shell /bin/bash bamboo
 
 # Become the bamboo user
-$ sudo su - bamboo
+sudo su - bamboo
 
 # Create a password
-$ passwd
+passwd
 ```
 
 The password will be used later when transfering the kubeconfig file to the `bamboo` user's home directory.
@@ -231,22 +231,22 @@ The password will be used later when transfering the kubeconfig file to the `bam
 Before you can install Bamboo, you will need to install Java OpenJDK as Bamboo requires it. To Install OpenJDK, run the following commands.
 ```bash
 # Install java and ssh
-$ sudo apt-get update
+sudo apt-get update
 
 # Java Installation
-$ sudo apt-get install -y default-jdk
-$ sudo echo "JAVA_HOME=\"/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java\"" >> /etc/environment
+sudo apt-get install -y default-jdk
+sudo echo "JAVA_HOME=\"/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java\"" >> /etc/environment
 
 # Become bamboo user
-$ sudo su - bamboo
+sudo su - bamboo
 
 # Add Java to JAVA_HOME
-$ touch ~/.bashrc
-$ echo "source /etc/environment" >> ~/.bashrc
-$ . ~/.bashrc
+touch ~/.bashrc
+echo "source /etc/environment" >> ~/.bashrc
+. ~/.bashrc
 
 # Check that JAVA_HOME is set properly
-$ echo $JAVA_HOME
+echo $JAVA_HOME
 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 ```
 
@@ -262,37 +262,37 @@ Now that Bamboo is ready, we should connect it to JIRA user server to avoid mana
 To Install docker on Ubuntu Xenial, run the following steps:
 ```bash
 # Become sudo
-$ sudo su
+sudo su
 
 # Update package repository
-$ apt-get update
+apt-get update
 
 # Install docker
-$ apt-get install -y docker.io
+apt-get install -y docker.io
 
 # Run docker hello world to check everything works
-$ docker run hello-world
+docker run hello-world
 
 # Create docker group if it doesn't already exist
-$ groupadd docker
+groupadd docker
 
 # Add the bamboo user to docker group
 # The bamboo user was created during Bamboo installation to run it as a service
 # In order for Bamboo to run docker from the CI/CD jobs, we need to add the bamboo user to the docker group
-$ gpasswd -a bamboo docker
+gpasswd -a bamboo docker
 
 # Activate the changes to docker group
-$ newgrp docker
+newgrp docker
 
 # Now become the bamboo user and run docker hellow world to verity that everything works
-$ sudo su - bamboo
-$ docker run hello-world
+sudo su - bamboo
+docker run hello-world
 ```
 
 Docker is now installed! But before we can push docker images to ICP's private Docker registry, we need to add an entry for it in Docker's insecure registries and in /etc/hosts. To add ICP private registry to insecure Docker registries, do the following:
 ```bash
 # Open the /etc/docker/daemon.json with your preferred text editor
-$ sudo vim /etc/docker/daemon.json
+sudo vim /etc/docker/daemon.json
 
 # Enter the following content:
 {
@@ -300,21 +300,21 @@ $ sudo vim /etc/docker/daemon.json
 }
 
 # Then restart docker docker
-$ sudo systemctl restart docker
+sudo systemctl restart docker
 ```
 
 Where `${CLUSTER_NAME}` is the name of your ICP cluster.
 
 To add ICP cluster to /etc/hosts, do the following:
 ```bash
-$ echo "${CLUSTER_MASTER_IP} ${CLUSTER_NAME}"
+echo "${CLUSTER_MASTER_IP} ${CLUSTER_NAME}"
 ```
 
 Where `${CLUSTER_MASTER_IP}` is the IP address of your ICP master node and `${CLUSTER_NAME}` is the name of your ICP cluster.
 
 To verify that everything works, login to ICP's private Docker registry using your ICP user credentials as follows:
 ```bash
-$ docker login -u "${USERNAME}" -p "${PASSWORD}" "${CLUSTER_NAME}:8500"
+docker login -u "${USERNAME}" -p "${PASSWORD}" "${CLUSTER_NAME}:8500"
 ```
 
 Where:
@@ -329,12 +329,12 @@ If the login succeeded, then that means that Docker is fully setup and ready to 
 ### f. Install kubectl
 `kubectl` will be used to update the Kubernetes deployment on ICP. To install `kubectl` in Bamboo, run the following commands:
 ```bash
-$ sudo apt-get update && sudo apt-get install -y apt-transport-https
-$ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-$ sudo touch /etc/apt/sources.list.d/kubernetes.list 
-$ echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-$ sudo apt-get update
-$ sudo apt-get install -y kubectl
+sudo apt-get update && sudo apt-get install -y apt-transport-https
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo touch /etc/apt/sources.list.d/kubernetes.list
+echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubectl
 ```
 
 If you have any issues, you can refer to `Install kubectl binary via native package management` section of the kubectl installation guide here:
@@ -344,15 +344,15 @@ If you have any issues, you can refer to `Install kubectl binary via native pack
 Bamboo will need the ICP config file for `kubectl` to successfully authenticate against ICP's Kubernetes API and be able to update deployments. To do so, first you need to do the following in the Bamboo host:
 ```bash
 # Login as the bamboo user
-$ sudo su - bamboo
+sudo su - bamboo
 
 # Create the kube directory where the config file will reside
-$ mkdir ~/.kube
+mkdir ~/.kube
 ```
 
 Now from your laptop or wherever you have the kubeconfig file, run the following command:
 ```bash
-$ scp "${CONFIG_FOLDER}/config.yaml" bamboo@${BAMBOO_IP}:~/.kube
+scp "${CONFIG_FOLDER}/config.yaml" bamboo@${BAMBOO_IP}:~/.kube
 ```
 
 Where `${CONFIG_FOLDER}` is the path where you created service account kubeconfig file.
@@ -360,10 +360,10 @@ Where `${CONFIG_FOLDER}` is the path where you created service account kubeconfi
 Log back into Bamboo host as the `bamboo` user and run the following commands:
 ```bash
 # Login as the bamboo user
-$ sudo su - bamboo
+sudo su - bamboo
 
 # Test that kubectl can talk with ICP
-$ KUBECONFIG=/home/bamboo/.kube/config.yml kubectl get pods
+KUBECONFIG=/home/bamboo/.kube/config.yml kubectl get pods
 ```
 
 If you are able to see pods and get no errors, then kubectl is ready to be used by Bamboo!
@@ -516,15 +516,15 @@ If all went well, you should be greeted with the `bluecompute-web` home page whe
 
 Now we need to clone the `bluecompute-web` repo from GitHub and push it to Bitbucket. To clone the repo, use the following command in your workstation:
 ```bash
-$ git clone https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web.git
+git clone https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web.git
 ```
 
 Now we can push it to Bitbucket as follows:
 ```bash
-$ cd refarch-cloudnative-bluecompute-web
-$ git remote set-url origin ssh://git@${BITBUCKET_IP}:7999/blue/bluecompute-web.git
-$ git push -u origin --all
-$ git push origin --tags
+cd refarch-cloudnative-bluecompute-web
+git remote set-url origin ssh://git@${BITBUCKET_IP}:7999/blue/bluecompute-web.git
+git push -u origin --all
+git push origin --tags
 ```
 
 The above commands come from the `My code is already tracked by Git` section in the `bluecompute-web` home page on Bitbucket, where `${BITBUCKET_IP}` is Bitbucket's IP address, which should be shown by the commands in the `bluecompute-web` page.
@@ -621,13 +621,13 @@ On top of that, we Bitbucket commits will also show on JIRA!
 ### a. Create and Push Test Commit to Trigger the Bamboo Build
 To trigger the build, let's start by changing some text in the `bluecompute-web` home page:
 ```bash
-$ cd refarch-cloudnative-bluecompute-web
+cd refarch-cloudnative-bluecompute-web
 
 # On Mac OS
-$ sed -i.bak 's/CHECK OUR AWESOME COLLECTIONS/BAMBOO TEST/g' StoreWebApp/public/resources/components/views/home.html
+sed -i.bak 's/CHECK OUR AWESOME COLLECTIONS/BAMBOO TEST/g' StoreWebApp/public/resources/components/views/home.html
 
 # On Linux
-$ sed -i 's/CHECK OUR AWESOME COLLECTIONS/BAMBOO TEST/g' StoreWebApp/public/resources/components/views/home.html
+sed -i 's/CHECK OUR AWESOME COLLECTIONS/BAMBOO TEST/g' StoreWebApp/public/resources/components/views/home.html
 
 ```
 
@@ -637,8 +637,8 @@ If you rather make the change using your text editor, then open the `StoreWebApp
 
 Now commit the file and push it to Bitbucket as follows:
 ```bash
-$ git commit -m "BLUEWEB-1: Integration Test" StoreWebApp/public/resources/components/views/home.html
-$ git push origin master
+git commit -m "BLUEWEB-1: Integration Test" StoreWebApp/public/resources/components/views/home.html
+git push origin master
 ```
 
 This should trigger the Bamboo build.

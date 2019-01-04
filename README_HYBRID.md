@@ -101,7 +101,7 @@ Now that your registry is setup we can proceed to creating a `Registry Token`, w
 ### Create a Registry Namespace
 In order to push Docker images to the IBM Cloud Container Registry, you will first need to create a globally unique namespace:
 ```bash
-$ bx cr namespace-add ${NAMESPACE}
+bx cr namespace-add ${NAMESPACE}
 ```
 
 Where `${NAMESPACE}` is the globally unique name for your namespace.
@@ -109,7 +109,7 @@ Where `${NAMESPACE}` is the globally unique name for your namespace.
 ### Create Docker Registry Token
 To create a Registry Token on IBM Cloud Container Registry, run the following command:
 ```bash
-$ bx cr token-add --non-expiring --readwrite --description "For Hybrid Deployment"
+bx cr token-add --non-expiring --readwrite --description "For Hybrid Deployment"
 ```
 
 ### Upload the Docker Token to Jenkins
@@ -135,10 +135,10 @@ For Jenkins to be able to use the Docker Registry Token, we must create a `Usern
 On both IKS and ICP clusters, create the following Docker Config secret using the token from previous step:
 ```bash
 # Create jenkins namespace
-$ kubectl create ns jenkins
+kubectl create ns jenkins
 
 # Create docker registry secret
-$ kubectl --namespace jenkins create secret docker-registry bluemix-registry --docker-server=registry.ng.bluemix.net --docker-username=token --docker-password=${TOKEN} --docker-email=test@test.com
+kubectl --namespace jenkins create secret docker-registry bluemix-registry --docker-server=registry.ng.bluemix.net --docker-username=token --docker-password=${TOKEN} --docker-email=test@test.com
 ```
 
 Where:
@@ -157,14 +157,14 @@ Now our docker registry is ready to be used by the clusters and the pipelines.
 In order for clusters to be able to deploy pods from our registry, we need to create a [Service Account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) on each cluster and associate the docker registry secret, known as a [Pull Down Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to it. This is so that the service account is able to pull down images from the registry and deploy pods with them. To do so, run the following commands in BOTH IKS and ICP clusters:
 ```bash
 # Create service account
-$ kubectl create serviceaccount jenkins --namespace jenkins
+kubectl create serviceaccount jenkins --namespace jenkins
 
 # Assign admin cluster role to service account so it can get/create/update/delete pods
 # NOTE: In production it is a best practice to assign a non-admin role with less priviledges
-$ kubectl create clusterrolebinding jenkins-admin --clusterrole=admin --serviceaccount=jenkins:jenkins
+kubectl create clusterrolebinding jenkins-admin --clusterrole=admin --serviceaccount=jenkins:jenkins
 
 # Patch the service account with the registry secret
-$ kubectl --namespace jenkins patch serviceaccount jenkins -p '{"imagePullSecrets": [{"name": "bluemix-registry"}]}'
+kubectl --namespace jenkins patch serviceaccount jenkins -p '{"imagePullSecrets": [{"name": "bluemix-registry"}]}'
 ```
 
 **NOTE:** Please run the above commands in BOTH IKS and ICP clusters.
@@ -203,13 +203,13 @@ First let's setup access to the IKS cluster in Jenkins. To do so, we are going t
 Here is how to get CA certificate and the token
 ```bash
 # Get secret name for jenkins service account certificate and token
-$ kubectl --namespace jenkins get serviceaccount jenkins -o=jsonpath='{.secrets[0].name}'
+kubectl --namespace jenkins get serviceaccount jenkins -o=jsonpath='{.secrets[0].name}'
 
 # Get certificate of authority from secret jenkins-token-t8fkk
-$ kubectl --namespace jenkins get secret ${SECRET_NAME} -o=jsonpath='{.data.ca\.crt}' | base64 --decode > iks-ca.crt
+kubectl --namespace jenkins get secret ${SECRET_NAME} -o=jsonpath='{.data.ca\.crt}' | base64 --decode > iks-ca.crt
 
 # Get token from secret
-$ kubectl --namespace jenkins get secret ${SECRET_NAME} -o=jsonpath='{.data.token}' | base64 --decode > iks-token
+kubectl --namespace jenkins get secret ${SECRET_NAME} -o=jsonpath='{.data.token}' | base64 --decode > iks-token
 ```
 Where `${SECRET_NAME}` is the secret name, which is the result for the first command.
 
@@ -229,7 +229,7 @@ Now open a browser windows and do the following:
 	+ Optional: Enter a description for the secret file
 	+ Press the `OK` button.
 	+ If successful, you should see the `iks-ca.crt` Secret file entry listed.
-	 
+
 #### Upload the IKS Token to Jenkins
 Now let's upload the token as a `Secret text` as follows:
 * On your browser, go to `http://JENKINS_IP:PORT/credentials/store/system/domain/_/newCredentials`
@@ -251,7 +251,7 @@ Now let's do the same, but for the ICP cluster. Again, since we will be using th
 For this step, you can follow the same instructions in [Get the IKS CA Certificate and the Token](#get-the-iks-ca-certificate-and-the-token), but make sure to name the CA certificate as `icp-ca.crt` and the token file as `icp-token`.
 
 #### Upload the ICP CA Certificate and the Token to Jenkins
-For ICP we are going to have to do this in `Kubernetes` section of the Jenkins Configuration page. Open a web browser tab and go to `http://JENKINS_IP:PORT/configure`. Assuming you properly installed the `Kubernetes Plugin`, you should now have a `Cloud` section on this page. If you don't, then click on the `Add a new cloud` button that's at the bottom and select the `Kubernetes` option. 
+For ICP we are going to have to do this in `Kubernetes` section of the Jenkins Configuration page. Open a web browser tab and go to `http://JENKINS_IP:PORT/configure`. Assuming you properly installed the `Kubernetes Plugin`, you should now have a `Cloud` section on this page. If you don't, then click on the `Add a new cloud` button that's at the bottom and select the `Kubernetes` option.
 
 The best way to enter the required information is in 2 parts:
 * Fill out the `Cloud` section.
@@ -302,7 +302,7 @@ To create a parameter in Jenkins, just follow the instructions below:
 Once you create a parameter, then fill in the details as shown below:
 ![Create Pipeline](static/imgs/p_2_parameters_2.png?raw=true)
 
-Do the above for all 5 parameters. 
+Do the above for all 5 parameters.
 
 Now scroll down to the **Pipeline** section and do the following:
 * In the `Definition` field, select `Pipeline script from SCM`.
@@ -328,14 +328,14 @@ Again, the pipeline setup is similar to the Build pipeline with some minor adjus
 	+ Where `${IKS_URL}` is the Kubernetes API server URL that you obtain after downloading the cluster context on your workstation as shown in the `Configuring the CLI to run kubectl` section on this [page](https://console.bluemix.net/docs/containers/cs_cli_install.html#cs_cli_install).
 	+ To obtain the server url directly from `kubectl`, run this command:
 		```bash
-		$ kubectl config view | grep server
+		kubectl config view | grep server
 		```
 	+ Another option is to open the config file directly, run this command:
 		```bash
 		# Open the config file directly
-		$ cat ~/.bluemix/plugins/container-service/clusters/${CLUSTER_NAME}/kube-config-${CLUSTER_NAME}.yml | grep server
+		cat ~/.bluemix/plugins/container-service/clusters/${CLUSTER_NAME}/kube-config-${CLUSTER_NAME}.yml | grep server
 		# Using environment variable
-		$ cat ${KUBECONFIG} | grep server
+		cat ${KUBECONFIG} | grep server
 		```
 * `SERVICE_ACCOUNT`: `jenkins`.
 * `TOKEN_ID`: `iks-token`.
@@ -400,7 +400,7 @@ Follow the same procedure to get the job's console output as explained in the pr
 
 To verify that the pipeline indeed updated the docker image, run the following command:
 ```bash
-$ kubectl --namespace jenkins get deployments bluecompute-web -o=jsonpath='{.spec.template.spec.containers[0].image}'; echo
+kubectl --namespace jenkins get deployments bluecompute-web -o=jsonpath='{.spec.template.spec.containers[0].image}'; echo
 ```
 
 If successful, you should see the docker image printed as follows:
@@ -412,7 +412,7 @@ Where `${IMAGE_TAG}` is the image tag that you entered right before running the 
 
 Lastly, verify that you can access the web front end by following these [instructions](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#access-and-validate-the-application)
 
-If you can access the web app, then you have successfully ran the deploy pipeline! 
+If you can access the web app, then you have successfully ran the deploy pipeline!
 
 ### Run the ICP Deploy Pipeline
 This pipeline just runs one stage, which is to update the container image from the pod in the existing `bluecompute-web` deployment.
@@ -426,7 +426,7 @@ Follow the same procedure to get the job's console output as explained in the pr
 
 To verify that the pipeline indeed updated the docker image, run the following command:
 ```bash
-$ kubectl --namespace jenkins get deployments bluecompute-web -o=jsonpath='{.spec.template.spec.containers[0].image}'; echo
+kubectl --namespace jenkins get deployments bluecompute-web -o=jsonpath='{.spec.template.spec.containers[0].image}'; echo
 ```
 
 If successful, you should see the docker image printed as follows:
@@ -452,6 +452,6 @@ Congratulations on getting to the end of this document! The journey to fully aut
 * Ran build pipeline.
 * Ran IKS and ICP deploy pipelines by specifying the image tag to deploy.
 
-With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines. 
+With this knowledge, you will be able to setup your own fully automated Kubernetes CICD pipelines.
 
 All that remains is to use this knowledge to put together your own pipelines and create webhooks that will trigger the pipelines via the `git push` command. There are plenty of tutorials online that explain how to setup GitHub (or any other source control) to trigger Jenkins pipelines via webhooks. We recommend that you checkout our [Microclimate guide](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate), specifically the [Create GitHub Web Hook](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-microclimate#create-github-web-hook), if you are interested in setting this up.
