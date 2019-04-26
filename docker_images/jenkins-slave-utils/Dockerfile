@@ -5,7 +5,7 @@ RUN apk add --update bash jq curl ca-certificates openssl
 
 # kubectl
 # From https://github.com/lachie83/k8s-kubectl/blob/master/Dockerfile
-ENV KUBE_LATEST_VERSION="v1.11.1"
+ENV KUBE_LATEST_VERSION="v1.12.4"
 
 RUN apk add --update ca-certificates \
  && apk add --update -t deps \
@@ -28,11 +28,11 @@ RUN apk add --update --no-cache && \
     rm /var/cache/apk/*
 
 # cloudctl
-# From https://www.ibm.com/support/knowledgecenter/SSBS6K_3.1.0/manage_cluster/install_cli.html
+# From https://www.ibm.com/support/knowledgecenter/SSBS6K_3.1.2/manage_cluster/install_cli.html
 ADD cloudctl /usr/local/bin/cloudctl
 RUN chmod +x /usr/local/bin/cloudctl
 
 # mcmctl
-# From https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.0/mcm/installing/install.html#install_cli
+# From https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.2/mcm/installing/install.html#install_cli
 ADD mcmctl /usr/local/bin/mcmctl
 RUN chmod +x /usr/local/bin/mcmctl
