@@ -154,8 +154,8 @@ Each of the following `helm install` options downloads the Jenkins chart from Ku
 The following command assumes you have [Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) enabled, which will not only install jenkins, but also provision a [Persistent Volume Claim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) where Jenkins can store its build data:
 ```bash
 helm upgrade --install jenkins --namespace default \
-    --set Master.ServiceType=NodePort \
-    --set rbac.install=true \
+    --set master.serviceType=NodePort \
+    --set rbac.create=true \
     stable/jenkins # If ICP, add the --tls flag
 ```
 
@@ -163,9 +163,9 @@ helm upgrade --install jenkins --namespace default \
 To Install the Jenkins Chart and Pass an Existing PVC, use the following command:
 ```bash
 helm upgrade --install jenkins --namespace default \
-    --set Master.ServiceType=NodePort \
-    --set rbac.install=true \
-    --set Persistence.ExistingClaim=${EXISTING_PVC} \
+    --set master.serviceType=NodePort \
+    --set rbac.create=true \
+    --set persistence.existingClaim=${EXISTING_PVC} \
     stable/jenkins # If ICP, add the --tls flag
 ```
 
@@ -175,9 +175,10 @@ Where `${EXISTING_PVC}` is the name of an existing PVC, which is usually named `
 To Install the Jenkins Chart without a PVC, use the following command:
 ```bash
 helm upgrade --install jenkins --namespace default \
-    --set Master.ServiceType=NodePort \
-    --set rbac.install=true \
-    --set Persistence.Enabled=false \
+    --set master.serviceType=ClusterIP \
+    --set master.ingress.enabled=true \
+    --set rbac.create=true \
+    --set persistence.enabled=false \
     stable/jenkins # If ICP, add the --tls flag
 ```
 
@@ -255,7 +256,7 @@ Jenkins creates pods from containers in order to run jobs, sometimes creating mu
 ### Delete Jenkins Deployment
 To delete the Jenkins chart from your cluster, run the following:
 ```bash
-helm delete jenkins --purge
+helm delete jenkins --purge # add --tls flag if using IBM Cloud Private
 ```
 
 ## Setup Docker Registry
@@ -273,14 +274,14 @@ If you don't already have a `Docker ID`, create one at https://hub.docker.com/
 
 This information will go in a `docker-registry secret`, which you can create using the following:
 ```bash
-kubectl create secret docker-registry registry-creds --docker-server=https://index.docker.io/v1/ --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=${EMAIL}
+kubectl create secret docker-registry registry-creds --docker-server=https://index.docker.io/v1/ --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --docker-email=${EMAIL}
 ```
 
 Where:
 * `registry-creds` is the name of the secret.
 * `https://index.docker.io/v1/` is Docker Hub's Fully Qualified Domain Name.
-* `${USERNAME}` is your `Docker ID` or username.
-* `${PASSWORD}` is your Docker Hub password.
+* `${DOCKER_USERNAME}` is your `Docker ID` or username.
+* `${DOCKER_PASSWORD}` is your Docker Hub password.
 * `${EMAIL}` is your Docker Hub email.
 
 #### IBM Cloud Kubernetes Service
@@ -318,19 +319,19 @@ Where:
 #### IBM Cloud Private
 This information will go in a `docker-registry secret`, which you can create using the following:
 ```bash
-kubectl create secret docker-registry registry-creds --docker-server=mycluster.icp:8500 --docker-username=${USERNAME} --docker-password=${PASSWORD} --docker-email=test@test.com
+kubectl create secret docker-registry registry-creds --docker-server=mycluster.icp:8500 --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD} --docker-email=test@test.com
 ```
 
 Where:
 * `bluemix-registry` is the name of the secret.
 * `registry.ng.bluemix.net` is the registry domain address.
-* `${USERNAME}` is the username associated with the registry token.
-* `${PASSWORD}` is the actual token obtained in the previous step.
+* `${DOCKER_USERNAME}` is the username associated with the registry token.
+* `${DOCKER_PASSWORD}` is the actual token obtained in the previous step.
 * `test@test.com` is just a sample email to associate with the token.
 
 
 ### Step 2: Patch Jenkins Service Account
-When you installed the Jenkins helm chart, you also created a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) with it, which is called `jenkins`. This is done with the `--set rbac.install=true` parameter. A service account is like a regular Kubernetes user account (i.e. admin) but for procceses rather than humans. With the service account we can interact with the Kubernetes API from running pods to do things like create, get, and delete pods, deployments, etc.
+When you installed the Jenkins helm chart, you also created a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) with it, which is called `jenkins`. This is done with the `--set rbac.create=true` parameter. A service account is like a regular Kubernetes user account (i.e. admin) but for procceses rather than humans. With the service account we can interact with the Kubernetes API from running pods to do things like create, get, and delete pods, deployments, etc.
 
 In our case, we are going to use the service account to update existing deployments with a Docker image from our private registry. Since the repository is private, the service account needs acccess to the Docker Secret (which we created in Step 1) to authenticate against Docker Hub and pull down the image into our deployment. In service account terms, this kind of secret is known as an `imagePullSecret`. To patch the service account, run the following command:
 ```bash
@@ -352,7 +353,7 @@ For Jenkins to be able to safely use the Docker Registry Credentials in the pipe
     + Make sure the `Scope` stays as `Global`.
     + Enter your registry username as the `Username`.
     + Enter registry password as the `Password`.
-    + Enter `registry-credentials` as the `ID`.
+    + Enter `registry-credentials-id` as the `ID`.
     + Optional: Enter a description for the credentials.
     + Press the `OK` button.
     + If successful, you should see the `username/******` credentials entry listed.
@@ -376,15 +377,13 @@ Click [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluec
 The next step is to create the pipeline parameters. You will need the following parameters with their respective default values:
 * **CLOUD**: `kubernetes`.
 * **NAMESPACE**: `default`.
-* **REGISTRY**: `${REGISTRY_URL}/${REGISTRY_NAMESPACE}`.
-    + Where `${REGISTRY_NAMESPACE}` is your `Docker ID`.
-    + Where `${REGISTRY_URL}` can be either of the following:
-        - If **Docker Hub**, then use `docker.io`.
-        - If **IBM Cloud Container Registry**, use `registry.ng.bluemix.net`.
-        - If **IBM Cloud Private**, use `mycluster.icp:8500` or whatever your cluster name is.
+    + Only needed if using IBM Cloud Private's Docker Registry.
+* **REGISTRY**: `docker.io` if using Docker Hub or `mycluster.icp:8500` (or whatever the cluster name is) for IBM Cloud Private's Docker Registry.
+* **IMAGE_NAME**: If using Docker Hub, then use `${DOCKER_USERNAME}/bluecompute-web`.
+    + If using IBM Cloud Private's Docker Registry, then just use `bluecompute-web`.
 * **SERVICE_ACCOUNT**: `jenkins`.
-* **REGISTRY_CREDENTIALS**: `registry-credentials`.
-    + Where `registry-credentials` is the Jenkins credentials that you created for the registry in [Step 3: Save Docker Credentials in Jenkins](#step-3-save-docker-credentials-in-jenkins).
+* **REGISTRY_CREDENTIALS**: `registry-credentials-id`.
+    + Where `registry-credentials-id` is the Jenkins credentials that you created for the registry in [Step 3: Save Docker Credentials in Jenkins](#step-3-save-docker-credentials-in-jenkins).
 
 To create a parameter in Jenkins, just follow the instructions below:
 ![Create Pipeline](static/imgs/p_2_parameters.png?raw=true)
