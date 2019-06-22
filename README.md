@@ -12,6 +12,7 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/sp
     + [Install Bluecompute Reference Architecture Chart](#install-bluecompute-reference-architecture-chart)
   * [Deploy Jenkins to Kubernetes Cluster](#deploy-jenkins-to-kubernetes-cluster)
     + [Pre-Requisites:](#pre-requisites)
+      - [IBM Cloud Private: Image Policy](#ibm-cloud-private-image-policy)
       - [Optional: IBM Cloud Kubernetes Service - Create a Persistent Volume Claim](#optional-ibm-cloud-kubernetes-service---create-a-persistent-volume-claim)
       - [Optional: IBM Cloud Private - Dynamic Provisioning](#optional-ibm-cloud-private---dynamic-provisioning)
     + [1. Initialize `helm` in your cluster:](#1-initialize-helm-in-your-cluster)
@@ -96,6 +97,14 @@ This document assumes that you have installed the `bluecompute-ce` chart in the 
 As mentioned in the [**Introduction Section**](#introduction), we will be using a [Jenkins Helm Chart](#https://github.com/kubernetes/charts/tree/master/stable/jenkins) to deploy Jenkins into a Kubernetes Cluster. Before you do so, make sure that you installed all the required CLIs as indicated in the [**Pre-Requisites**](#pre-requisites).
 
 ### Pre-Requisites:
+#### IBM Cloud Private: Image Policy
+Starting with version 3.1.0 for IBM Cloud Private, you are REQUIRED to create an [`Image Policy`](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.2.0/manage_images/image_security.html) in order to whitelist container images that come from registries other than the built-in Private Docker Registry. We created a simple `Cluster Image Policy` located at [jenkins/cluster_image_policy.yaml](jenkins/cluster_image_policy.yaml) that lets you deploy not only the Jenkins images but also some images that we built to run the CI/CD environment for this demo.
+
+To create the `Cluster Image Policy`, run the following command:
+```bash
+kubectl apply -f jenkins/cluster_image_policy.yaml
+```
+
 #### Optional: IBM Cloud Kubernetes Service - Create a Persistent Volume Claim
 If you would like Jenkins to use a PVC, you must provision a PVC from IBM Cloud and pass it to the `helm install` command once you get to the [Install the Jenkins Chart and Pass an Existing PVC](#install-the-jenkins-chart-and-pass-an-existing-pvc) step.
 
