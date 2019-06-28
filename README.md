@@ -4,6 +4,8 @@
 https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring*
 
 ## Table of Contents
+- [DevOps for Cloud Native Reference Application](#devops-for-cloud-native-reference-application)
+  * [Table of Contents](#table-of-contents)
   * [Introduction](#introduction)
   * [Architecture & CI/CD Workflow](#architecture--cicd-workflow)
   * [Pre-Requisites](#pre-requisites)
@@ -50,6 +52,7 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/sp
     + [Step 6: Monitor Console Output](#step-6-monitor-console-output)
   * [Conclusion](#conclusion)
   * [Further Reading: Hybrid Cloud Setup](#further-reading-hybrid-cloud-setup)
+  * [Further Reading: Using Podman as the CI/CD Container Engine](#further-reading-using-podman-as-the-cicd-container-engine)
 
 ## Introduction
 DevOps, specifically automated Continuous Integration and Continuous Deployment (CI/CD), is important for Cloud Native Microservice style application. This project is developed to demonstrate how to use tools and services available on IBM Cloud to implement the CI/CD for the BlueCompute reference application.
@@ -438,3 +441,8 @@ All that remains is to use this knowledge to put together your own pipelines and
 Most companies already have a standalone Jenkins deployment and would like to integrate new technologies (i.e. Kubernetes) with it. Also, a standalone Jenkis is usually used to deploy to multiple environments (i.e. Public Cloud for Dev and On-Premise for Prod).
 
 To learn about this use case, we encourage you to read our `Hybrid Cloud DevOps` guideline [here](README_HYBRID.md).
+
+## Further Reading: Using Podman as the CI/CD Container Engine
+To learn more about how [podman](https://podman.io/) is a much better suited container engine for CI/CD when compared to Docker, checkout this document:
+
+* [docs/podman.md](docs/podman.md)
