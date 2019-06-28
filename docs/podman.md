@@ -196,10 +196,9 @@ Notice above in the `containers` section that we are using the `podman` image th
 To learn how to setup a simple pipeline using the above Jenkinsfile, feel free to follow the instructions in the link below:
 * https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes#create-and-run-a-sample-cicd-pipeline
 
-Make sure that you use the [`jenkins/Jenkinsfile-podman-build.groovy`](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/blob/spring/jenkins/Jenkinsfile-build.groovy) Jenkinsfile in the [`refarch-cloudnative-bluecompute-web`](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/tree/spring) git repo.
+Make sure that you use the [`jenkins/Jenkinsfile-podman-build.groovy`](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/blob/spring/jenkins/Jenkinsfile-podman-build.groovy) Jenkinsfile in the [`refarch-cloudnative-bluecompute-web`](https://github.com/ibm-cloud-architecture/refarch-cloudnative-bluecompute-web/tree/spring) git repo.
 
 ## Conclusion
 Replacing a container engine with another one can seem like a daunting task, but `podman` makes this easier by making its CLI practically identical to that of Docker, making adoption much easier. Also, not having to manage a separate container daemon and the required configuration files makes managing `podman` a breeze when compare to either the DooD or DinD approaches.
 
 Now that you know how to build CI/CD pipelines with `podman` as the container engine, I encourage you to try and build your own pipelines!
-
