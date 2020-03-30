@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  generateName: mysql-task-run
+  name: mysql-task-run
+spec:
+  taskRef:
+    name: mysql-deploy-using-yaml
+  inputs:
+    resources:
+      - name: source
+        resourceRef:
+          name: source
+      - name: image
+        resourceRef:
+          name: image
+    params:
+      - name: pathToYamlFile
+        value: "bluecompute-os/bluecompute-ce/charts/mysql/templates"
+      - name: imageUrl
+        value: "index.docker.io/mysql"
+      - name: imageTag
+        value: "5.7.14"
