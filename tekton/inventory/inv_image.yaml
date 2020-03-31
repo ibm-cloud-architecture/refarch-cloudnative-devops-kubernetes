@@ -6,4 +6,4 @@ spec:
   type: image
   params:
     - name: url
-      value: index.docker.io/ibmcase/bluecompute-inventory:openshift
+      value: index.docker.io/ibmcase/bluecompute-inventory

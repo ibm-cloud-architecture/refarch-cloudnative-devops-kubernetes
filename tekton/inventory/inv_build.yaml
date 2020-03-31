@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: inv-local-build
+spec:
+  inputs:
+    resources:
+      - name: inv-source
+        type: git
+  steps:
+    - name: gradle-build
+      image: gradle
+      command: ["gradle"]
+      args:
+        - "build"

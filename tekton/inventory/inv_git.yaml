@@ -1,11 +1,11 @@
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
-  name: source
+  name: inv-source
 spec:
   type: git
   params:
     - name: revision
-      value: master
+      value: spring
     - name: url
       value: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory

@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  generateName: inventory-task-run
+  name: inventory-task-run
+spec:
+  serviceAccountName: pipeline
+  # taskRef:
+  #   name: inv-local-build
+  # inputs:
+  #   resources:
+  #     - name: inv-source
+  #       resourceRef:
+  #         name: inv-source
+  taskRef:
+    name: buildah
+  inputs:
+    resources:
+      - name: inv-source
+        resourceRef:
+          name: inv-source
+      - name: image
+        resourceRef:
+          name: image
+  # taskRef:
+  #   name: inventory-deploy-using-yaml
+  # inputs:
+  #   resources:
+  #     - name: source
+  #       resourceRef:
+  #         name: source
+  #     - name: image
+  #       resourceRef:
+  #         name: image
+  #   params:
+  #     - name: pathToYamlFile
+  #       value: "bluecompute-os/bluecompute-ce/charts/inventory/templates"
+  #     - name: imageUrl
+  #       value: "index.docker.io/ibmcase/bluecompute-inventory"
+  #     - name: imageTag
+  #       value: "openshift"
