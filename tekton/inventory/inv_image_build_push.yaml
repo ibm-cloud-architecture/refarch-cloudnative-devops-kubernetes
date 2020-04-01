@@ -20,7 +20,7 @@ spec:
     resources:
       - name: inv-source
         type: git
-      - name: image
+      - name: inv-image
         type: image
   steps:
     - name: build
@@ -31,7 +31,7 @@ spec:
         - -c
         - |
           set -e
-          NEW_IMAGE_ID="$(inputs.resources.image.url):openshift"
+          NEW_IMAGE_ID="$(inputs.resources.inv-image.url):openshift"
           echo "Building Image $NEW_IMAGE_ID"
           buildah bud --tls-verify="$(inputs.params.TLSVERIFY)" --layers -f "$(inputs.params.DOCKERFILE)" -t "$NEW_IMAGE_ID" "$(inputs.params.CONTEXT)"
           echo "Pushing Image $NEW_IMAGE_ID"

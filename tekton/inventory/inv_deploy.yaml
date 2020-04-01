@@ -7,7 +7,7 @@ spec:
     resources:
       - name: source
         type: git
-      - name: image
+      - name: inv-image
         type: image
     params:
       - name: pathToYamlFile
