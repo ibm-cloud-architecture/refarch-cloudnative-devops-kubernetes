@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  generateName: build-push-deploy-run
+  name: build-push-deploy-run
+spec:
+  serviceAccountName: pipeline
+  pipelineRef:
+    name: build-push-deploy
+  resources:
+    - name: source
+      resourceRef:
+        name: source
+    - name: inv-source
+      resourceRef:
+        name: inv-source
+    - name: image
+      resourceRef:
+        name: image
+    - name: inv-image
+      resourceRef:
+        name: inv-image
