@@ -11,59 +11,59 @@ spec:
     - name: inv-image
       type: image
   tasks:
-    # - name: mysql-deployment
-    #   taskRef:
-    #     name: mysql-deploy-using-yaml
-    #   resources:
-    #     inputs:
-    #       - name: source
-    #         resource: source
-    #   params:
-    #     - name: pathToYamlFile
-    #       value: "bluecompute-os/bluecompute-ce/charts/mysql/templates"
-    # - name: inventory-local-build
-    #   taskRef:
-    #     name: inv-local-build
-    #   runAfter:
-    #     - mysql-deployment
-    #   resources:
-    #     inputs:
-    #       - name: inv-source
-    #         resource: inv-source
-    # - name: inventory-build-push
-    #   taskRef:
-    #     name: buildah
-    #   runAfter:
-    #     - inventory-local-build
-    #   resources:
-    #     inputs:
-    #       - name: inv-source
-    #         resource: inv-source
-    #       - name: inv-image
-    #         resource: inv-image
-    # - name: inventory-deploy
-    #   taskRef:
-    #     name: inv-deploy-using-yaml
-    #   runAfter:
-    #     - inventory-build-push
-    #   resources:
-    #     inputs:
-    #       - name: source
-    #         resource: source
-    #       - name: inv-image
-    #         resource: inv-image
-    #   params:
-    #     - name: pathToYamlFile
-    #       value: "bluecompute-os/bluecompute-ce/charts/inventory/templates"
-    #     - name: imageUrl
-    #       value: "index.docker.io/ibmcase/bluecompute-inventory"
-    #     - name: imageTag
-    #       value: "openshift"
+    - name: mysql-deployment
+      taskRef:
+        name: mysql-deploy-using-yaml
+      resources:
+        inputs:
+          - name: source
+            resource: source
+      params:
+        - name: pathToYamlFile
+          value: "bluecompute-os/bluecompute-ce/charts/mysql/templates"
+    - name: inventory-local-build
+      taskRef:
+        name: inv-local-build
+      runAfter:
+        - mysql-deployment
+      resources:
+        inputs:
+          - name: inv-source
+            resource: inv-source
+    - name: inventory-build-push
+      taskRef:
+        name: buildah
+      runAfter:
+        - inventory-local-build
+      resources:
+        inputs:
+          - name: inv-source
+            resource: inv-source
+          - name: inv-image
+            resource: inv-image
+    - name: inventory-deploy
+      taskRef:
+        name: inv-deploy-using-yaml
+      runAfter:
+        - inventory-build-push
+      resources:
+        inputs:
+          - name: source
+            resource: source
+          - name: inv-image
+            resource: inv-image
+      params:
+        - name: pathToYamlFile
+          value: "bluecompute-os/bluecompute-ce/charts/inventory/templates"
+        - name: imageUrl
+          value: "index.docker.io/ibmcase/bluecompute-inventory"
+        - name: imageTag
+          value: "openshift"
     - name: elasticsearch-deployment
       taskRef:
         name: es-deploy-using-yaml
-      # runAfter:
-      #   - inventory-deploy
+      runAfter:
+        - inventory-deploy
       resources:
         inputs:
           - name: source
