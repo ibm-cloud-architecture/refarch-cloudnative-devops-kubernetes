@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: catalog-deploy-using-yaml
+spec:
+  inputs:
+    resources:
+      - name: source
+        type: git
+      - name: catalog-image
+        type: image
+    params:
+      - name: pathToYamlFile
+        description: The path to the yaml file to deploy within the git source
+  steps:
+    - name: run-kubectl
+      image: lachlanevenson/k8s-kubectl
+      command: ["kubectl"]
+      args:
+        - "apply"
+        - "-f"
+        - "/workspace/source/$(inputs.params.pathToYamlFile)"

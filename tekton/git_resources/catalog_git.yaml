@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: catalog-source
+spec:
+  type: git
+  params:
+    - name: revision
+      value: spring
+    - name: url
+      value: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-catalog

@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  generateName: catalog-task-run
+  name: catalog-task-run
+spec:
+  serviceAccountName: pipeline
+  taskRef:
+    name: catalog-local-build
+  inputs:
+    resources:
+      - name: catalog-source
+        resourceRef:
+          name: catalog-source
+  taskRef:
+    name: catalog-buildah
+  inputs:
+    resources:
+      - name: catalog-source
+        resourceRef:
+          name: catalog-source
+      - name: catalog-image
+        resourceRef:
+          name: catalog-image
+  taskRef:
+    name: catalog-deploy-using-yaml
+  inputs:
+    resources:
+      - name: source
+        resourceRef:
+          name: source
+      - name: catalog-image
+        resourceRef:
+          name: catalog-image
+    params:
+      - name: pathToYamlFile
+        value: "bluecompute-os/bluecompute-ce/charts/catalog/templates"
