@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  generateName: es-task-run
+  name: es-task-run
+spec:
+  taskRef:
+    name: es-deploy-using-yaml
+  inputs:
+    resources:
+      - name: source
+        resourceRef:
+          name: source
+    params:
+      - name: pathToYamlFile
+        value: "bluecompute-os/bluecompute-ce/charts/elasticsearch/templates"

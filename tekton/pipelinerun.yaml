@@ -14,9 +14,6 @@ spec:
     - name: inv-source
       resourceRef:
         name: inv-source
-    - name: image
-      resourceRef:
-        name: image
     - name: inv-image
       resourceRef:
         name: inv-image

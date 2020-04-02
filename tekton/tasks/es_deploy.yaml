@@ -1,22 +1,15 @@
 apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
-  name: inv-deploy-using-yaml
+  name: es-deploy-using-yaml
 spec:
   inputs:
     resources:
       - name: source
         type: git
-      - name: inv-image
-        type: image
     params:
       - name: pathToYamlFile
         description: The path to the yaml file to deploy within the git source
-      - name: imageUrl
-        description: Url of image repository
-      - name: imageTag
-        description: Tag of the images to be used.
-        default: "latest"
   steps:
     - name: run-kubectl
       image: lachlanevenson/k8s-kubectl
