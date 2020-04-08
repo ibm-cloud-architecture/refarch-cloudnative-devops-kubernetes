@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bluecompute-inventory-pr
+spec:
+  pipelineRef:
+    name: bluecompute-build-and-deploy-pipeline-inventory
+  resources:
+    - name: git-source-inventory
+      resourceRef:
+        name: git-source-inventory
+    - name: docker-image-inventory
+      resourceRef:
+        name: docker-image-inventory
+  params:
+    - name: pathToYamlFile
+      value: "k8s_yamls"
+    - name: image-name
+      value: "index.docker.io/ibmcase/bluecompute-inventory"
+    - name: image-tag
+      value: "openshift"
+  serviceAccountName: pipeline-account
+  timeout: "1h0m0s"

@@ -1,0 +1,23 @@
+apiVersion: v1
+items:
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: docker-image-inventory
+  spec:
+    params:
+    - name: url
+      value: index.docker.io/ibmcase/bluecompute-inventory
+    type: image
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: git-source-inventory
+  spec:
+    params:
+    - name: revision
+      value: issue_222
+    - name: url
+      value: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
+    type: git
+kind: List

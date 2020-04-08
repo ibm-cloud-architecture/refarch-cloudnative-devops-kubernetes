@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: bluecompute-inventory-deploy-task
+spec:
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag of the images to be used.
+      default: "openshift"
+  resources:
+    inputs:
+      - name: git-source-inventory
+        type: git
+      - name: docker-image-inventory
+        type: image
+  steps:
+  - name: modify-app-deploy-yaml
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    command: ["sed"]
+    args:
+    - "-i"
+    - "-e"
+    - "s;__IMAGE__;$(inputs.params.imageUrl):$(inputs.params.imageTag);g"
+    - "/workspace/git-source-inventory/$(inputs.params.pathToYamlFile)/deployment.yaml"
+  - name: deploy-image
+    image: lachlanevenson/k8s-kubectl
+    command: ["kubectl"]
+    args:
+        - "apply"
+        - "-f"
+        - "/workspace/git-source-inventory/$(inputs.params.pathToYamlFile)"

@@ -1,0 +1,46 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-inventory
+spec:
+  resources:
+    - name: git-source-inventory
+      type: git
+    - name: docker-image-inventory
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+        - name: git-source-inventory
+          resource: git-source-inventory
+        - name: docker-image-inventory
+          resource: docker-image-inventory
+    taskRef:
+      name: bluecompute-inventory-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+      - name: imageUrl
+        value: "$(params.imageUrl)"
+      - name: imageTag
+        value: "$(params.imageTag)"
+    resources:
+      inputs:
+        - name: git-source-inventory
+          resource: git-source-inventory
+        - name: docker-image-inventory
+          resource: docker-image-inventory
+    runAfter:
+      - build-task
+    taskRef:
+      name: bluecompute-inventory-deploy-task

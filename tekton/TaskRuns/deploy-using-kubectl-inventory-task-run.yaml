@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-inventory-deploy-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-inventory-deploy-task
+  params:
+    - name: pathToYamlFile
+      value: k8s_yamls
+    - name: imageUrl
+      value: index.docker.io/ibmcase/bluecompute-inventory
+    - name: imageTag
+      value: openshift
+  resources:
+    inputs:
+      - name: git-source-inventory
+        resourceRef:
+          name: git-source-inventory
+      - name: docker-image-inventory
+        resourceRef:
+          name: docker-image-inventory
