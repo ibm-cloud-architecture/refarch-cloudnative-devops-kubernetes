@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-customer-build-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-customer-build-task
+  params:
+    - name: BUILDER_IMAGE
+      value: "quay.io/buildah/stable:v1.12.0"
+    - name: DOCKERFILE
+      value: ./Dockerfile
+    - name: CONTEXT
+      value: .
+    - name: TLSVERIFY
+      value: "true"
+  resources:
+    inputs:
+      - name: git-source-customer
+        resourceRef:
+          name: git-source-customer
+      - name: docker-image-customer
+        resourceRef:
+          name: docker-image-customer

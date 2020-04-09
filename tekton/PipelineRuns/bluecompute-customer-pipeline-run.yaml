@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bluecompute-customer-pr
+spec:
+  pipelineRef:
+    name: bluecompute-build-and-deploy-pipeline-customer
+  resources:
+    - name: git-source-customer
+      resourceRef:
+        name: git-source-customer
+    - name: docker-image-customer
+      resourceRef:
+        name: docker-image-customer
+  params:
+    - name: pathToYamlFile
+      value: "k8s_yamls"
+  serviceAccountName: pipeline-account
+  timeout: "1h0m0s"

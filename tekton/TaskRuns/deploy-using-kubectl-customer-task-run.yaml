@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-customer-deploy-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-customer-deploy-task
+  params:
+    - name: pathToYamlFile
+      value: k8s_yamls
+  resources:
+    inputs:
+      - name: git-source-customer
+        resourceRef:
+          name: git-source-customer
+      - name: docker-image-customer
+        resourceRef:
+          name: docker-image-customer

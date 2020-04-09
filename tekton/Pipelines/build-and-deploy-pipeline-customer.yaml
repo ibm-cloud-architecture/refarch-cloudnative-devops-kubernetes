@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-customer
+spec:
+  resources:
+    - name: git-source-customer
+      type: git
+    - name: docker-image-customer
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+      - name: git-source-customer
+        resource: git-source-customer
+      - name: docker-image-customer
+        resource: docker-image-customer
+    taskRef:
+      name: bluecompute-customer-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+    resources:
+      inputs:
+      - name: git-source-customer
+        resource: git-source-customer
+      - name: docker-image-customer
+        resource: docker-image-customer
+    runAfter:
+    - build-task
+    taskRef:
+      name: bluecompute-customer-deploy-task
