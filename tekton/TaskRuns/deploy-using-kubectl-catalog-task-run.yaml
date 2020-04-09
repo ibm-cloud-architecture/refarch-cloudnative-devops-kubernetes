@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-catalog-deploy-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-catalog-deploy-task
+  params:
+    - name: pathToYamlFile
+      value: k8s_yamls
+  resources:
+    inputs:
+      - name: git-source-catalog
+        resourceRef:
+          name: git-source-catalog
+      - name: docker-image-catalog
+        resourceRef:
+          name: docker-image-catalog

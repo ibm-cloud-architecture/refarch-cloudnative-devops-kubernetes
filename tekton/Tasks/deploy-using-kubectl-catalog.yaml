@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: bluecompute-catalog-deploy-task
+spec:
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+  resources:
+    inputs:
+      - name: git-source-catalog
+        type: git
+      - name: docker-image-catalog
+        type: image
+  steps:
+  - name: modify-app-deploy-yaml
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    workingDir: /workspace/git-source-catalog
+    command: ["/bin/bash"]
+    args:
+      - -c
+      - |
+        set -e
+        SHORT_GIT_HASH="$(cat .git/FETCH_HEAD | awk '{print substr($1,0,7)}')"
+        NEW_IMAGE_ID="$(resources.inputs.docker-image-catalog.url):$SHORT_GIT_HASH"
+        echo "SHORT_GIT_HASH = $SHORT_GIT_HASH"
+        echo "Using Image $NEW_IMAGE_ID"
+        sed -i -e 's|__IMAGE__|'"$NEW_IMAGE_ID"'|g' /workspace/git-source-catalog/$(inputs.params.pathToYamlFile)/deployment.yaml
+  - name: deploy-image
+    image: lachlanevenson/k8s-kubectl
+    command: ["kubectl"]
+    args:
+        - "apply"
+        - "-f"
+        - "/workspace/git-source-catalog/$(inputs.params.pathToYamlFile)"

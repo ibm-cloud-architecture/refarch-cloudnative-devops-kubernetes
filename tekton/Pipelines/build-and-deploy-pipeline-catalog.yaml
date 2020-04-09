@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-catalog
+spec:
+  resources:
+    - name: git-source-catalog
+      type: git
+    - name: docker-image-catalog
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+        - name: git-source-catalog
+          resource: git-source-catalog
+        - name: docker-image-catalog
+          resource: docker-image-catalog
+    taskRef:
+      name: bluecompute-catalog-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+    resources:
+      inputs:
+        - name: git-source-catalog
+          resource: git-source-catalog
+        - name: docker-image-catalog
+          resource: docker-image-catalog
+    runAfter:
+      - build-task
+    taskRef:
+      name: bluecompute-catalog-deploy-task

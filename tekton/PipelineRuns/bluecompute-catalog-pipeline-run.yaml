@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bluecompute-catalog-pr
+spec:
+  pipelineRef:
+    name: bluecompute-build-and-deploy-pipeline-catalog
+  resources:
+    - name: git-source-catalog
+      resourceRef:
+        name: git-source-catalog
+    - name: docker-image-catalog
+      resourceRef:
+        name: docker-image-catalog
+  params:
+    - name: pathToYamlFile
+      value: "k8s_yamls"
+  serviceAccountName: pipeline-account
+  timeout: "1h0m0s"
