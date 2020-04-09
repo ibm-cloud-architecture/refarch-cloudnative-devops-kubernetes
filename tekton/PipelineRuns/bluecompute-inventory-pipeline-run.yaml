@@ -15,9 +15,5 @@ spec:
   params:
     - name: pathToYamlFile
       value: "k8s_yamls"
-    - name: image-name
-      value: "index.docker.io/ibmcase/bluecompute-inventory"
-    - name: image-tag
-      value: "openshift"
   serviceAccountName: pipeline-account
   timeout: "1h0m0s"

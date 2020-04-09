@@ -36,7 +36,9 @@ spec:
       - -c
       - |
         set -e
-        NEW_IMAGE_ID="$(resources.inputs.docker-image-inventory.url):openshift"
+        SHORT_GIT_HASH="$(cat .git/FETCH_HEAD | awk '{print substr($1,0,7)}')"
+        NEW_IMAGE_ID="$(resources.inputs.docker-image-inventory.url):$SHORT_GIT_HASH"
+        echo "SHORT_GIT_HASH = $SHORT_GIT_HASH"
         echo "Building Image $NEW_IMAGE_ID"
         buildah bud --tls-verify="$(params.TLSVERIFY)" --layers -f "$(params.DOCKERFILE)" -t "$NEW_IMAGE_ID" "$(params.CONTEXT)"
         echo "Pushing Image $NEW_IMAGE_ID"

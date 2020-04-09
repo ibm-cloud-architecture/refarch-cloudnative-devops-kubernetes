@@ -9,10 +9,6 @@ spec:
   params:
     - name: pathToYamlFile
       value: k8s_yamls
-    - name: imageUrl
-      value: index.docker.io/ibmcase/bluecompute-inventory
-    - name: imageTag
-      value: openshift
   resources:
     inputs:
       - name: git-source-inventory

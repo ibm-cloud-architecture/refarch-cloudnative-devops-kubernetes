@@ -6,11 +6,6 @@ spec:
   params:
     - name: pathToYamlFile
       description: The path to the yaml file to deploy within the git source
-    - name: imageUrl
-      description: Url of image repository
-    - name: imageTag
-      description: Tag of the images to be used.
-      default: "openshift"
   resources:
     inputs:
       - name: git-source-inventory
@@ -20,12 +15,17 @@ spec:
   steps:
   - name: modify-app-deploy-yaml
     image: registry.access.redhat.com/ubi8/ubi:latest
-    command: ["sed"]
+    workingDir: /workspace/git-source-inventory
+    command: ["/bin/bash"]
     args:
-    - "-i"
-    - "-e"
-    - "s;__IMAGE__;$(inputs.params.imageUrl):$(inputs.params.imageTag);g"
-    - "/workspace/git-source-inventory/$(inputs.params.pathToYamlFile)/deployment.yaml"
+      - -c
+      - |
+        set -e
+        SHORT_GIT_HASH="$(cat .git/FETCH_HEAD | awk '{print substr($1,0,7)}')"
+        NEW_IMAGE_ID="$(resources.inputs.docker-image-inventory.url):$SHORT_GIT_HASH"
+        echo "SHORT_GIT_HASH = $SHORT_GIT_HASH"
+        echo "Using Image $NEW_IMAGE_ID"
+        sed -i -e 's|__IMAGE__|'"$NEW_IMAGE_ID"'|g' /workspace/git-source-inventory/$(inputs.params.pathToYamlFile)/deployment.yaml
   - name: deploy-image
     image: lachlanevenson/k8s-kubectl
     command: ["kubectl"]

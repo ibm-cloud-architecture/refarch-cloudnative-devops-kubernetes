@@ -12,10 +12,6 @@ spec:
     - name: pathToYamlFile
       description: The path to the yaml file to deploy within the git source
       default: "k8s_yamls"
-    - name: imageUrl
-      description: Url of image repository
-    - name: imageTag
-      description: Tag to apply to the built image
   tasks:
   - name: build-task
     resources:
@@ -30,10 +26,6 @@ spec:
     params:
       - name: pathToYamlFile
         value:  "$(params.pathToYamlFile)"
-      - name: imageUrl
-        value: "$(params.imageUrl)"
-      - name: imageTag
-        value: "$(params.imageTag)"
     resources:
       inputs:
         - name: git-source-inventory
