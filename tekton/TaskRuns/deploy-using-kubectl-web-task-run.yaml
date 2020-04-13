@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-web-deploy-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-web-deploy-task
+  params:
+    - name: pathToYamlFile
+      value: k8s_yamls
+  resources:
+    inputs:
+      - name: git-source-web
+        resourceRef:
+          name: git-source-web
+      - name: docker-image-web
+        resourceRef:
+          name: docker-image-web

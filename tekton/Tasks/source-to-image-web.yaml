@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: bluecompute-web-build-task
+spec:
+  params:
+    - name: BUILDER_IMAGE
+      description: The location of the buildah builder image.
+      default: "quay.io/buildah/stable:v1.12.0"
+    - name: DOCKERFILE
+      description: Path to the Dockerfile to build.
+      default: ./Dockerfile
+    - name: CONTEXT
+      description: Path to the directory to use as context.
+      default: .
+    - name: TLSVERIFY
+      description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+      default: "true"
+  resources:
+    inputs:
+      - name: git-source-web
+        type: git
+      - name: docker-image-web
+        type: image
+  steps:
+  - name: node-install
+    image: node:6-alpine
+    workingDir: /workspace/git-source-web/StoreWebApp
+    command: ["npm"]
+    args:
+      - "install"
+  - name: build-push
+    image: $(params.BUILDER_IMAGE)
+    workingDir: /workspace/git-source-web
+    command: ["/bin/bash"]
+    args:
+      - -c
+      - |
+        set -e
+        SHORT_GIT_HASH="$(cat .git/FETCH_HEAD | awk '{print substr($1,0,7)}')"
+        NEW_IMAGE_ID="$(resources.inputs.docker-image-web.url):$SHORT_GIT_HASH"
+        echo "SHORT_GIT_HASH = $SHORT_GIT_HASH"
+        echo "Building Image $NEW_IMAGE_ID"
+        buildah bud --tls-verify="$(params.TLSVERIFY)" --layers -f "$(params.DOCKERFILE)" -t "$NEW_IMAGE_ID" "$(params.CONTEXT)"
+        echo "Pushing Image $NEW_IMAGE_ID"
+        buildah push --tls-verify="$(params.TLSVERIFY)" "$NEW_IMAGE_ID" "docker://$NEW_IMAGE_ID"
+        echo "NEW_IMAGE_ID=$NEW_IMAGE_ID" >> /workspace/env-config
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: varlibcontainers
+        mountPath: /var/lib/containers
+  volumes:
+    - name: varlibcontainers
+      emptyDir: {}
+    - name: m2-repository
+      emptyDir: {}

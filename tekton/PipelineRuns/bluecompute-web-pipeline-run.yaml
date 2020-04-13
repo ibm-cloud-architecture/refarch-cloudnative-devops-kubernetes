@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bluecompute-web-pr
+spec:
+  pipelineRef:
+    name: bluecompute-build-and-deploy-pipeline-web
+  resources:
+    - name: git-source-web
+      resourceRef:
+        name: git-source-web
+    - name: docker-image-web
+      resourceRef:
+        name: docker-image-web
+  params:
+    - name: pathToYamlFile
+      value: "k8s_yamls"
+  serviceAccountName: pipeline-account
+  timeout: "1h0m0s"

@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-web
+spec:
+  resources:
+    - name: git-source-web
+      type: git
+    - name: docker-image-web
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+        - name: git-source-web
+          resource: git-source-web
+        - name: docker-image-web
+          resource: docker-image-web
+    taskRef:
+      name: bluecompute-web-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+    resources:
+      inputs:
+        - name: git-source-web
+          resource: git-source-web
+        - name: docker-image-web
+          resource: docker-image-web
+    runAfter:
+      - build-task
+    taskRef:
+      name: bluecompute-web-deploy-task
