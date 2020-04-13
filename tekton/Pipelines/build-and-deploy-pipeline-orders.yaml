@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-orders
+spec:
+  resources:
+    - name: git-source-orders
+      type: git
+    - name: docker-image-orders
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+        - name: git-source-orders
+          resource: git-source-orders
+        - name: docker-image-orders
+          resource: docker-image-orders
+    taskRef:
+      name: bluecompute-orders-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+    resources:
+      inputs:
+        - name: git-source-orders
+          resource: git-source-orders
+        - name: docker-image-orders
+          resource: docker-image-orders
+    runAfter:
+      - build-task
+    taskRef:
+      name: bluecompute-orders-deploy-task
