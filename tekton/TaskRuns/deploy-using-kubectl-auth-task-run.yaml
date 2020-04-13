@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: bluecompute-auth-deploy-task-run
+spec:
+  serviceAccountName: pipeline-account
+  taskRef:
+    name: bluecompute-auth-deploy-task
+  params:
+    - name: pathToYamlFile
+      value: k8s_yamls
+  resources:
+    inputs:
+      - name: git-source-auth
+        resourceRef:
+          name: git-source-auth
+      - name: docker-image-auth
+        resourceRef:
+          name: docker-image-auth

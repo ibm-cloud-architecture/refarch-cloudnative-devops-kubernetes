@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: bluecompute-auth-pr
+spec:
+  pipelineRef:
+    name: bluecompute-build-and-deploy-pipeline-auth
+  resources:
+    - name: git-source-auth
+      resourceRef:
+        name: git-source-auth
+    - name: docker-image-auth
+      resourceRef:
+        name: docker-image-auth
+  params:
+    - name: pathToYamlFile
+      value: "k8s_yamls"
+  serviceAccountName: pipeline-account
+  timeout: "1h0m0s"

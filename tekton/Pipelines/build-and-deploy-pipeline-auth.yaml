@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bluecompute-build-and-deploy-pipeline-auth
+spec:
+  resources:
+    - name: git-source-auth
+      type: git
+    - name: docker-image-auth
+      type: image
+  params:
+    - name: pathToYamlFile
+      description: The path to the yaml file to deploy within the git source
+      default: "k8s_yamls"
+  tasks:
+  - name: build-task
+    resources:
+      inputs:
+        - name: git-source-auth
+          resource: git-source-auth
+        - name: docker-image-auth
+          resource: docker-image-auth
+    taskRef:
+      name: bluecompute-auth-build-task
+  - name: deploy-task
+    params:
+      - name: pathToYamlFile
+        value:  "$(params.pathToYamlFile)"
+    resources:
+      inputs:
+        - name: git-source-auth
+          resource: git-source-auth
+        - name: docker-image-auth
+          resource: docker-image-auth
+    runAfter:
+      - build-task
+    taskRef:
+      name: bluecompute-auth-deploy-task
